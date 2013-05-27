@@ -63,28 +63,25 @@ class RuleAttribute(Rule):
 
         # TODO: Support attribute namespaces (6.3.3)
 
-        passes = True
         attr_val = self.attr_value
         el_val = element.attributes.get(element, '')
-        if binop == '=':
-            passes = el_val == attr_val
-        elif binop == '~=':
-            passes = attr_val in el_val.split() or not attr_val
-        elif binop == '|=':
-            passes = attr_val == el_val or el_val.startswith('%s-' % attr_val)
-        elif binop == '^=':
-            passes = el_val.startswith(attr_val)
-        elif binop == '$=':
-            passes = el_val.endswith(attr_val)
-        elif binop == '*=':
-            passes = attr_val in el_val
-
-        return passes
+        if self.binop == '=':
+            return el_val == attr_val
+        elif self.binop == '~=':
+            return attr_val in el_val.split() or not attr_val
+        elif self.binop == '|=':
+            return attr_val == el_val or el_val.startswith('%s-' % attr_val)
+        elif self.binop == '^=':
+            return el_val.startswith(attr_val)
+        elif self.binop == '$=':
+            return el_val.endswith(attr_val)
+        elif self.binop == '*=':
+            return attr_val in el_val
 
     def __unicode__(self):
         generated = self.attr_name
-        if binop:
-            generated += binop
+        if self.binop:
+            generated += self.binop
             generated += self.attr_value
         return u'[%s]' % generated
 

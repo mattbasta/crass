@@ -43,7 +43,7 @@ css = Grammar(r"""
 
     id_selector     = "#" IDENT
     class_selector  = "." IDENT
-    attrib_selector = "[" S* IDENT ( ("=" / "~=" / "|=" ) S* ( IDENT / STRING ) S*)? "]"
+    attrib_selector = "[" S* IDENT ( ("=" / "~=" / "|=" / "^=" / "$=" / "*=") S* ( IDENT / STRING ) S*)? "]"
     pseudo_selector = ":" IDENT
     tbd_pseudo_selector = ":" IDENT ( "(" ( IDENT S* )? ")" )?
 
@@ -51,7 +51,7 @@ css = Grammar(r"""
 
     declaration = property ":" S* expr prio?
     property = IDENT S*
-    prio = "!" S*
+    prio = "!important" S*
     expr = term ( operator? term )*
     operator = operator_a S*
     operator_a =  "/" / ","
@@ -82,7 +82,15 @@ css = Grammar(r"""
 
     function = IDENT "(" S* expr ")" S*
     STRING = '"' ( !'"' ~"." )* '"'
-    URI = "url(" ( !")" ~"." )* ")"
+    stringchar = urlchar / " " / ("\\" nl)
+    urlchar = ~r"[\u0009\u0021\u0023-\u0026\u0027-\u007e]" / nonascii / escape
+    nonascii = ~r"[\u0080-\ud7ff\ue000-\ufffd\u10000-\u10ffff]"
+    escape = unicode / ("\\" ~r"[\u0020-\u007E\u0080-\uD7FF\uE000-\uFFFD\u10000-\u10FFFF]")
+    unicode = "\\" ~r"[0-9a-fA-F]{1,6}" wc?
+    w = wc*
+    wc = "\u0009" / "\u000a" / "\u000C" / "\u000D" / "\u0020"
+    nl = "\n" / "\r\n" / "\r" / "\f"
+    URI = "url(" w (STRING / urlchar*) w ")"
     hexcolor = ("#" hex hex hex hex hex hex) / ("#" hex hex hex)
     hex = ~r"[0123456789abcdefABCDEF]"
 
@@ -93,6 +101,8 @@ css = Grammar(r"""
     """)
 
 
+import declaration
+import objects
 import rule
 import selector
 from statement import Statement
@@ -193,7 +203,33 @@ class CssVisitor(NodeVisitor):
         return rule.RuleClass(name)
 
     def visit_attrib_selector(self, node, body):
-        pass
+        binop, val = None, None
+        if body[3]:
+            binop = node.children[3].children[0].children[0].text
+            val = body[3][0][2][0]
+        return rule.RuleAttribute(body[2], binop, val)
+
+    def visit_rule_rhs(self, node, body):
+        return body[1]
+
+    def visit_decls(self, node, (ws, decl, more_decl)):
+        return [decl] + more_decl
+
+    def visit_more_declaration(self, node, (sc, ws, decl)):
+        return decl
+
+    def visit_declaration(self, node, (name, c, ws, expr, prior)):
+        return declaration.Declaration(name[0], expr, bool(prior))
+
+    def visit_prio(self, node, *args):
+        return bool(node.text)
+
+    def visit_expr(self, node, (term, more_terms)):
+        # TODO: Make this parse into a data structure
+        return node.text.strip()
+
+    def visit_STRING(self, node, body):
+        return objects.String(u''.join(body[1]))
 
     def visit_IDENT(self, identifier, (nmstart, nmchar)):
         return identifier.text
@@ -210,6 +246,7 @@ tree = css.parse("""
         thing: 4em;
         thang: 5khz
     }
+    [a] [b=c] {color:blue}
     """)
 
 print tree

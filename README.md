@@ -26,3 +26,9 @@ Features that won't be added:
 
 \* Note that unimplemented selectors simply refer to the library's ability to match against those selectors in a document.
 
+
+Differences from CSS3
+---------------------
+
+(To be written)
+

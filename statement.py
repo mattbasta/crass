@@ -5,8 +5,10 @@ class Statement(object):
         self.descriptors = descriptors
 
     def __unicode__(self):
+        if not self.descriptors:
+            return u''
         return u'%s{%s}' % (self.selector,
-                            u';'.join(self.descriptors))
+                            u';'.join(unicode(d) for d in self.descriptors))
 
     def __repr__(self):
         return unicode(self)

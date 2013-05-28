@@ -56,6 +56,39 @@ class Stylesheet(object):
 
         return u''.join(output)
 
+    def pretty(self):
+        output = []
+
+        # Add charset
+        if self.charset:
+            output.append(u'@charset "%s";' % self.charset)
+
+        # Add namespaces
+        if self.default_namespace:
+            output.append(u'@namespace "%s";' % self.default_namespace)
+        if self.namespaces:
+            for keyword, url in self.namespaces.items():
+                output.append(u'@namespace %s "%s";' % (keyword, url))
+
+        # Add imports
+        for imp in self.imports:
+            url, media_types = imp
+            media = u''
+            if media_types:
+                media = u' %s' % u', '.join(media_types)
+            output.append(u'@import "%s";' % url)
+
+        # Add statements
+        for stmt in self.statements:
+            output.append(stmt.pretty())
+
+        # Add media
+        if self.media:
+            for media in self.media:
+                output.append(media.pretty())
+
+        return u'\n'.join(output)
+
 
 class MediaQuery(Stylesheet):
     def __init__(self, media_types, query, *args, **kw):

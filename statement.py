@@ -13,3 +13,7 @@ class Statement(object):
     def __repr__(self):
         return unicode(self)
 
+    def pretty(self):
+        return u'%s {\n    %s;\n}' % (
+                self.selector.pretty(),
+                u';\n    '.join(d.pretty() for d in self.descriptors))

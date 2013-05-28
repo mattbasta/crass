@@ -243,15 +243,14 @@ class CssVisitor(NodeVisitor):
 
 tree = css.parse("""
     p #id .class p.classname#identifier {
-        thing: 4em;
+        thing: 4em !important;
         thang: 5khz
     }
     [a] [b=c] {color:blue}
     """)
 
-print tree
+#print tree
 visited = CssVisitor().visit(tree)
+print unicode(visited)
+print visited.pretty()
 import pdb; pdb.set_trace()
-
-# The next step would be to figure out how you want to transform the AST and
-# write a NodeVisitor subclass (or something custom) to do it.

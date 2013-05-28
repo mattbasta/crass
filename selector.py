@@ -1,6 +1,7 @@
 
 class Selector(object):
-    pass
+    def pretty(self):
+        return unicode(self)
 
 
 class MultiSelector(Selector):
@@ -13,6 +14,9 @@ class MultiSelector(Selector):
 
     def __unicode__(self):
         return u','.join(unicode(s) for s in self.selectors)
+
+    def pretty(self):
+        return u',\n'.join(unicode(s) for s in self.selectors)
 
 
 class SimpleSelector(Selector):
@@ -53,6 +57,9 @@ class DirectDescendantSelector(DescendantSelector):
     def __unicode__(self):
         return u'%s>%s' % (self.ancestor, self.descendant)
 
+    def pretty(self):
+        return u'%s > %s' % (self.ancestor, self.descendant)
+
 
 class AdjacencySelector(Selector):
     def __init__(self, first, second):
@@ -67,6 +74,9 @@ class AdjacencySelector(Selector):
 
     def __unicode__(self):
         return u'%s+%s' % (self.first, self.second)
+
+    def pretty(self):
+        return u'%s + %s' % (self.first, self.second)
 
 
 class SiblingSelector(Selector):
@@ -88,3 +98,5 @@ class SiblingSelector(Selector):
     def __unicode__(self):
         return u'%s~%s' % (self.first, self.second)
 
+    def pretty(self):
+        return u'%s ~ %s' % (self.first, self.second)

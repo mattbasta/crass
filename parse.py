@@ -39,8 +39,7 @@ css = Grammar(r"""
     nmchar = nmstart / ~"[0123456789-]"
     string1 = "\"" (~r"[\t \!#\$%&\(-~]" / ("\\" nl) / "\'" / nonascii / escape)* "\""
     string2 = "\'" (~r"[\t \!#\$%&\(-~]" / ("\\" nl) / "\"" / nonascii / escape)* "\'"
-    # XXX: URLs cannot contain parentheses
-    urlchar = ~r"[\t!#\$%&\'*+,\-./0-9:-~]"  / escape #/ nonascii
+    urlchar = ~r"[\t!#\$%&\'*+,\-./0-9:-~]"  / escape / nonascii
 
     IDENT = "-"? nmstart nmchar*
     name = nmchar+

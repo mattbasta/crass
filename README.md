@@ -31,4 +31,5 @@ Differences from CSS3
 ---------------------
 
 - Unquoted URLs cannot contain parentheses.
+- `@keyframes` blocks can be vendor prefixed (e.g.: `@-webkit-keyframes`).
 

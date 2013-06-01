@@ -30,5 +30,5 @@ Features that won't be added:
 Differences from CSS3
 ---------------------
 
-(To be written)
+- Unquoted URLs cannot contain parentheses.
 

@@ -7,25 +7,63 @@ from parsimonious.nodes import NodeVisitor
 # optimize. Eventually, Parsimonious will know how to do that automatically.
 css = Grammar(r"""
     program = S* stylesheet
-    digit = ~"[0123456789]"
-    nmstart = ~"[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_]"
+    stylesheet = ("@charset" S* STRING S* ";")? SCC (import SCC)* (namespace SCC)* ((ruleset / media / page / font_face / keyframes) SCC)*
+    SCC = S / CDO / CDC
+    import = "@import" S* (STRING / URI) S* medium_list? ";" S*
+    namespace = "@namespace" S* (IDENT S*)? (STRING / URI) S* ";" S*
+    media = "@media" medium_list "{" (ruleset / media)* "}" S*
+    medium_list = S* media_query ("," S* media_query)*
+    media_query = media_query_type / media_query_expr
+    media_query_type = ("only" / "not")? S* IDENT S* ("and" S* media_expr)*
+    media_query_expr = media_expr ("and" S* media_expr)*
+    media_expr = "(" S* IDENT S* (":" S* expr)? ")" S*
+    page = "@page" S* IDENT? pseudo_page? S* "{" S* declaration_list? "}" S*
+    pseudo_page = ":" IDENT
+    font_face = "@font-face" S* "{" S* declaration_list? "}" S*
+    keyframes = "@" ~r"\-[a-zA-Z]+\-"? "keyframes" S* IDENT S* "{" S* keyframe+ "}" S*
+    keyframe = keyframe_selector_list "{" S* declaration_list? "}" S*
+    keyframe_selector_list = keyframe_selector S* ("," S* keyframe_selector S*)*
+    keyframe_selector = (num "%") / "from" / "to"
+    combinator = ("+" / ">" / "~") S*
+    unary_operator = "-" / "+"
+    property = IDENT S*
+    ruleset = more_selector S* "{" S* declaration_list? "}" S*
+    more_selector = selector (S* "," S* selector)*
+
+    h = ~r"[0-9a-fA-F]"
+    wc = ~r"[ \n\r\t\f]"
+    nonascii = ~r"[\u0080-\ud7ff\ue000-\ufffd\u10000-\u10ffff]"
+    unicode = "\\" ~r"[0-9a-fA-F]{1,6}" wc?
+    escape = unicode / ("\\" ~r"[\u0020-\u007E\u0080-\uD7FF\uE000-\uFFFD\u10000-\u10FFFF]")
+    nmstart = ~"[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_]" / escape # / nonascii
     nmchar = nmstart / ~"[0123456789-]"
-    minus = "-"
-    IDENT = nmstart nmchar*
-    NUMBER = digit+ / (digit* "." digit+)
-    ws = ~r"[ \t]"
-    nl = ~r"[\n]"
+    string1 = "\"" (~r"[\t \!#\$%&\(-~]" / ("\\" nl) / "\'" / nonascii / escape)* "\""
+    string2 = "\'" (~r"[\t \!#\$%&\(-~]" / ("\\" nl) / "\"" / nonascii / escape)* "\'"
+    # XXX: URLs cannot contain parentheses
+    urlchar = ~r"[\t!#\$%&\'*+,\-./0-9:-~]"  / escape #/ nonascii
+
+    IDENT = "-"? nmstart nmchar*
+    name = nmchar+
+    digit = ~r"[0-9]"
+    num = digit+ / (digit* "." digit+)
+    STRING = string1 / string2
+    url = urlchar+
+    w = wc*
+    nl = "\n" / "\r\n" / "\r" / "\f"
+
     comment = "/*" (!"*/" ~".")* "*/"
-    ws_or_nl = ws / nl
-    S = ws_or_nl / comment
-    stylesheet = stmt*
-    stmt = rule / media
-    rule = rule_lhs rule_rhs
-    rule_lhs = selector more_selector*
-    more_selector = "," S* selector
-    rule_rhs = "{" decls  ";"? S* "}" S*
-    decls = S* declaration more_declaration*
-    more_declaration = ";" S* declaration
+    S = w / comment
+
+    CDO = "<!--"
+    CDC = "-->"
+
+    HASH = "#" name
+
+    IMPORTANT_SYM = "!" w "important"
+
+    DIMENSION = num (IDENT / "%")
+
+    URI = "url(" w (STRING / url) w ")"
 
     selector = simple_selector selector_trailer?
     selector_trailer = selector_trailer_a / selector_trailer_b / selector_trailer_c / selector_trailer_d
@@ -37,67 +75,35 @@ css = Grammar(r"""
     simple_selector = (element_name simple_selector_etc*) / (simple_selector_etc+)
     simple_selector_etc = id_selector / class_selector / attrib_selector / pseudo_selector
 
-    element_name = element_selector / wild_element_selector
-    element_selector = IDENT
-    wild_element_selector = "*"
+    element_type = (IDENT / "*")
+    element_ns = "|" IDENT
+    element_name = (element_type element_ns?) / element_ns
 
     id_selector     = "#" IDENT
     class_selector  = "." IDENT
     attrib_selector = "[" S* IDENT ( ("=" / "~=" / "|=" / "^=" / "$=" / "*=") S* ( IDENT / STRING ) S*)? "]"
-    pseudo_selector = ":" IDENT
-    tbd_pseudo_selector = ":" IDENT ( "(" ( IDENT S* )? ")" )?
+    pseudo_selector = ":" ":"? IDENT ("(" S* (nth / more_selector / expr) S* ")")?
 
-    combinator = ("+" / ">" / "~") S*
+    integer = digit+
+    nth = S* (nth_body_full / nth_body_num / "odd" / "even") S*
+    nth_body_full = unary_operator? integer? "n" (S* unary_operator S* integer)?
+    nth_body_num = unary_operator? integer
 
-    declaration = property ":" S* expr prio?
-    property = IDENT S*
-    prio = "!important" S*
-    expr = term ( operator? term )*
-    operator = operator_a S*
-    operator_a =  "/" / ","
-    term = (unary_op measure) / measure / other_term
-    unary_op = "-" / "+"
-    measure = mess S*
-    mess = em_m / ex_m / px_m / cm_m / mm_m / in_m / pt_m / pc_m / deg_m / rad_m / grad_m / ms_m / s_m / hx_m / khz_m / precent_m / dim_m / raw_m
-    em_m = NUMBER "em"
-    ex_m = NUMBER "ex"
-    px_m = NUMBER "px"
-    cm_m = NUMBER "cm"
-    mm_m = NUMBER "mm"
-    in_m = NUMBER "in"
-    pt_m = NUMBER "pt"
-    pc_m = NUMBER "pc"
-    deg_m = NUMBER "deg"
-    rad_m = NUMBER "rad"
-    grad_m = NUMBER "grad"
-    ms_m = NUMBER "ms"
-    s_m = NUMBER "s"
-    hx_m = NUMBER "hz"
-    khz_m = NUMBER "khz"
-    precent_m = NUMBER "%"
-    dim_m = NUMBER IDENT
-    raw_m = NUMBER
-
-    other_term = (STRING S*) / (URI S*) / (IDENT S*) / (hexcolor S*) / function
+    declaration_list = declaration (";" S* declaration)* ";"? S*
+    declaration = property ":" S* expr S* IMPORTANT_SYM? S*
+    expr = term ( operator term )*
+    math_expr = math_product (S+ ("+" / "-") S+ math_product)*
+    math_product = unit (S* (("*" S* unit) / ("/" S* num)))*
+    calc = "calc(" S* math_expr S* ")"
+    attr = "attr(" S* element_name (S+ IDENT)? S* ("," (unit / calc) S*)? ")"
+    operator = ("/" / ",")? S*
+    unit = DIMENSION / num / ("(" S* math_expr S* ")") / calc / attr / function
+    term = (unary_operator? unit S*) / other_term
+    other_term = (STRING S*) / (URI S*) / (IDENT S*) / (hexcolor S*)
 
     function = IDENT "(" S* expr ")" S*
-    STRING = '"' ( !'"' ~"." )* '"'
-    stringchar = urlchar / " " / ("\\" nl)
-    urlchar = ~r"[\u0009\u0021\u0023-\u0026\u0027-\u007e]" / nonascii / escape
-    nonascii = ~r"[\u0080-\ud7ff\ue000-\ufffd\u10000-\u10ffff]"
-    escape = unicode / ("\\" ~r"[\u0020-\u007E\u0080-\uD7FF\uE000-\uFFFD\u10000-\u10FFFF]")
-    unicode = "\\" ~r"[0-9a-fA-F]{1,6}" wc?
-    w = wc*
-    wc = "\u0009" / "\u000a" / "\u000C" / "\u000D" / "\u0020"
-    nl = "\n" / "\r\n" / "\r" / "\f"
-    URI = "url(" w (STRING / urlchar*) w ")"
-    hexcolor = ("#" hex hex hex hex hex hex) / ("#" hex hex hex)
-    hex = ~r"[0123456789abcdefABCDEF]"
+    hexcolor = ("#" h h h h h h) / ("#" h h h)
 
-
-    medium = IDENT S*
-    medium_list = medium ("," S* medium)*
-    media = "@media" S* medium "{" S* stylesheet "}"
     """)
 
 
@@ -241,16 +247,23 @@ class CssVisitor(NodeVisitor):
         return visited_children
 
 
-tree = css.parse("""
-    p #id .class p.classname#identifier {
-        thing: 4em !important;
-        thang: 5khz
-    }
-    [a] [b=c] {color:blue}
-    """)
+if __name__ == '__main__':
+    tree = css.parse("""
+        p #id .class p.classname#identifier {
+            thing: 4em !important;
+            thang: 5khz
+        }
+        [a] [b=c] {color:blue}
+        """)
 
-#print tree
-visited = CssVisitor().visit(tree)
-print unicode(visited)
-print visited.pretty()
-import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
+    #print tree
+    visited = CssVisitor().visit(tree)
+    print unicode(visited)
+    print visited.pretty()
+    import pdb; pdb.set_trace()
+
+def do_parse(raw):
+    tree = css.parse(raw)
+    return CssVisitor().visit(tree)
+

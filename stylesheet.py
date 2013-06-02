@@ -1,6 +1,10 @@
+from statement import Statement
+
 
 class Stylesheet(object):
     def __init__(self):
+        super(Stylesheet, self).__init__()
+
         # Statements is a list of Statement objects.
         self.statements = []
         # Imports is a list of tuples in the form:
@@ -14,9 +18,6 @@ class Stylesheet(object):
 
         # The document charset or None. (@charset)
         self.charset = None
-
-        # A list of @media blocks in the sheet.
-        self.media = []
 
     def optimize(self):
         # TODO: remove duplicate imports
@@ -49,11 +50,6 @@ class Stylesheet(object):
         # Add statements
         output.append(''.join(unicode(s) for s in self.statements))
 
-        # Add media
-        if self.media:
-            for media in self.media:
-                output.append(unicode(media))
-
         return u''.join(output)
 
     def pretty(self):
@@ -82,20 +78,12 @@ class Stylesheet(object):
         for stmt in self.statements:
             output.append(stmt.pretty())
 
-        # Add media
-        if self.media:
-            for media in self.media:
-                output.append(media.pretty())
-
         return u'\n'.join(output)
 
 
-class MediaQuery(Stylesheet):
-    def __init__(self, media_types, query, *args, **kw):
-        super(MediaQuery, self).__init__(*args, **kw)
+class MediaQuery(Statement, Stylesheet):
+    def __init__(self, media_types, query):
+        super(MediaQuery, self).__init__()
         self.media_types = media_types
         self.query = query
-
-    def __unicode__(self):
-        raise Exception('Not Implemented yet')
 

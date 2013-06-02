@@ -6,6 +6,9 @@ class Rule(object):
     def __unicode__(self):
         return u''
 
+    def pretty(self):
+        return unicode(self)
+
 
 class RuleType(Rule):
     def __init__(self, type_):
@@ -87,7 +90,7 @@ class RuleAttribute(Rule):
 
 
 class RulePseudoClass(Rule):
-    def __init__(self, pseudoclass, extra):
+    def __init__(self, pseudoclass, extra=None):
         self.pseudoclass = pseudoclass
         self.extra = extra
 
@@ -147,6 +150,12 @@ class RulePseudoClass(Rule):
         if self.extra:
             generated += u'(%s)' % self.extra
         return generated
+
+    def pretty(self):
+        import pdb; pdb.set_trace()
+        if self.extra and getattr(self.extra, 'pretty'):
+            return u':%s(%s)' % (self.pseudoclass, self.extra.pretty())
+        return super(RulePseudoClass, self).pretty()
 
 
 class RulePseudoElement(Rule):

@@ -14,7 +14,7 @@ css = Grammar(r"""
     media = "@media" medium_list "{" (ruleset / media)* "}" S*
     medium_list = S* media_query ("," S* media_query)*
     media_query = media_query_type / media_query_expr
-    media_query_type = ("only" / "not")? S* IDENT S* ("and" S* media_expr)*
+    media_query_type = ("only" / "not")? S* IDENT S* ("and" S* media_query_expr)?
     media_query_expr = media_expr ("and" S* media_expr)*
     media_expr = "(" S* IDENT S* (":" S* expr)? ")" S*
     page = "@page" S* IDENT? pseudo_page? S* "{" S* declaration_list? "}" S*
@@ -109,6 +109,7 @@ css = Grammar(r"""
 
 
 import declaration
+import media
 import objects
 import selector
 from rule import (RuleAttribute, RuleClass, RuleID, RulePseudoClass, RuleType)
@@ -146,6 +147,46 @@ class CssVisitor(NodeVisitor):
         for stmt in statements:
             sheet.statements.append(stmt[0][0])
         return sheet
+
+    def visit_media(self, node, body):
+        medium_list = body[1]
+        media = MediaQuery(medium_list)
+
+        for stmt in body[3]:
+            media.statements.append(stmt[0])
+
+        return media
+
+    def visit_medium_list(self, node, body):
+        output = [body[1]]
+        if body[2]:
+            for query in body[2]:
+                output.append(query[2])
+
+        return output
+
+    def visit_media_query(self, node, body):
+        result = body[0]
+        if isinstance(result, list):
+            return media.MediaQuery(media_exprs=result)
+        return result
+
+    def visit_media_query_type(self, node, body):
+        exprs = body[4]
+        return media.MediaQuery(
+                media_type=body[2],
+                media_type_modifier=body[1] or None,
+                media_exprs=exprs[0][2] if exprs else None)
+
+    def visit_media_query_expr(self, rule, body):
+        output = [body[0]]
+        if body[1]:
+            for expr in body[1]:
+                output.append(expr[2])
+        return output
+
+    def visit_media_expr(self, rule, body):
+        return media.MediaExpr(body[2], body[4][0][2] if body[4] else None)
 
     def visit_ruleset(self, rule, body):
         return Statement(body[0], body[4][0] if body[4] else [])

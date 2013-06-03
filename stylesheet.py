@@ -82,8 +82,17 @@ class Stylesheet(object):
 
 
 class MediaQuery(Statement, Stylesheet):
-    def __init__(self, media_types, query):
+    def __init__(self, media_types):
         super(MediaQuery, self).__init__()
         self.media_types = media_types
-        self.query = query
+
+    def __unicode__(self):
+        return u'@media %s{%s}' % (
+                u','.join(unicode(q) for q in self.media_types),
+                u''.join(unicode(s) for s in self.statements))
+
+    def pretty(self):
+        return u'@media %s {\n    %s\n}' % (
+                u','.join(q.pretty() for q in self.media_types),
+                u'\n    '.join(s.pretty() for s in self.statements))
 

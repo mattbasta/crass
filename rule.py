@@ -152,7 +152,6 @@ class RulePseudoClass(Rule):
         return generated
 
     def pretty(self):
-        import pdb; pdb.set_trace()
         if self.extra and getattr(self.extra, 'pretty'):
             return u':%s(%s)' % (self.pseudoclass, self.extra.pretty())
         return super(RulePseudoClass, self).pretty()

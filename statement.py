@@ -1,6 +1,7 @@
 
 class Statement(object):
-    def __init__(self, selector, descriptors):
+    def __init__(self, selector=None, descriptors=None):
+        super(Statement, self).__init__()
         self.selector = selector
         self.descriptors = descriptors
 

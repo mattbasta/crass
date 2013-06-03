@@ -266,6 +266,8 @@ class CssVisitor(NodeVisitor):
         return RulePseudoClass(body[0], body[3])
 
     def visit_nth(self, node, body):
+        if not body[0]:
+            return node.text
         return body[0]
 
     def visit_nth_func(self, node, body):

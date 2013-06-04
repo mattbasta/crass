@@ -33,11 +33,12 @@ class Number(object):
         if u'.' in val:
             whole, dec = val.split(u'.', 1)
             # OPT: Cap floating point #s at 4 decimal places.
-            val = u'%s.%s' % (whole, dec[:4])
+            # OPT: Strip trailing zeroes
+            val = u'%s.%s' % (whole, dec[:4].rstrip('0'))
 
-        # OPT: Strip leading and trailing zeroes
+        # OPT: Strip leading zeroes
         # OPT: Remove spurious decimals (1.0 -> 1)
-        val = val.strip(u'0').rstrip(u'.')
+        val = val.lstrip(u'0').rstrip(u'.')
 
         return self.sign, val or u'0'
 

@@ -20,8 +20,8 @@ css = Grammar(r"""
     page = "@page" S* IDENT? pseudo_page? S* "{" S* declaration_list? "}" S*
     pseudo_page = ":" IDENT
     font_face = "@font-face" S* "{" S* declaration_list? "}" S*
-    keyframes = "@" ~r"\-[a-zA-Z]+\-"? "keyframes" S* IDENT S* "{" S* keyframe+ "}" S*
-    keyframe = keyframe_selector_list "{" S* declaration_list? "}" S*
+    keyframes = "@" vendor_prefix? "keyframes" S* IDENT S* "{" S* keyframe+ "}" S*
+    keyframe = keyframe_selector_list "{" S* declaration_list "}" S*
     keyframe_selector_list = keyframe_selector S* ("," S* keyframe_selector S*)*
     keyframe_selector = (num "%") / "from" / "to"
     combinator = ("+" / ">" / "~") S*
@@ -29,6 +29,8 @@ css = Grammar(r"""
     property = IDENT S*
     ruleset = more_selector S* "{" S* declaration_list? "}" S*
     more_selector = selector (S* "," S* selector)*
+
+    vendor_prefix = ~r"\-[a-zA-Z]+\-"
 
     h = ~r"[0-9a-fA-F]"
     wc = ~r"[ \n\r\t\f]"
@@ -113,8 +115,9 @@ import media
 import objects
 import selector
 from rule import (RuleAttribute, RuleClass, RuleID, RulePseudoClass, RuleType)
-from statement import Statement
-from stylesheet import MediaQuery, Stylesheet
+from statement import (FontFace, Keyframe, Keyframes, KeyframeSelector,
+                       MediaQuery, Statement)
+from stylesheet import Stylesheet
 
 
 class CssVisitor(NodeVisitor):
@@ -187,6 +190,37 @@ class CssVisitor(NodeVisitor):
 
     def visit_media_expr(self, rule, body):
         return media.MediaExpr(body[2], body[4][0][2] if body[4] else None)
+
+    def visit_font_face(self, node, body):
+        descriptors = body[4][0]
+        return FontFace(descriptors)
+
+    def visit_keyframes(self, node, body):
+        return Keyframes(name=body[4],
+                         frames=body[8],
+                         prefix=body[1][0] if body[1] else None)
+
+    def visit_keyframe(self, node, body):
+        selectors = body[0]
+        descriptors = body[3] or []
+        return Keyframe(selectors, descriptors)
+
+    def visit_keyframe_selector_list(self, node, body):
+        output = [body[0]]
+        if body[2]:
+            for frame in body[2]:
+                output.append(frame[2])
+
+        return output
+
+    def visit_keyframe_selector(self, node, body):
+        sel = body[0]
+        if not sel:
+            return KeyframeSelector(node.text)
+        return KeyframeSelector(sel[0])  # Return numeric part of percent.
+
+    def visit_vendor_prefix(self, node, body):
+        return node.text
 
     def visit_ruleset(self, rule, body):
         return Statement(body[0], body[4][0] if body[4] else [])

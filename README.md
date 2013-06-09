@@ -39,6 +39,8 @@ Features that will be added:
 
 - Paged media parsing support
 - Conditional rules parsing support
+- Device adaptation (`@viewport`) parsing support
+- Standardized level 4 constructs
 
 Features that might be added:
 
@@ -50,6 +52,8 @@ Features that might be added:
 - Selectors 6.6.3: `:lang`
 - Selectors 6.6.4: UI element states
 - Selectors 7.3: `::before` and `::after`
+
+- Lists 8: `@counter-style`
 
 Features that won't be added:
 
@@ -89,6 +93,7 @@ Features that won't be added:
 - Strip quotes around keyframe names when possible
 - Strip quotes around attribute selectors when possible
 - Sort adjacent groups of statements by specificity (most specific last)
+- `:nth-child(2n+1)` -> `:nth-child(odd)`
 
 #### Combinations
 

@@ -49,11 +49,10 @@ Features that won't be added:
  - Hex values
 - Strip units from zero where appropriate (not in `hsl`/`hsla`)
 - Combine lists of dimensions (except in coordinate declarations; e.g. `background-position` or `transform-origin`)
- - x [x [x [x]]] -> x
+ - x x [x [x]] -> x
  - x y x y -> x y
  - x y z y -> x y z
  - x y x -> x y
- - x x -> x
 - Convert `rgb()` to hex
 - #XXYYZZ -> #XYZ
 - Convert hex to color names when available and smaller

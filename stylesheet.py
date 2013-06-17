@@ -1,3 +1,6 @@
+from optimization import RemovalOptimization
+
+
 class Stylesheet(object):
     def __init__(self):
         super(Stylesheet, self).__init__()
@@ -16,11 +19,30 @@ class Stylesheet(object):
         # The document charset or None. (@charset)
         self.charset = None
 
-    def optimize(self):
-        # TODO: remove duplicate imports
-        # TODO: optimize statements
-        # TODO: compact statements
-        pass
+    def _opt_imports(self, kw):
+        # Remove duplicate imports
+        self.imports = [imp for i, imp in enumerate(self.imports) if
+                        # Exact duplicates
+                        imp not in self.imports[:i] and
+                        # Un-mediaed duplicates
+                        (imp[0], None) not in self.imports[:i]]
+
+    def _opt_statements(self, kw):
+        # Optimize statements
+        def opt(statement, index):
+            try:
+                return statement.optimize(parent=self, index=index)
+            except RemovalOptimization:
+                print "Removing %s" % statement
+                return None
+
+        self.statements = filter(None, [opt(s, i) for i, s in
+                                        enumerate(self.statements)])
+
+    def optimize(self, **kw):
+        self._opt_imports(kw)
+        self._opt_statements(kw)
+        return self
 
     def __unicode__(self):
         output = []

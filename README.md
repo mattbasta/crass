@@ -4,6 +4,32 @@ crass
 A Python CSS3 utility library
 
 
+Optimizations
+-------------
+
+- Removal of unnecessary whitespace
+- Lower-case identifiers appropriately
+ - Element names
+ - Pseudo selectors
+ - Descriptor names
+- Sort multiselectors
+- Collapse mutliselectors containing wildcard selectors into just a wildcard selector
+ - `.class, *` -> `*`
+- Alphabetize descriptors (keeping relative order of identical descriptors)
+
+### Deletions
+
+- Remove mis-matched browser-prefixed declarations for browser-prefixed blocks
+- Remove duplicate simple selectors within multiple selectors (`.class, .class` -> `.class`)
+- Remove wildcard selector in simple selectors with other rules (`*.class` -> `.class`)
+- Remove duplicate simple selector rules (`.class.class` -> `.class`)
+
+### Combinations
+
+- Combine identical media queries (`screen, screen` -> `screen`)
+- Combine identical @keyframes blocks
+- Combine keyframes with @keyframes blocks that have the same keyframe selector
+
 Unimplemented Features
 ----------------------
 
@@ -38,12 +64,8 @@ Features that won't be added:
 
 #### General
 
-- Alphabetize descriptors (keeping relative order of identical descriptors)
-- Sort adjacent groups of rules by specificity (most specific last)
+- Sort simple selector rules by specificity
 - Lower-case identifiers appropriately
- - Element names
- - Pseudo selectors
- - Descriptor names
  - Units
  - Function names
  - Hex values
@@ -54,6 +76,7 @@ Features that won't be added:
  - x y z y -> x y z
  - x y x -> x y
 - Convert `rgb()` to hex
+- Convert `rgba()` to `hsla()` (and vise versa) if the opposite is smaller
 - #XXYYZZ -> #XYZ
 - Convert hex to color names when available and smaller
 - Convert color names to hex when smaller
@@ -65,6 +88,7 @@ Features that won't be added:
 - Strip quotes around font and animation names when possible
 - Strip quotes around keyframe names when possible
 - Strip quotes around attribute selectors when possible
+- Sort adjacent groups of statements by specificity (most specific last)
 
 #### Combinations
 
@@ -78,26 +102,28 @@ Features that won't be added:
 - Combine adjacent statements containing an intersection of declarations where the intersection's string length is greater than the length of the two statements' selectors' string length plus one
  - `x {a:b;c:d long value} y{e:f;c:d long value}` -> `x{a:b}y{e:f}x,y{c:d long value}`
 - Combine identical or overridden media query expressions
-- Combine identical media queries (`screen, screen` -> `screen`)
 - Combine near media blocks when possible
  - `@media X{a{}b{}c{}}@media Y{d{}e{}f{}}@media X{d{}e{}f{}}` -> `@media X{a{}b{}c{}d{}e{}f{}}@media Y{d{}e{}f{}}`
 
 #### Deletions
 
-- Remove overridden descriptors
-- Remove wildcard selector in simple selectors with other rules (`*.class` -> `.class`)
-- Remove duplicate simple selector rules (`.class.class` -> `.class`)
-- Remove duplicate simple selectors within multiple selectors (`.class, .class` -> `.class`)
 - Remove "all" media type
-- Remove mis-matched browser-prefixed declarations for browser-prefixed blocks
 
 #### Lossy/Unsafe (optional)
 
 - Remove obsolete descriptors
  - Will result in dropped support for old browsers
  - Allow choice of browser support
-- Combine identical statements within the whole sheet
+- Combine statements with identical selectors across the whole sheet
  - May cause issues if CSS relies on order rather than specificity
+
+#### Speculative Optimizations
+
+- Spaces between @blocks and parentheses
+ - `@media (` -> `@media(`
+- Spaces between closing parentheses and next token
+ - `url(...) foo` -> `url(...)foo`
+ - Not IE7 compatible
 
 
 Differences from CSS3

@@ -26,7 +26,7 @@ if __name__ == '__main__':
         stylesheet = do_parse(sys.stdin.read())
 
     if args.optimize:
-        stylesheet.optimize()
+        stylesheet = stylesheet.optimize()
     if args.pretty:
         sys.stdout.write(stylesheet.pretty())
     else:

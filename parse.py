@@ -1,6 +1,10 @@
+import re
+
 from parsimonious import Grammar
 from parsimonious.nodes import NodeVisitor
 
+
+CHARSET = re.compile(r'@charset[\s]*(.+?)[\s]*;')
 
 # Adapted from https://raw.github.com/bhyde/css-parser/master/css.peg:
 # This is an incredibly inefficient grammar, but it would be simple to
@@ -35,25 +39,23 @@ css = Grammar(r"""
     h = ~r"[0-9a-fA-F]"
     wc = ~r"[ \n\r\t\f]"
     nonascii = ~r"[\u0080-\ud7ff\ue000-\ufffd\u10000-\u10ffff]"
-    unicode = "\\" ~r"[0-9a-fA-F]{1,6}" wc?
-    escape = unicode / ("\\" ~r"[\u0020-\u007E\u0080-\uD7FF\uE000-\uFFFD\u10000-\u10FFFF]")
-    nmstart = ~r"[a-zA-Z_]" / escape #/ nonascii
-    nmchar = ~r"[a-zA-Z0-9\-_]" / escape #/ nonascii
-    string_chars = ~r"[\t \!#\$%&\(-~]" / ("\\" nl) / nonascii / escape
+    unicode = ~r"\\[0-9a-fA-F]{1,6}" wc?
+    escape = unicode / ~r"\\[\u0020-\u007E\u0080-\uD7FF\uE000-\uFFFD\u10000-\u10FFFF]"
+    nmstart = ~r"-?[a-zA-Z_]" #/ escape #/ nonascii
+    nmchar = ~r"[a-zA-Z0-9\-_]" #/ escape #/ nonascii
+    string_chars = ~r"[\t \!#\$%&\(-~]" / ~r"\\(\n|\r\n|\r|\f)" / nonascii #/ escape
     string1 = "\"" ("\'" / string_chars)* "\""
     string2 = "\'" ("\"" / string_chars)* "\'"
-    urlchar = ~r"[\t!-\'*-~]"  / escape / nonascii
+    urlchar = ~r"[\t!-\'*-~]" / nonascii #/ escape
 
-    IDENT = "-"? nmstart nmchar*
+    IDENT = nmstart nmchar*
     name = nmchar+
-    digit = ~r"[0-9]"
-    num = unary_operator? (digit+ / (digit* "." digit+))
+    num = unary_operator? ~r"([0-9]+|[0-9]*\.[0-9]+)"
     STRING = string1 / string2
     url = urlchar+
     w = wc*
-    nl = "\n" / "\r\n" / "\r" / "\f"
 
-    comment = "/*" (!"*/" ~".")* "*/"
+    comment = "/*" (!"*/" ~r".")* "*/"
     S = w / comment
 
     CDO = "<!--"
@@ -87,7 +89,7 @@ css = Grammar(r"""
     pseudo_sel_not = "not(" S* more_selector S* ")"
     pseudo_sel_func = IDENT "(" S* expr ")"
 
-    integer = digit+
+    integer = ~r"[1-9][0-9]*"
     nth = nth_body_full / nth_body_num / "odd" / "even"
     nth_body_full = unary_operator? integer? "n" (S* unary_operator S* integer)?
     nth_body_num = unary_operator? integer
@@ -150,6 +152,9 @@ class CssVisitor(NodeVisitor):
         for stmt in statements:
             sheet.statements.append(stmt[0][0])
         return sheet
+
+    def visit_import(self, node, body):
+        return body[2], body[4][0] if body[4] else None
 
     def visit_media(self, node, body):
         medium_list = body[1]
@@ -392,6 +397,17 @@ if __name__ == '__main__':
     import pdb; pdb.set_trace()
 
 def do_parse(raw):
+    # Try to decode the string if it's encoded.
+    if not isinstance(raw, unicode):
+        charset_match = CHARSET.search(raw)
+        charset = 'utf-8'
+        if charset_match:
+            charset = charset_match.group(1).strip('"\'')
+        try:
+            raw = raw.decode(charset)
+        except Exception:
+            pass
+
     tree = css.parse(raw)
     return CssVisitor().visit(tree)
 

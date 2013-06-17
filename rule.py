@@ -1,3 +1,5 @@
+from optimization import CSS_PREFIXES, HTML_PREFIXES, RemovalOptimization
+
 
 class Rule(object):
     def match(self, element):
@@ -9,10 +11,13 @@ class Rule(object):
     def pretty(self):
         return unicode(self)
 
+    def optimize(self, **kw):
+        return self
+
 
 class RuleType(Rule):
     def __init__(self, type_):
-        self.type_ = type_
+        self.type_ = type_.lower()
 
     def match(self, element):
         if '|' in self.type_:
@@ -88,10 +93,18 @@ class RuleAttribute(Rule):
             generated += self.attr_value
         return u'[%s]' % generated
 
+    def optimize(self, **kw):
+        prefix = kw.get('prefix')
+        if (prefix and
+                any(self.attr_name.startswith(p) for p in HTML_PREFIXES) and
+                not self.attr_name.startswith(prefix)):
+            raise RemovalOptimization()
+        return self
+
 
 class RulePseudoClass(Rule):
     def __init__(self, pseudoclass, extra=None):
-        self.pseudoclass = pseudoclass
+        self.pseudoclass = pseudoclass.lower()
         self.extra = extra
 
     def match(self, element):
@@ -154,12 +167,32 @@ class RulePseudoClass(Rule):
     def pretty(self):
         if self.extra and getattr(self.extra, 'pretty'):
             return u':%s(%s)' % (self.pseudoclass, self.extra.pretty())
+        elif self.extra:
+            return u':%s(%s)' % (self.pseudoclass, self.extra)
         return super(RulePseudoClass, self).pretty()
+
+    def optimize(self, **kw):
+        prefix = kw.get('prefix')
+        if (prefix and
+                any(self.pseudoclass.startswith(p) for p in CSS_PREFIXES) and
+                not self.pseudoclass.startswith(prefix)):
+            raise RemovalOptimization()
+
+        # Support for `:not()`. Don't worry about prefixes for this because
+        # we're dealing with negation.
+        if self.pseudoclass == u'not':
+            inner_kw = dict(kw)
+            inner_kw['not'] = True
+            if 'prefix' in inner_kw:
+                del inner_kw['prefix']
+            self.extra = self.extra.optimize(**inner_kw)
+
+        return self
 
 
 class RulePseudoElement(Rule):
     def __init__(self, pseudoelement):
-        self.pseudoelement = pseudoelement
+        self.pseudoelement = pseudoelement.lower()
 
     def match(self, element):
         return False
@@ -167,3 +200,10 @@ class RulePseudoElement(Rule):
     def __unicode__(self):
         return u'::%s' % self.pseudoelement
 
+    def optimize(self, **kw):
+        prefix = kw.get('prefix')
+        if (prefix and
+                any(self.pseudoelement.startswith(p) for p in CSS_PREFIXES) and
+                not self.pseudoelement.startswith(prefix)):
+            raise RemovalOptimization()
+        return self

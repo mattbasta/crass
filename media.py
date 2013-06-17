@@ -38,6 +38,9 @@ class MediaQuery(object):
 
         return u' '.join(output)
 
+    def optimize(self, **kw):
+        return self
+
 
 class MediaExpr(object):
     def __init__(self, key, value=None):
@@ -56,3 +59,5 @@ class MediaExpr(object):
         else:
             return unicode(self)
 
+    def optimize(self, **kw):
+        return self

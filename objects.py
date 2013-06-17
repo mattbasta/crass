@@ -8,7 +8,7 @@ class String(object):
         self.value = value
 
     def __unicode__(self):
-        return u'"%s"' % self.value.replace('"', '\"')
+        return self.value
 
 class Number(object):
     def __init__(self, value):

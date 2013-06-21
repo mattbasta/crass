@@ -94,7 +94,9 @@ css = Grammar(ur"""
     nth_body_num = unary_operator? integer
 
     declaration_list = declaration (";" S* declaration)* ";"? S*
-    declaration = property ":" S* expr S* IMPORTANT_SYM? S*
+    declaration = (filter_property / normal_property) S* (IMPORTANT_SYM S*)?
+    normal_property = property ":" S* expr
+    filter_property = "filter:" S* ie_filter_blob
     expr = term ( operator term )*
     math_expr = math_product (S+ ("+" / "-") S+ math_product)*
     math_product = unit (S* (("*" S* unit) / ("/" S* num)))*
@@ -104,6 +106,9 @@ css = Grammar(ur"""
     unit = DIMENSION / num / ("(" S* math_expr S* ")") / calc / attr / function
     term = (unary_operator? unit S*) / other_term
     other_term = (STRING S*) / (URI S*) / (IDENT S*) / (hexcolor S*)
+
+    ie_filter_blob = ie_filter_blob_term (S+ ie_filter_blob)? S*
+    ie_filter_blob_term = ~r"(progid:)?[a-zA-Z0-9\.]+\([a-zA-Z0-9=#, \n\r\t]*\)"
 
     function = IDENT "(" S* expr ")" S*
     hexcolor = ("#" h h h h h h) / ("#" h h h)
@@ -349,7 +354,15 @@ class CssVisitor(NodeVisitor):
         return decls
 
     def visit_declaration(self, node, body):
-        return declaration.Declaration(body[0][0], body[3], bool(body[5]))
+        decl = body[0][0]
+        decl.imp = bool(body[2][0] if body[2] else None)
+        return decl
+        
+    def visit_normal_property(self, node, body):
+        return declaration.Declaration(body[0][0], body[3])
+        
+    def visit_filter_property(self, node, body):
+        return declaration.Declaration(u'filter', body[2])
 
     def visit_expr(self, node, (term, more_terms)):
         # TODO: Make this parse into a data structure
@@ -369,6 +382,9 @@ class CssVisitor(NodeVisitor):
         return node.text
 
     def visit_IDENT(self, node, _):
+        return node.text
+
+    def visit_ie_filter_blob(self, node, body):
         return node.text
 
     def visit_S(self, *args):

@@ -16,6 +16,7 @@ Optimizations
 - Collapse mutliselectors containing wildcard selectors into just a wildcard selector
  - `.class, *` -> `*`
 - Alphabetize descriptors (keeping relative order of identical descriptors)
+- `:nth-child(2n+1)` -> `:nth-child(odd)`
 
 ### Deletions
 
@@ -41,6 +42,7 @@ Features that will be added:
 - Conditional rules parsing support
 - Device adaptation (`@viewport`) parsing support
 - Standardized level 4 constructs
+- Basic parse support for IE filters
 
 Features that might be added:
 
@@ -93,7 +95,9 @@ Features that won't be added:
 - Strip quotes around keyframe names when possible
 - Strip quotes around attribute selectors when possible
 - Sort adjacent groups of statements by specificity (most specific last)
-- `:nth-child(2n+1)` -> `:nth-child(odd)`
+- Basic collapsing of `:not(:nth-child(...))`
+ - `:not(:nth-child(even))` -> `:nth-child(odd)`
+ - `:not(:nth-child(odd))` -> `:nth-child(even)`
 
 #### Combinations
 

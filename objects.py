@@ -10,6 +10,7 @@ class String(object):
     def __unicode__(self):
         return self.value
 
+
 class Number(object):
     def __init__(self, value):
         self.value = value.lstrip(u'-')
@@ -117,4 +118,3 @@ class LinearFunc(object):
             return u'%s %s' % (coef, offset)
         else:
             return coef or offset
-

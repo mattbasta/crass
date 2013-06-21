@@ -1,3 +1,4 @@
+import objects
 from optimization import CSS_PREFIXES, HTML_PREFIXES, RemovalOptimization
 
 
@@ -90,7 +91,7 @@ class RuleAttribute(Rule):
         generated = self.attr_name
         if self.binop:
             generated += self.binop
-            generated += self.attr_value
+            generated += unicode(self.attr_value)
         return u'[%s]' % generated
 
     def optimize(self, **kw):
@@ -186,6 +187,16 @@ class RulePseudoClass(Rule):
             if 'prefix' in inner_kw:
                 del inner_kw['prefix']
             self.extra = self.extra.optimize(**inner_kw)
+
+        elif (self.pseudoclass == u'nth-child' or
+              self.pseudoclass == u'nth-last-child'):
+            str_extra = unicode(self.extra)
+            if str_extra == u'2n+1':
+                # OPT: Replace `:nth-child(2n+1)` with `:nth-child(odd)`
+                self.extra = u'odd'
+            elif str_extra == u'even':
+                # OPT: Replace `:nth-child(even)` with `:nth-child(2n)`
+                self.extra = objects.LinearFunc(2, 0)
 
         return self
 

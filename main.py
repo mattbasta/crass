@@ -30,5 +30,5 @@ if __name__ == '__main__':
     if args.pretty:
         sys.stdout.write(stylesheet.pretty())
     else:
-        sys.stdout.write(unicode(stylesheet))
+        sys.stdout.write(unicode(stylesheet).encode('utf-8'))
 

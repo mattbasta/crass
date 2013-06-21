@@ -9,7 +9,7 @@ CHARSET = re.compile(r'@charset[\s]*(.+?)[\s]*;')
 # Adapted from https://raw.github.com/bhyde/css-parser/master/css.peg:
 # This is an incredibly inefficient grammar, but it would be simple to
 # optimize. Eventually, Parsimonious will know how to do that automatically.
-css = Grammar(r"""
+css = Grammar(ur"""
     program = S* stylesheet
     stylesheet = ("@charset" S* STRING S* ";")? SCC (import SCC)* (namespace SCC)* ((ruleset / media / page / font_face / keyframes) SCC)*
     SCC = S / CDO / CDC
@@ -37,10 +37,9 @@ css = Grammar(r"""
     vendor_prefix = ~r"\-[a-zA-Z]+\-"
 
     h = ~r"[0-9a-fA-F]"
-    wc = ~r"[ \n\r\t\f]"
-    nonascii = ~r"[\u0080-\ud7ff\ue000-\ufffd\u10000-\u10ffff]"
-    unicode = ~r"\\[0-9a-fA-F]{1,6}" wc?
-    escape = unicode / ~r"\\[\u0020-\u007E\u0080-\uD7FF\uE000-\uFFFD\u10000-\u10FFFF]"
+    nonascii = ~u"[\u0080-\ud7ff\ue000-\ufffd\u10000-\u10ffff]"
+    unicode = ~r"\\[0-9a-fA-F]{1,6}[ \n\r\t\f]"
+    escape = unicode / ~u"\\[\u0020-\u007E\u0080-\uD7FF\uE000-\uFFFD\u10000-\u10FFFF]"
     nmstart = ~r"-?[a-zA-Z_]" #/ escape #/ nonascii
     nmchar = ~r"[a-zA-Z0-9\-_]" #/ escape #/ nonascii
     string_chars = ~r"[\t \!#\$%&\(-~]" / ~r"\\(\n|\r\n|\r|\f)" / nonascii #/ escape
@@ -53,9 +52,9 @@ css = Grammar(r"""
     num = unary_operator? ~r"([0-9]+|[0-9]*\.[0-9]+)"
     STRING = string1 / string2
     url = urlchar+
-    w = wc*
+    w = ~r"[ \n\r\t\f]*"
 
-    comment = "/*" (!"*/" ~r".")* "*/"
+    comment = ~r"\/\*[^*]*\*+([^/*][^*]*\*+)*\/"
     S = w / comment
 
     CDO = "<!--"
@@ -131,7 +130,7 @@ class CssVisitor(NodeVisitor):
 
         charset = body[0]
         if charset:
-            sheet.charset = body[0][2]
+            sheet.charset = body[0][0][2]
 
         imports = body[2]
         for imp in imports:
@@ -183,7 +182,7 @@ class CssVisitor(NodeVisitor):
         exprs = body[4]
         return media.MediaQuery(
                 media_type=body[2],
-                media_type_modifier=body[1] or None,
+                media_type_modifier=body[0][0][0] if body[0] and body[0][0][0] else None,
                 media_exprs=exprs[0][2] if exprs else None)
 
     def visit_media_query_expr(self, rule, body):

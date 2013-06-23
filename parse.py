@@ -30,7 +30,6 @@ css = Grammar(ur"""
     keyframe_selector = (num "%") / "from" / "to"
     combinator = ("+" / ">" / "~") S*
     unary_operator = "-" / "+"
-    property = IDENT S*
     ruleset = more_selector S* "{" S* declaration_list? "}" S*
     more_selector = selector (S* "," S* selector)*
 
@@ -49,7 +48,7 @@ css = Grammar(ur"""
 
     IDENT = nmstart nmchar*
     name = nmchar+
-    num = unary_operator? ~r"([0-9]+|[0-9]*\.[0-9]+)"
+    num = unary_operator? ~r"([0-9]*\.[0-9]+|[0-9]+)"
     STRING = string1 / string2
     url = urlchar+
     w = ~r"[ \n\r\t\f]*"
@@ -64,7 +63,8 @@ css = Grammar(ur"""
 
     IMPORTANT_SYM = "!" w "important"
 
-    DIMENSION = num (IDENT / "%")
+    dim_unit = IDENT / "%"
+    DIMENSION = num dim_unit
 
     URI = "url(" w (STRING / url) w ")"
 
@@ -74,7 +74,7 @@ css = Grammar(ur"""
     simple_selector = (element_name simple_selector_etc*) / (simple_selector_etc+)
     simple_selector_etc = id_selector / class_selector / attrib_selector / pseudo_selector
 
-    element_type = (IDENT / "*")
+    element_type = IDENT / "*"
     element_ns = "|" IDENT
     element_name = (element_type element_ns?) / element_ns
 
@@ -95,17 +95,18 @@ css = Grammar(ur"""
 
     declaration_list = declaration (";" S* declaration)* ";"? S*
     declaration = (filter_property / normal_property) S* (IMPORTANT_SYM S*)?
+    property = IDENT S*
     normal_property = property ":" S* expr
     filter_property = "filter:" S* ie_filter_blob
-    expr = term ( operator term )*
+    expr_operator = "/" / ","
+    expr = term S* (expr_operator? S* term)*
     math_expr = math_product (S+ ("+" / "-") S+ math_product)*
     math_product = unit (S* (("*" S* unit) / ("/" S* num)))*
     calc = "calc(" S* math_expr S* ")"
     attr = "attr(" S* element_name (S+ IDENT)? S* ("," (unit / calc) S*)? ")"
-    operator = ("/" / ",")? S*
-    unit = DIMENSION / num / ("(" S* math_expr S* ")") / calc / attr / function
-    term = (unary_operator? unit S*) / other_term
-    other_term = (STRING S*) / (URI S*) / (IDENT S*) / (hexcolor S*)
+    paren_math_expr = "(" S* math_expr S* ")"  # XXX: Is this needed?
+    unit = DIMENSION / num / paren_math_expr / calc / attr / function
+    term = (URI / unit / STRING / IDENT / hexcolor) S*
 
     ie_filter_blob = ie_filter_blob_term (S+ ie_filter_blob)? S*
     ie_filter_blob_term = ~r"(progid:)?[a-zA-Z0-9\.]+\([a-zA-Z0-9=#, \n\r\t]*\)"
@@ -364,13 +365,34 @@ class CssVisitor(NodeVisitor):
     def visit_filter_property(self, node, body):
         return declaration.Declaration(u'filter', body[2])
 
-    def visit_expr(self, node, (term, more_terms)):
-        # TODO: Make this parse into a data structure
-        return node.text.strip()
+    def visit_expr_operator(self, node, body):
+        return node.text
+
+    def visit_expr(self, node, body):
+        extra_terms = []
+        for op, _, term in body[2]:
+            extra_terms.append((op[0] if op else None, term))
+
+        return declaration.Expression(body[0], extra_terms)
+
+    def visit_term(self, node, body):
+        return body[0][0]
+
+    def visit_unit(self, node, (content, )):
+        return content
+
+    def visit_paren_math_expr(self, node, body):
+        return body[2]
 
     def visit_STRING(self, node, body):
         # XXX: objects.String(node.text[1:-1]) would be better?
         return objects.String(u''.join(x[0] for x in body[0][1]))
+
+    def visit_url(self, node, body):
+        return node.text
+
+    def visit_URI(self, node, body):
+        return objects.URI(body[2][0])
 
     def visit_num(self, node, body):
         return objects.Number(node.text)
@@ -378,8 +400,20 @@ class CssVisitor(NodeVisitor):
     def visit_integer(self, node, body):
         return objects.Number(node.text)
 
+    def visit_function(self, node, body):
+        return declaration.Function(body[0], body[3])
+
     def visit_string_chars(self, node, body):
         return node.text
+
+    def visit_dim_unit(self, node, body):
+        return node.text
+
+    def visit_DIMENSION(self, node, body):
+        return objects.Dimension(body[0], body[1])
+
+    def visit_hexcolor(self, node, body):
+        return objects.Color.fromhex(node.text)
 
     def visit_IDENT(self, node, _):
         return node.text

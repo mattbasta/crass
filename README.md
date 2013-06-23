@@ -9,14 +9,25 @@ Optimizations
 
 - Removal of unnecessary whitespace
 - Lower-case identifiers appropriately
- - Element names
- - Pseudo selectors
  - Descriptor names
+ - Element names
+ - Hex values
+ - Pseudo selectors
+ - Units
 - Sort multiselectors
 - Collapse mutliselectors containing wildcard selectors into just a wildcard selector
  - `.class, *` -> `*`
 - Alphabetize descriptors (keeping relative order of identical descriptors)
 - `:nth-child(2n+1)` -> `:nth-child(odd)`
+- Convert `rgb()` to hex
+- Convert `rgba()` to `hsla()` (and vise versa) if the opposite is smaller
+- #XXYYZZ -> #XYZ
+- Collapse dimensional declarations where appropriate
+ - `x x [ x[ x]]` -> `x`
+ - `x y x y` -> `x y`
+ - `x y z y` -> `x y z`
+ - `x y x` -> `x y`
+- Strip units from zero where appropriate
 
 ### Deletions
 
@@ -31,40 +42,6 @@ Optimizations
 - Combine identical @keyframes blocks
 - Combine keyframes with @keyframes blocks that have the same keyframe selector
 
-Unimplemented Features
-----------------------
-
-### CSS Specification
-
-Features that will be added:
-
-- Paged media parsing support
-- Conditional rules parsing support
-- Device adaptation (`@viewport`) parsing support
-- Standardized level 4 constructs
-- Basic parse support for IE filters
-
-Features that might be added:
-
-- Selectors 6.3.3: Attribute namespaces
-- Selectors 6.6.1: Dynamic pseudo-classes
-  - Selectors 6.6.1.1: `:visited`
-  - Selectors 6.6.1.2: User action pseudo-classes
-- Selectors 6.6.2: `:target`
-- Selectors 6.6.3: `:lang`
-- Selectors 6.6.4: UI element states
-- Selectors 7.3: `::before` and `::after`
-
-- Lists 8: `@counter-style`
-
-Features that won't be added:
-
-- Selectors 6.3.4: Attribute selectors and DTDs
-- Selectors 7.1/7.2: `::first-line` and `::first-letter`
-- Removed/special CSS features (`::selection`, `::contains()`)
-
-\* Note that unimplemented selectors simply refer to the library's ability to match against those selectors in a document.
-
 
 ### Planned Optimizations
 
@@ -72,18 +49,7 @@ Features that won't be added:
 
 - Sort simple selector rules by specificity
 - Lower-case identifiers appropriately
- - Units
  - Function names
- - Hex values
-- Strip units from zero where appropriate (not in `hsl`/`hsla`)
-- Combine lists of dimensions (except in coordinate declarations; e.g. `background-position` or `transform-origin`)
- - x x [x [x]] -> x
- - x y x y -> x y
- - x y z y -> x y z
- - x y x -> x y
-- Convert `rgb()` to hex
-- Convert `rgba()` to `hsla()` (and vise versa) if the opposite is smaller
-- #XXYYZZ -> #XYZ
 - Convert hex to color names when available and smaller
 - Convert color names to hex when smaller
 - `font-weight: normal` -> `font-weight: 400` (also for `font`)
@@ -128,11 +94,50 @@ Features that won't be added:
 
 #### Speculative Optimizations
 
+- Shorten IE filter declarations when possible
+ - `progid:DXImageTransform.Microsoft.Alpha` -> `alpha`
+ - `progid:DXImageTransform.Microsoft.Chroma` -> `chroma`
 - Spaces between @blocks and parentheses
  - `@media (` -> `@media(`
 - Spaces between closing parentheses and next token
  - `url(...) foo` -> `url(...)foo`
  - Not IE7 compatible
+
+
+Unimplemented Features
+----------------------
+
+### CSS Specification
+
+Features that will be added:
+
+- Paged media parsing support
+- Conditional rules parsing support
+- Device adaptation (`@viewport`) parsing support
+- Standardized level 4 constructs
+- Basic parse support for IE filters
+- Color 3.5: `@color-profile`
+
+Features that might be added:
+
+- Selectors 6.3.3: Attribute namespaces
+- Selectors 6.6.1: Dynamic pseudo-classes
+  - Selectors 6.6.1.1: `:visited`
+  - Selectors 6.6.1.2: User action pseudo-classes
+- Selectors 6.6.2: `:target`
+- Selectors 6.6.3: `:lang`
+- Selectors 6.6.4: UI element states
+- Selectors 7.3: `::before` and `::after`
+
+- Lists 8: `@counter-style`
+
+Features that won't be added:
+
+- Selectors 6.3.4: Attribute selectors and DTDs
+- Selectors 7.1/7.2: `::first-line` and `::first-letter`
+- Removed/special CSS features (`::selection`, `::contains()`)
+
+\* Note that unimplemented selectors simply refer to the library's ability to match against those selectors in a document.
 
 
 Differences from CSS3

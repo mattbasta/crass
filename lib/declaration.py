@@ -17,7 +17,8 @@ class Declaration(object):
 
     def pretty(self):
         base = u'%s: %s !important' if self.imp else u'%s: %s'
-        return base % (self.name, self.body)
+        body = getattr(self.body, 'pretty', lambda: self.body)()
+        return base % (self.name, body)
 
     def optimize(self, **kw):
         prefix = kw.get('prefix')
@@ -58,8 +59,16 @@ class Expression(object):
         return u''.join(unicode(x) for x in output)
 
     def pretty(self):
-        return u' '.join(
-            ('%s %s' % (op, term) if op else term) for op, term in self.terms)
+        output = []
+        for op, term in self.terms:
+            if not op and output:
+                output.append(u' ')
+            elif op:
+                output.append(op + u' ')
+            output.append(term)
+
+        return u''.join(
+            getattr(x, 'pretty', lambda: unicode(x))() for x in output)
 
     def _opt_dimensions(self, **kw):
         if kw.get('decl') in NON_DIM_DECLS:

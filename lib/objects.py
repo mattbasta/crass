@@ -64,13 +64,13 @@ class Number(object):
 
     def __unicode__(self):
         sign, num = self.get_value()
-        if num:
-            return sign + num
-        else:
-            return u'0'
+        return (sign + num) if num else u'0'
 
     def pretty(self):
-        return unicode(self)
+        sign, num = self.get_value()
+        if num and num.startswith(u'.'):
+            num = u'0%s' % num
+        return (sign + num) if num else u'0'
 
     def get_value(self):
         if not self.value:
@@ -101,14 +101,14 @@ class Number(object):
 
 class Dimension(object):
     def __init__(self, number, unit):
-        self.number = number
+        self.number = Number.on(number)
         self.unit = unit.lower()
 
     def __unicode__(self):
         return u'%s%s' % (self.number, self.unit)
 
     def pretty(self):
-        return unicode(self)
+        return u'%s%s' % (self.number.pretty(), self.unit)
 
     def optimize(self, **kw):
         # OPT: Strip unnecessary units from zero

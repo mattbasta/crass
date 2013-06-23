@@ -16,8 +16,6 @@ Optimizations
  - Units
  - Function names
 - Sort multiselectors
-- Collapse mutliselectors containing wildcard selectors into just a wildcard selector
- - `.class, *` -> `*`
 - Alphabetize descriptors (keeping relative order of identical descriptors)
 - `:nth-child(2n+1)` -> `:nth-child(odd)`
 - Convert `rgb()` to hex
@@ -33,6 +31,7 @@ Optimizations
 - Attempt to switch quote types on URLs if smaller
 - `font-weight: normal` -> `font-weight: 400` (also for `font`)
 - `font-weight: bold` -> `font-weight: 700` (also for `font`)
+- `none` -> `0` (when possible)
 
 ### Deletions
 
@@ -47,6 +46,11 @@ Optimizations
 - Combine identical @keyframes blocks
 - Combine keyframes with @keyframes blocks that have the same keyframe selector
 
+### Mostly Safe (activate with `--O1`)
+
+- Collapse mutliselectors containing wildcard selectors into just a wildcard selector
+ - `.class, *` -> `*`
+
 
 ### Planned Optimizations
 
@@ -55,7 +59,6 @@ Optimizations
 - Sort simple selector rules by specificity
 - Convert hex to color names when available and smaller
 - Convert color names to hex when smaller
-- `none` -> `0` (when possible)
 - Strip quotes around font and animation names when possible
 - Strip quotes around keyframe names when possible
 - Strip quotes around attribute selectors when possible
@@ -87,7 +90,7 @@ Optimizations
 
 - Remove "all" media type
 
-#### Lossy/Unsafe (optional)
+#### Unsafe (optional; activate with `--O2`)
 
 - Remove obsolete descriptors
  - Will result in dropped support for old browsers

@@ -26,8 +26,8 @@ class MultiSelector(Selector):
     def optimize(self, **kw):
         str_sels = map(unicode, self.selectors)
 
-        # OPT: If multiselector contains wildcard, simplify to wildcard.
-        if u'*' in str_sels:
+        # OPT(O1): If multiselector contains wildcard, simplify to wildcard.
+        if u'*' in str_sels and kw.get('O1'):
             from rule import RuleType
             return SimpleSelector([RuleType(u'*')])
 

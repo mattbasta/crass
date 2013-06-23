@@ -41,6 +41,8 @@ class Declaration(object):
 # A list of declarations which shouldn't use dimensional optimizations.
 NON_DIM_DECLS = [u'background-position', u'transform-origin', u'box-shadow',
                  u'mask-position']
+NONEABLE_DECLS = [u'border', u'border-top', u'border-right', u'border-bottom',
+                  u'border-left', u'outline', u'background']
 
 class Expression(object):
     def __init__(self, first_term, term_list=None):
@@ -121,12 +123,21 @@ class Expression(object):
             return val
         self.terms = [(opt, repl(term)) for opt, term in self.terms]
 
+    def _opt_none(self, **kw):
+        if kw.get('decl') not in NONEABLE_DECLS or len(self.terms) > 1:
+            return
+
+        # OPT: Convert `none` to `0` where appropriate
+        if self.terms[0][1] == u'none':
+            self.terms[0][1] = u'0'
+
     def optimize(self, **kw):
         optimize = (
             lambda term: getattr(term, 'optimize', lambda **kw: term)(**kw))
         self.terms = [(op, optimize(term)) for op, term in self.terms]
         self._opt_dimensions(**kw)
         self._opt_fonts(**kw)
+        self._opt_none(**kw)
         return self
 
 

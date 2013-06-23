@@ -45,8 +45,9 @@ class MultiSelector(Selector):
             raise RemovalOptimization()
 
         # OPT: Sort complex selectors in multiselectors
-        self.selectors = sorted(
-            self.selectors, cmp=lambda a, b: cmp(unicode(a), unicode(b)))
+        if kw.get('sort'):
+            self.selectors = sorted(
+                self.selectors, cmp=lambda a, b: cmp(unicode(a), unicode(b)))
 
         return self
 

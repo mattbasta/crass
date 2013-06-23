@@ -22,6 +22,9 @@ if __name__ == '__main__':
     parser.add_argument(
             '--optimize', action='store_const', const=True, default=False,
             help='Optimize parsed CSS')
+    parser.add_argument(
+            '--no-reorder', action='store_const', const=False, default=True,
+            help='Prevents descriptors and selectors from being sorted')
     args = parser.parse_args()
 
     if args.input:
@@ -31,7 +34,7 @@ if __name__ == '__main__':
         stylesheet = parse(sys.stdin.read())
 
     if args.optimize:
-        stylesheet = stylesheet.optimize()
+        stylesheet = stylesheet.optimize(sort=args.no_reorder)
     if args.pretty:
         sys.stdout.write(stylesheet.pretty())
     else:

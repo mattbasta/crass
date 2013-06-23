@@ -23,14 +23,14 @@ class Statement(object):
                 u';\n    '.join(d.pretty() for d in self.descriptors))
 
     def optimize(self, **kw):
-        self.selector = self.selector.optimize(
-            statement=self, prefix=kw.get('prefix'))
+        self.selector = self.selector.optimize(statement=self, **kw)
 
         self.descriptors = filter(None, [
-            d.optimize(parent=self, index=i) for i, d in
+            d.optimize(**extend(kw, parent=self, index=i)) for i, d in
             enumerate(self.descriptors)])
         # OPT: Sort descriptors
-        self.descriptors = sorted(self.descriptors, key=lambda d: d.name)
+        if kw.get('sort'):
+            self.descriptors = sorted(self.descriptors, key=lambda d: d.name)
         return self
 
 
@@ -55,7 +55,7 @@ class MediaQuery(Statement, Stylesheet):
         # Optimize media queries
         def opt(mq, index):
             try:
-                return mq.optimize(parent=self, index=index)
+                return mq.optimize(**extend(kw, parent=self, index=index))
             except RemovalOptimization:
                 return None
 
@@ -63,8 +63,8 @@ class MediaQuery(Statement, Stylesheet):
             opt(mq, i) for i, mq in enumerate(self.media_types) if
             unicode(mq) not in str_mqs[:i]])
 
-        self._opt_imports(kw)
-        self._opt_statements(kw)
+        self._opt_imports(**kw)
+        self._opt_statements(**kw)
         return self
 
 
@@ -84,7 +84,7 @@ class FontFace(Statement):
 
     def optimize(self, **kw):
         self.descriptors = filter(None, [
-            d.optimize(parent=self, index=i) for i, d in
+            d.optimize(**extend(kw, parent=self, index=i)) for i, d in
             enumerate(self.descriptors)])
         return self
 
@@ -125,7 +125,7 @@ class Keyframes(Statement, Stylesheet):
 
         # Optimize each frame.
         self.frames = filter(None, [
-            f.optimize(parent=self, prefix=self.prefix) for i, f in
+            f.optimize(**extend(kw, parent=self, prefix=self.prefix)) for i, f in
             enumerate(self.frames)])
 
         parent = kw.get('parent')
@@ -144,8 +144,7 @@ class Keyframes(Statement, Stylesheet):
                         raise RemovalOptimization()
 
                     statement.frames.extend(self.frames)
-                    parent.statements[index] = statement.optimize(
-                        parent=parent, index=index)
+                    parent.statements[index] = statement.optimize(**kw)
                     raise RemovalOptimization()
         return self
 

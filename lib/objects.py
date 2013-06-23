@@ -119,6 +119,7 @@ class Dimension(object):
 
 
 same = lambda s: s[0] == s[1]
+dehex = lambda hex: int(hex, 16)
 
 class Color(object):
 
@@ -128,10 +129,10 @@ class Color(object):
         hlen = len(hex_)
 
         if hlen == 3:
-            return Color(int(hex_[0], 16), int(hex_[1], 16), int(hex_[2], 16))
-        elif hlen == 6:
             return Color(
-                int(hex_[0:2], 16), int(hex_[2:4], 16), int(hex_[4:6], 16))
+                dehex(hex_[0] * 2), dehex(hex_[1] * 2), dehex(hex_[2] * 2))
+        elif hlen == 6:
+            return Color(dehex(hex_[0:2]), dehex(hex_[2:4]), dehex(hex_[4:6]))
 
         raise Exception('Invalid hex color')
 

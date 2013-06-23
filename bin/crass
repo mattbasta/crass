@@ -1,8 +1,13 @@
+#!/usr/bin/env python
+import os
 import sys
 
 import argparse
 
-from parse import do_parse
+sys.path.append(os.path.abspath('..'))
+
+
+from lib import parse
 
 if __name__ == '__main__':
 
@@ -21,9 +26,9 @@ if __name__ == '__main__':
 
     if args.input:
         with open(args.input) as inp:
-            stylesheet = do_parse(inp.read())
+            stylesheet = parse(inp.read())
     else:
-        stylesheet = do_parse(sys.stdin.read())
+        stylesheet = parse(sys.stdin.read())
 
     if args.optimize:
         stylesheet = stylesheet.optimize()

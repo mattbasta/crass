@@ -33,7 +33,6 @@ class Stylesheet(object):
             try:
                 return statement.optimize(**extend(kw, parent=self, index=index))
             except RemovalOptimization:
-                print "Removing %s" % statement
                 return None
 
         self.statements = filter(None, [opt(s, i) for i, s in

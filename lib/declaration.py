@@ -39,7 +39,8 @@ class Declaration(object):
 
 
 # A list of declarations which shouldn't use dimensional optimizations.
-NON_DIM_DECLS = [u'background-position', u'transform-origin']
+NON_DIM_DECLS = [u'background-position', u'transform-origin', u'box-shadow',
+                 u'mask-position']
 
 class Expression(object):
     def __init__(self, first_term, term_list=None):
@@ -71,7 +72,9 @@ class Expression(object):
             getattr(x, 'pretty', lambda: unicode(x))() for x in output)
 
     def _opt_dimensions(self, **kw):
-        if kw.get('decl') in NON_DIM_DECLS:
+        if (kw.get('decl') in NON_DIM_DECLS or
+            any(prefix + kw.get('decl') in NON_DIM_DECLS for prefix in
+                CSS_PREFIXES)):
             return
 
         # If there's too many or too few operators, it's not a dim. decl.
@@ -104,19 +107,32 @@ class Expression(object):
         if len(self.terms) == 3 and _t[0] == _t[2]:
             self.terms = self.terms[:2]
 
+    def _opt_fonts(self, **kw):
+        if kw.get('decl') not in (u'font-weight', u'font', ):
+            return
+
+        def repl(val):
+            if val == u'bold':
+                return u'700'
+            elif val == u'normal':
+                return u'400'
+            return val
+        self.terms = [(opt, repl(term)) for opt, term in self.terms]
 
     def optimize(self, **kw):
         optimize = (
             lambda term: getattr(term, 'optimize', lambda **kw: term)(**kw))
         self.terms = [(op, optimize(term)) for op, term in self.terms]
         self._opt_dimensions(**kw)
+        self._opt_fonts(**kw)
         return self
 
 
 class Function(object):
     # TODO: Move this somewhere else?
     def __init__(self, name, content):
-        self.name = name
+        # OPT: Lower-case function names
+        self.name = name.lower()
         self.content = content
 
     def __unicode__(self):

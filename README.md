@@ -14,6 +14,7 @@ Optimizations
  - Hex values
  - Pseudo selectors
  - Units
+ - Function names
 - Sort multiselectors
 - Collapse mutliselectors containing wildcard selectors into just a wildcard selector
  - `.class, *` -> `*`
@@ -28,6 +29,10 @@ Optimizations
  - `x y z y` -> `x y z`
  - `x y x` -> `x y`
 - Strip units from zero where appropriate
+- Strip quotes from URLs when possible
+- Attempt to switch quote types on URLs if smaller
+- `font-weight: normal` -> `font-weight: 400` (also for `font`)
+- `font-weight: bold` -> `font-weight: 700` (also for `font`)
 
 ### Deletions
 
@@ -48,15 +53,9 @@ Optimizations
 #### General
 
 - Sort simple selector rules by specificity
-- Lower-case identifiers appropriately
- - Function names
 - Convert hex to color names when available and smaller
 - Convert color names to hex when smaller
-- `font-weight: normal` -> `font-weight: 400` (also for `font`)
-- `font-weight: bold` -> `font-weight: 700` (also for `font`)
 - `none` -> `0` (when possible)
-- Strip quotes from URLs when possible
-- Attempt to switch quote types on URLs if smaller
 - Strip quotes around font and animation names when possible
 - Strip quotes around keyframe names when possible
 - Strip quotes around attribute selectors when possible
@@ -79,6 +78,10 @@ Optimizations
 - Combine identical or overridden media query expressions
 - Combine near media blocks when possible
  - `@media X{a{}b{}c{}}@media Y{d{}e{}f{}}@media X{d{}e{}f{}}` -> `@media X{a{}b{}c{}d{}e{}f{}}@media Y{d{}e{}f{}}`
+- Combine four border declarations into a shorthand declaration and one-offs
+ - `border-left:none;border-right:none;border-top:1px solid #fff;border-bottom:none;` -> `border:none;border-top:1px solid #fff`
+ - `border:10px 0;border-bottom:5px;border-left:4px solid #ddd;` -> `border:10px 0 5px;border-left:4px solid #ddd`
+ - Shorthand must come before one-offs.
 
 #### Deletions
 

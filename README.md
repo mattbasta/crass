@@ -37,7 +37,6 @@ Optimizations
 
 - Remove mis-matched browser-prefixed declarations for browser-prefixed blocks
 - Remove duplicate simple selectors within multiple selectors (`.class, .class` -> `.class`)
-- Remove wildcard selector in simple selectors with other rules (`*.class` -> `.class`)
 - Remove duplicate simple selector rules (`.class.class` -> `.class`)
 
 ### Combinations
@@ -50,6 +49,7 @@ Optimizations
 
 - Collapse mutliselectors containing wildcard selectors into just a wildcard selector
  - `.class, *` -> `*`
+- Remove wildcard selector in simple selectors with other rules (`*.class` -> `.class`)
 
 
 ### Planned Optimizations

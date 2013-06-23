@@ -73,10 +73,10 @@ class SimpleSelector(Selector):
         str_rules = map(unicode, self.rules)
 
         # Allow RemovalOptimizations to bubble up.
-        # OPT: Remove wildcard from simple selectors.
+        # OPT(O1): Remove wildcard from simple selectors.
         self.rules = [r.optimize(**kw) for i, r in enumerate(self.rules) if
                       unicode(r) not in str_rules[:i] and
-                      unicode(r) != u'*']
+                      (unicode(r) != u'*' or not kw.get('O1'))]
         return self
 
 

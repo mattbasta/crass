@@ -112,8 +112,10 @@ class Expression(object):
             return
 
         def repl(val):
+            # OPT: `font-weight:bold` -> `font-weight:700`
             if val == u'bold':
                 return u'700'
+            # OPT: `font-weight:normal` -> `font-weight:400`
             elif val == u'normal':
                 return u'400'
             return val

@@ -66,6 +66,7 @@ Optimizations
 - Basic collapsing of `:not(:nth-child(...))`
  - `:not(:nth-child(even))` -> `:nth-child(odd)`
  - `:not(:nth-child(odd))` -> `:nth-child(even)`
+- If an element's `max-width` is statically smaller than its `width`, change the `width` to match the `max-width` (O1).
 
 #### Combinations
 

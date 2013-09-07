@@ -11,8 +11,10 @@ var extend = scope.extend = function(base, extension) {
     }
 };
 
-
 var utils = require('./lib/utils');
+var identity = utils.identity;
+var invoker = utils.invoker;
+var optimization = require('./lib/optimization');
 
 scope.Stylesheet = function(charset, imports, namespaces, content) {
     this.charset = charset;
@@ -32,7 +34,19 @@ scope.Stylesheet = function(charset, imports, namespaces, content) {
         return output;
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        if (this.charset) {
+            this.charset = this.charset.optimize(kw);
+        }
+        if (this.imports.length) {
+            this.imports = optimization.optimizeList(this.imports, kw);
+        }
+        if (this.namespaces) {
+            this.namespaces = optimization.optimizeList(this.namespaces, kw);
+        }
+        this.content = optimization.optimizeBlocks(this.content, kw);
+        return this;
+    };
 };
 
 scope.Charset = function(charset) {
@@ -42,7 +56,7 @@ scope.Charset = function(charset) {
         return '@charset ' + this.charset.toString() + ';';
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {return this;};
 };
 
 scope.Import = function(uri, medium_list) {
@@ -57,7 +71,7 @@ scope.Import = function(uri, medium_list) {
         }
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {return this;};
 };
 
 scope.Namespace = function(uri, name) {
@@ -72,18 +86,22 @@ scope.Namespace = function(uri, name) {
         };
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {return this;};
 };
 
 scope.Media = function(medium_list, content) {
-    this.medium_list = medium_list;
+    this.medium_list = medium_list || [];
     this.content = content;
 
     this.toString = function() {
         return '@media ' + utils.joinAll(this.medium_list, ',') + '{' + utils.joinAll(this.content) + '}';
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.medium_list = optimization.optimizeList(this.medium_list);
+        this.content = utils.optimizeBlocks(this.content, kw);
+        return this;
+    };
 };
 
 scope.MediaQuery = function(type, prefix, expression) {
@@ -104,7 +122,11 @@ scope.MediaQuery = function(type, prefix, expression) {
         return output.join(' ');
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        // TODO(opt): sort expressions
+        // TODO(opt): filter bunk expressions
+        return this;
+    };
 }
 
 scope.MediaExpression = function(descriptor, value) {
@@ -119,7 +141,10 @@ scope.MediaExpression = function(descriptor, value) {
         }
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.value = this.value.optimize(kw);
+        return this;
+    };
 };
 
 scope.Page = function(name, content) {

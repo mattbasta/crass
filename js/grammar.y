@@ -258,10 +258,10 @@ media_query_expr
     ;
 
 media_expr
-    : '(' junk IDENT junk ')'
+    : '(' junk IDENT junk ':' junk expr ')'
+        { $$ = new yy.MediaExpression($3, $7); }
+    | '(' junk IDENT junk ')'
         { $$ = new yy.MediaExpression($3, null); }
-    | '(' junk IDENT junk ':' junk expr ')'
-        { $$ = new yy.MediaExpression($3, $6); }
     ;
 
 page_block

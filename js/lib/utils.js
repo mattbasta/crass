@@ -21,3 +21,11 @@ var opts = module.exports.opts = function(opts, defaults) {
 module.exports.joinAll = function(list, joiner) {
     return list.map(function(i) {return i.toString();}).join(joiner || '');
 };
+
+module.exports.identity = function(data) {return data;};
+module.exports.invoker = function(method) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return function(obj) {
+        return obj[method].apply(this, args);
+    };
+}

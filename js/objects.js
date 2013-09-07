@@ -12,7 +12,7 @@ var extend = scope.extend = function(base, extension) {
 };
 
 
-var utils = require('./utils');
+var utils = require('./lib/utils');
 
 scope.Stylesheet = function(charset, imports, namespaces, content) {
     this.charset = charset;
@@ -51,9 +51,9 @@ scope.Import = function(uri, medium_list) {
 
     this.toString = function() {
         if (this.medium_list) {
-            return '@import "' + this.uri + '" ' + this.medium_list.toString() + ';';
+            return '@import ' + this.uri.asString() + ' ' + this.medium_list.toString() + ';';
         } else {
-            return '@import "' + this.uri + '";';
+            return '@import ' + this.uri.asString() + ';';
         }
     };
     this.pretty = function(indent) {};
@@ -66,9 +66,9 @@ scope.Namespace = function(uri, name) {
 
     this.toString = function() {
         if (this.name) {
-            return '@namespace ' + this.name + ' "' + this.uri.toString() + '";';
+            return '@namespace ' + this.name + ' ' + this.uri.toString() + ';';
         } else {
-            return '@namespace "' + this.uri.toString() + '";';
+            return '@namespace ' + this.uri.toString() + ';';
         };
     };
     this.pretty = function(indent) {};
@@ -394,12 +394,25 @@ scope.Declaration = function(ident, expr) {
 };
 
 scope.URI = function(uri) {
+    uri = uri.trim();
+    if (uri[0] === uri[uri.length - 1] &&
+        (uri[0] === '"' || uri[0] === "'"))
+        uri = new scope.String(uri.substring(1, uri.length - 1));
+
     this.uri = uri;
+
+    this.asString = function() {
+        if (this.uri instanceof scope.String)
+            return this.uri;
+        return new scope.String(this.uri);
+    };
 
     this.toString = function() {
         var uri = this.uri;
-        // TODO: Add logic for quoting here.
-        return 'url(' + uri + ')';
+        if (typeof uri === 'string' && uri.indexOf(')') !== -1) {
+            uri = new scope.String(uri);
+        }
+        return 'url(' + uri.toString(true) + ')';
     };
     this.pretty = function(indent) {};
     this.optimize = function(kw) {};
@@ -427,7 +440,10 @@ scope.Dimension = function(number, unit) {
     this.unit = unit;
 
     this.toString = function() {
-        return this.number.toString() + this.unit;
+        if (this.unit)
+            return this.number.toString() + this.unit;
+        else
+            return this.number.toString();
     };
     this.pretty = function(indent) {};
     this.optimize = function(kw) {};
@@ -445,6 +461,12 @@ scope.Func = function(name, content) {
 };
 
 scope.HexColor = function(color) {
+    if (color.length === 7 &&
+        color[1] === color[2] &&
+        color[3] === color[4] &&
+        color[5] === color[6]) {
+        color = '#' + color[1] + color[3] + color[5];
+    }
     this.color = color;
 
     this.toString = function() {
@@ -467,9 +489,37 @@ scope.Number = function(value) {
     };
 
     this.toString = function(positive) {
-        if (positive) {
-            return Math.abs(this.value).toString();
+        function post(str) {
+            if (str.length === 1) {
+                return str;
+            }
+            if (str[0] === '0' && str[1] === '.') {
+                str = str.substr(1);
+            } else if (str[0] === '-' && str[1] === '0' && str[2] === '.') {
+                str = '-' + str.substr(2);
+            }
+            return str;
         }
-        return this.value.toString();
+        if (positive) {
+            return post(Math.abs(this.value).toString());
+        }
+        return post(this.value.toString());
     };
+    this.pretty = function(indent) {};
+    this.optimize = function(kw) {};
 };
+
+scope.String = function(value) {
+    this.value = value.toString().replace(/\\['"]/g, '$1');
+
+    this.asString = this.toString = function(raw) {
+        if (raw && this.value.indexOf('\\') === -1) {
+            return this.value;
+        }
+        var single_ = "'" + this.value.replace(/'/g, "\\'") + "'";
+        var double_ = '"' + this.value.replace(/"/g, '\\"') + '"';
+        return (single_.length < double_.length) ? single_ : double_;
+    };
+    this.pretty = function(indent) {};
+    this.optimize = function(kw) {};
+}

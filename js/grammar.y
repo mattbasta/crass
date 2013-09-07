@@ -15,8 +15,8 @@ ie_junk             [a-zA-Z0-9=#, \n\r\t]
 ie_ident            [a-zA-Z0-9\.:]
 
 %%
-"#"{hex}{hex}{hex}                  return 'HEX_SHORT'
 "#"{hex}{hex}{hex}{hex}{hex}{hex}   return 'HEX_LONG'
+"#"{hex}{hex}{hex}                  return 'HEX_SHORT'
 {int}?"."[0-9]+                     return 'FLOAT'
 {int}                               return 'INTEGER'
 ({ws}|{comment})+                   return 'S'
@@ -61,8 +61,8 @@ ie_ident            [a-zA-Z0-9\.:]
 "@right-middle"                     return 'PAGE_RIGHT_MIDDLE'
 "@right-bottom"                     return 'PAGE_RIGHT_BOTTOM'
 
-\"(?:{esc}["bfnrt/{esc}]|{esc}"u"{hex}{1,7}{ws}|[^"{esc}])*\"  yytext = yytext.substr(1,yyleng-2); return 'STRING';
-\'(?:{esc}['bfnrt/{esc}]|{esc}"u"{hex}{1,7}{ws}|[^'{esc}])*\'  yytext = yytext.substr(1,yyleng-2); return 'STRING';
+\"(?:{esc}"u"{hex}{1,7}{ws}|{esc}.|[^"{esc}])*\"  yytext = yytext.substr(1,yyleng-2); return 'STRING';
+\'(?:{esc}"u"{hex}{1,7}{ws}|{esc}.|[^'{esc}])*\'  yytext = yytext.substr(1,yyleng-2); return 'STRING';
 "only"                              return 'ONLY'
 "not-allowed"                       return 'IDENT'  // For cursor: not-allowed
 "not"                               return 'NOT'
@@ -74,7 +74,7 @@ ie_ident            [a-zA-Z0-9\.:]
 "!"                                 return '!'
 "important"                         return 'IMPORTANT'
 "filter"{ws}*":"({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
-"url("[^)]+")"                      return 'URL_FULL'
+"url("[^)]*")"                      return 'URL_FULL'
 "calc"                              return 'CALC'
 "attr"                              return 'ATTR'
 "#"{ident}                          return 'ID_IDENT'
@@ -104,15 +104,20 @@ file
         { return $2; }
     ;
 
-string_or_ident
+string
     : STRING
+        { $$ = new yy.String($1); }
+    ;
+
+string_or_ident
+    : string
         { $$ = $1; }
     | IDENT
         { $$ = $1; }
     ;
 
 string_or_uri
-    : STRING
+    : string
         { $$ = $1; }
     | uri
         { $$ = $1; }
@@ -141,40 +146,36 @@ stylesheet
 
 charset_block
     : BLOCK_CHARSET junk STRING junk ';' scc
-        { $$ = new yy.Charset($4); }
+        { $$ = new yy.Charset($3); }
     |
         { $$ = null; }
     ;
 
 import_list
-    : import_list import_block
-        { $$ = $1; $$.push($2); }
-    /*| import_block
-        { $$ = [$1]; }*/
+    : import_block ';' scc import_list
+        { $$ = $4; $$.unshift($1); }
     |
         { $$ = []; }
     ;
 
 import_block
-    : BLOCK_IMPORT junk string_or_uri scc
+    : BLOCK_IMPORT junk string_or_uri junk
         { $$ = new yy.Import($3, null); }
-    | BLOCK_IMPORT junk string_or_uri junk medium_list scc
+    | BLOCK_IMPORT junk string_or_uri junk medium_list junk
         { $$ = new yy.Import($3, $5); }
     ;
 
 namespace_list
-    : namespace_list namespace_block
-        { $$ = $1; $$.push($2); }
-    /*| namespace_block
-        { $$ = [$1]; }*/
+    : namespace_block ';' scc namespace_list
+        { $$ = $4; $$.unshift($1); }
     |
         { $$ = []; }
     ;
 
 namespace_block
-    : BLOCK_NAMESPACE junk string_or_uri junk ';' scc
+    : BLOCK_NAMESPACE junk string junk
         { $$ = new yy.Namespace($3, null); }
-    | BLOCK_NAMESPACE junk IDENT junk string_or_uri junk ';' scc
+    | BLOCK_NAMESPACE junk IDENT junk string junk
         { $$ = new yy.Namespace($5, $3); }
     ;
 
@@ -183,6 +184,8 @@ blocks
         { $$ = $1; $$.push($2); }
     | block
         { $$ = [$1]; }
+    |
+        { $$ = []; }
     ;
 
 block
@@ -576,7 +579,7 @@ unit_dim
     : IDENT
         { $$ = $1; }
     | '%'
-        { $$ = $1; }
+        { $$ = '%'; }
     |
         { $$ = null; }
     ;
@@ -613,7 +616,7 @@ hexcolor
     : HEX_SHORT
         { $$ = new yy.HexColor($1); }
     | HEX_LONG
-        { $$ = new yy.HexColor($2); }
+        { $$ = new yy.HexColor($1); }
     ;
 
 signed_integer

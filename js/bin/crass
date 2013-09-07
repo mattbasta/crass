@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+
+function help() {
+    console.log([
+        'Usage:',
+        '  crass <input file> [options]',
+        '',
+        'Options:'
+    ].join('\n'));
+}
+
+var opts = utils.opts(process.argv.slice(1));
+

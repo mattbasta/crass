@@ -145,7 +145,7 @@ stylesheet
     ;
 
 charset_block
-    : BLOCK_CHARSET junk STRING junk ';' scc
+    : BLOCK_CHARSET junk string junk ';' scc
         { $$ = new yy.Charset($3); }
     |
         { $$ = null; }
@@ -397,31 +397,31 @@ selector_chunk_list
 
 simple_selector
     : element_name simple_selector_part_list
-        { $$ = [$1].concat($2); }
+        { $$ = new yy.SimpleSelector([$1].concat($2)); }
     | simple_selector_part_list
-        { $$ = $1; }
+        { $$ = new yy.SimpleSelector($1); }
     ;
 
 simple_selector_part_list
-    : simple_selector_part_list ID_IDENT junk
+    : simple_selector_part_list ID_IDENT
         { $$ = $1; $$.push(new yy.IDSelector($2.substr(1))); }
     /* FIXME: These next four rules are an abomination. */
-    | simple_selector_part_list HEX_SHORT junk
+    | simple_selector_part_list HEX_SHORT
         { $$ = $1; $$.push(new yy.IDSelector($2.substr(1))); }
-    | simple_selector_part_list HEX_SHORT IDENT junk
+    | simple_selector_part_list HEX_SHORT IDENT
         { $$ = $1; $$.push(new yy.IDSelector($2.substr(1) + $3)); }
-    | simple_selector_part_list HEX_LONG junk
+    | simple_selector_part_list HEX_LONG
         { $$ = $1; $$.push(new yy.IDSelector($2.substr(1))); }
-    | simple_selector_part_list HEX_LONG IDENT junk
+    | simple_selector_part_list HEX_LONG IDENT
         { $$ = $1; $$.push(new yy.IDSelector($2.substr(1) + $3)); }
     /* </abomination> */
-    | simple_selector_part_list CLASS_IDENT junk
+    | simple_selector_part_list CLASS_IDENT
         { $$ = $1; $$.push(new yy.ClassSelector($2.substr(1))); }
-    | simple_selector_part_list attribute_selector junk
+    | simple_selector_part_list attribute_selector
         { $$ = $1; $$.push($2); }
-    | simple_selector_part_list pseudo_selector junk
+    | simple_selector_part_list pseudo_selector
         { $$ = $1; $$.push($2); }
-    | junk
+    |
         { $$ = []; }
     ;
 
@@ -540,7 +540,7 @@ term
         { $$ = $1; }
     | unit
         { $$ = $1; }
-    | STRING
+    | string
         { $$ = $1; }
     | IDENT
         { $$ = $1; }
@@ -572,7 +572,7 @@ unit
 
 function
     : FUNCTION_IDENT junk expr junk ')'
-        { $$ = new yy.Func($1.substr(0, $1.length - 2), $3); }
+        { $$ = new yy.Func($1.substr(0, $1.length - 1), $3); }
     ;
 
 unit_dim

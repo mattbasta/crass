@@ -39,7 +39,7 @@ scope.Charset = function(charset) {
     this.charset = charset;
 
     this.toString = function() {
-        return '@charset "' + this.charset + '";';
+        return '@charset ' + this.charset.toString() + ';';
     };
     this.pretty = function(indent) {};
     this.optimize = function(kw) {};
@@ -215,6 +215,16 @@ scope.SelectorList = function(selectors) {
 
     this.toString = function() {
         return utils.joinAll(this.selectors, ',');
+    };
+    this.pretty = function(indent) {};
+    this.optimize = function(kw) {};
+};
+
+scope.SimpleSelector = function(conditions) {
+    this.conditions = conditions || [];
+
+    this.toString = function() {
+        return utils.joinAll(this.conditions);
     };
     this.pretty = function(indent) {};
     this.optimize = function(kw) {};

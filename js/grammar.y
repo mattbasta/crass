@@ -1,18 +1,27 @@
+// CSS grammar based on CSS3 specification
+// Written by Matt Basta
+// Copyright 2013
+
 
 %lex
 esc                 "\\"
-digit               [0-9]
 unary_operator      [\-\+]
 ws                  [ \n\r\t\f]
 comment             "/*"[^*]*"*"+([^/*][^*]*"*"+)"*/"
 hex                 [a-fA-F0-9]
-ident               [a-zA-Z_\-][a-zA-Z0-9_\-]*
+ident               ([a-zA-Z_]|"-"[a-zA-Z\-]+)[a-zA-Z0-9_\-]*
+int                 ([1-9][0-9]*|"0")
+ie_junk             [a-zA-Z0-9=#, \n\r\t]
+ie_ident            [a-zA-Z0-9\.:]
 
 %%
+"#"{hex}{hex}{hex}                  return 'HEX_SHORT'
+"#"{hex}{hex}{hex}{hex}{hex}{hex}   return 'HEX_LONG'
+{int}?"."[0-9]+                     return 'FLOAT'
+{int}                               return 'INTEGER'
 ({ws}|{comment})+                   return 'S'
 ","                                 return ','
 ";"                                 return ';'
-":"                                 return ':'
 ","                                 return ','
 "{"                                 return '{'
 "}"                                 return '}'
@@ -20,48 +29,68 @@ ident               [a-zA-Z_\-][a-zA-Z0-9_\-]*
 "]"                                 return ']'
 "("                                 return '('
 ")"                                 return ')'
-"#"                                 return '#'
 "%"                                 return '%'
-"."                                 return '.'
 "*"                                 return '*'
 "|"                                 return '|'
 "/"                                 return '/'
 "*"                                 return '*'
+"="                                 return '='
 "n"                                 return 'N'
-"-"[a-zA-Z]+"-"                     return 'VENDOR_PREFIX'
-"@"                                 return 'BLOCK_START'
 "@charset"                          return 'BLOCK_CHARSET'
 "@import"                           return 'BLOCK_IMPORT'
 "@namespace"                        return 'BLOCK_NAMESPACE'
 "@media"                            return 'BLOCK_MEDIA'
 "@font-face"                        return 'BLOCK_FONT_FACE'
 "@page"                             return 'BLOCK_PAGE'
-"keyframes"                         return 'BLOCK_KEYFRAMES'
+"@keyframes"                        return 'BLOCK_KEYFRAMES'
+"@-"[a-zA-Z]+"-keyframes"           return 'BLOCK_VENDOR_KEYFRAMES'
+"@top-left-corner"                  return 'PAGE_TOP_LEFT_CORNER'
+"@top-left"                         return 'PAGE_TOP_LEFT'
+"@top-center"                       return 'PAGE_TOP_CENTER'
+"@top-right"                        return 'PAGE_TOP_RIGHT'
+"@top-right-corner"                 return 'PAGE_TOP_RIGHT_CORNER'
+"@bottom-left-corner"               return 'PAGE_BOTTOM_LEFT_CORNER'
+"@bottom-left"                      return 'PAGE_BOTTOM_LEFT'
+"@bottom-center"                    return 'PAGE_BOTTOM_CENTER'
+"@bottom-right"                     return 'PAGE_BOTTOM_RIGHT'
+"@bottom-right-corner"              return 'PAGE_BOTTOM_RIGHT_CORNER'
+"@left-top"                         return 'PAGE_LEFT_TOP'
+"@left-middle"                      return 'PAGE_LEFT_MIDDLE'
+"@left-bottom"                      return 'PAGE_LEFT_BOTTOM'
+"@right-top"                        return 'PAGE_RIGHT_TOP'
+"@right-middle"                     return 'PAGE_RIGHT_MIDDLE'
+"@right-bottom"                     return 'PAGE_RIGHT_BOTTOM'
+
 \"(?:{esc}["bfnrt/{esc}]|{esc}"u"{hex}{1,7}{ws}|[^"{esc}])*\"  yytext = yytext.substr(1,yyleng-2); return 'STRING';
 \'(?:{esc}['bfnrt/{esc}]|{esc}"u"{hex}{1,7}{ws}|[^'{esc}])*\'  yytext = yytext.substr(1,yyleng-2); return 'STRING';
 "only"                              return 'ONLY'
+"not-allowed"                       return 'IDENT'  // For cursor: not-allowed
 "not"                               return 'NOT'
 "and"                               return 'AND'
 "from"                              return 'FROM'
 "to"                                return 'TO'
 "odd"                               return 'ODD'
 "even"                              return 'EVEN'
+"!"                                 return '!'
 "important"                         return 'IMPORTANT'
-"filter"                            return 'IE_FILTER'
-"nth-"("last-")?("child"|"of-type") return 'NTH_FUNC'
+"filter"{ws}*":"({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
 "url("[^)]+")"                      return 'URL_FULL'
 "calc"                              return 'CALC'
 "attr"                              return 'ATTR'
+"#"{ident}                          return 'ID_IDENT'
+"."{ident}                          return 'CLASS_IDENT'
 {ident}"("                          return 'FUNCTION_IDENT'
 {ident}                             return 'IDENT'
-[1-9][0-9]*                         return 'INTEGER'
-([1-9][0-9]+|[0-9])"."[0-9]+        return 'FLOAT'
-[+>~]                               return 'COMBINATOR'
-{unary_operator}                    return 'UNARY_OPERATOR'
-[,/]                                return 'EXPR_OPERATOR'
-[~|^$*]?"="                         return 'ATTRIBUTE_COMPARISON'
-"progid:"?[a-zA-Z0-9\.]+"("[a-zA-Z0-9=#, \n\r\t]*")"{ws}*    return 'IE_PROGID'
-{hex}                               return 'HEX'
+"-"                                 return '-'
+"+"                                 return '+'
+">"                                 return 'SEL_CHILD'
+"~"                                 return 'SEL_SIBLING'
+":nth-"("last-")?("child"|"of-type") return 'NTH_FUNC'
+":only-child"                       return 'PSEUDO_CLASS'
+":only-of-type"                     return 'PSEUDO_CLASS'
+"::"                                return '::'
+":"                                 return ':'
+[~|^$*]"="                          return 'ATTRIBUTE_COMPARISON'
 <<EOF>>                             return 'EOF'
 
 /lex
@@ -129,7 +158,7 @@ import_list
 import_block
     : BLOCK_IMPORT junk string_or_uri scc
         { $$ = new yy.Import($3, null); }
-    : BLOCK_IMPORT junk string_or_uri junk medium_list scc
+    | BLOCK_IMPORT junk string_or_uri junk medium_list scc
         { $$ = new yy.Import($3, $5); }
     ;
 
@@ -233,7 +262,7 @@ media_expr
     ;
 
 page_block
-    : BLOCK_PAGE junk page_name junk '{' junk declaration_list junk '}'
+    : BLOCK_PAGE junk page_name junk '{' junk page_declaration_list junk '}'
         { $$ = new yy.Page($3, $7); }
     ;
 
@@ -248,16 +277,65 @@ page_name
         { $$ = null; }
     ;
 
+page_declaration_list
+    : page_declaration_list junk ';' junk page_declaration
+        { $$ = $1; $$.push($5); }
+    | page_declaration
+        { $$ = [$1]; }
+    ;
+
+page_declaration
+    : declaration
+        { $$ = $1; }
+    | page_margin junk '{' junk declaration_list junk '}'
+        { $$ = new yy.PageMargin($1.substr(1), $5); }
+    ;
+
+page_margin
+    : PAGE_TOP_LEFT_CORNER
+        { $$ = $1; }
+    | PAGE_TOP_LEFT
+        { $$ = $1; }
+    | PAGE_TOP_CENTER
+        { $$ = $1; }
+    | PAGE_TOP_RIGHT
+        { $$ = $1; }
+    | PAGE_TOP_RIGHT_CORNER
+        { $$ = $1; }
+    | PAGE_BOTTOM_LEFT_CORNER
+        { $$ = $1; }
+    | PAGE_BOTTOM_LEFT
+        { $$ = $1; }
+    | PAGE_BOTTOM_CENTER
+        { $$ = $1; }
+    | PAGE_BOTTOM_RIGHT
+        { $$ = $1; }
+    | PAGE_BOTTOM_RIGHT_CORNER
+        { $$ = $1; }
+    | PAGE_LEFT_TOP
+        { $$ = $1; }
+    | PAGE_LEFT_MIDDLE
+        { $$ = $1; }
+    | PAGE_LEFT_BOTTOM
+        { $$ = $1; }
+    | PAGE_RIGHT_TOP
+        { $$ = $1; }
+    | PAGE_RIGHT_MIDDLE
+        { $$ = $1; }
+    | PAGE_RIGHT_BOTTOM
+        { $$ = $1; }
+    ;
+
 font_face_block
     : BLOCK_FONT_FACE junk '{' junk declaration_list junk '}'
         { $$ = new yy.FontFace($6); }
     ;
 
 keyframes_block
-    : BLOCK_START BLOCK_KEYFRAMES junk IDENT junk '{' junk keyframe_list '}'
-        { $$ = new yy.Keyframes($4, $8); }
-    | BLOCK_START vendor_prefix BLOCK_KEYFRAMES junk IDENT junk '{' junk keyframe_list '}'
-        { $$ = new yy.Keyframes($5, $9, $2); }
+    : BLOCK_KEYFRAMES junk IDENT junk '{' junk keyframe_list '}'
+        { $$ = new yy.Keyframes($3, $7); }
+    | BLOCK_VENDOR_KEYFRAMES junk IDENT junk '{' junk keyframe_list '}'
+        { $$ = new yy.Keyframes($3, $7, $1.substring(1, $1.length - 10)); }
     ;
 
 keyframe_list
@@ -298,14 +376,20 @@ selector_list
     : selector_list ',' junk selector_chunk_list
         { $$ = $1; $$.push($4); }
     | selector_chunk_list
-        { $$ = [$1]; }
+        { $$ = new yy.SelectorList([$1]); }
     ;
 
 selector_chunk_list
-    : selector_chunk_list COMBINATOR junk simple_selector junk
-        { $$ = $1; $$.push([$2, $4]); }
+    : selector_chunk_list '+' junk simple_selector junk
+        { $$ = new yy.AdjacentSelector($1, $4); }
+    | selector_chunk_list SEL_CHILD junk simple_selector junk
+        { $$ = new yy.DirectDescendantSelector($1, $4); }
+    | selector_chunk_list SEL_SIBLING junk simple_selector junk
+        { $$ = new yy.SiblingSelector($1, $4); }
+    | selector_chunk_list simple_selector junk
+        { $$ = new yy.DescendantSelector($1, $2); }
     | simple_selector junk
-        { $$ = [[null, $1]]; }
+        { $$ = $1; }
     ;
 
 simple_selector
@@ -316,10 +400,20 @@ simple_selector
     ;
 
 simple_selector_part_list
-    : simple_selector_part_list '#' IDENT junk
-        { $$ = $1; $$.push(new yy.IDSelector($3)); }
-    | simple_selector_part_list '.' IDENT junk
-        { $$ = $1; $$.push(new yy.ClassSelector($3)); }
+    : simple_selector_part_list ID_IDENT junk
+        { $$ = $1; $$.push(new yy.IDSelector($2.substr(1))); }
+    /* FIXME: These next four rules are an abomination. */
+    | simple_selector_part_list HEX_SHORT junk
+        { $$ = $1; $$.push(new yy.IDSelector($2.substr(1))); }
+    | simple_selector_part_list HEX_SHORT IDENT junk
+        { $$ = $1; $$.push(new yy.IDSelector($2.substr(1) + $3)); }
+    | simple_selector_part_list HEX_LONG junk
+        { $$ = $1; $$.push(new yy.IDSelector($2.substr(1))); }
+    | simple_selector_part_list HEX_LONG IDENT junk
+        { $$ = $1; $$.push(new yy.IDSelector($2.substr(1) + $3)); }
+    /* </abomination> */
+    | simple_selector_part_list CLASS_IDENT junk
+        { $$ = $1; $$.push(new yy.ClassSelector($2.substr(1))); }
     | simple_selector_part_list attribute_selector junk
         { $$ = $1; $$.push($2); }
     | simple_selector_part_list pseudo_selector junk
@@ -347,6 +441,8 @@ element_type
 attribute_selector
     : '[' junk IDENT junk ']'
         { $$ = new yy.AttributeSelector($3, null, null); }
+    | '[' junk IDENT junk '=' junk string_or_ident junk ']'
+        { $$ = new yy.AttributeSelector($3, $5, $7); }
     | '[' junk IDENT junk ATTRIBUTE_COMPARISON junk string_or_ident junk ']'
         { $$ = new yy.AttributeSelector($3, $5, $7); }
     ;
@@ -354,45 +450,49 @@ attribute_selector
 pseudo_selector
     : '::' IDENT
         { $$ = new yy.PseudoElementSelector($2); }
-    | ':' NTH_FUNC '(' junk nth ')'
-        { $$ = new yy.NthSelector($2, $5); }
+    | NTH_FUNC '(' junk nth ')'
+        { $$ = new yy.NthSelector($1.substr(1), $4); }
     | ':' NOT '(' junk selector_list junk ')'
         { $$ = new yy.NotSelector($5); }
     | ':' IDENT '(' junk expr junk ')'
         { $$ = new yy.PseudoSelectorFunction($2, $5); }
+    | PSEUDO_CLASS
+        { $$ = new yy.PseudoClassSelector($1.substr(1)); }
     | ':' IDENT
-        { $$ = new yy.PseudoClass($2); }
+        { $$ = new yy.PseudoClassSelector($2); }
     ;
 
 nth
-    : n_val UNARY_OPERATOR junk INTEGER junk
-        { $$ = new yy.LinearFunction($1, $2, $4); }
+    : n_val '+' junk integer junk
+        { $4.applySign($2); $$ = new yy.LinearFunction($1, $4); }
+    | n_val '-' junk integer junk
+        { $4.applySign($2); $$ = new yy.LinearFunction($1, $4); }
     | n_val
-        { $$ = new yy.LinearFunction($1, '+', '0'); }
+        { $$ = $1; }
     | ODD junk
         { $$ = 'odd'; }
     | EVEN junk
         { $$ = 'even'; }
     | signed_integer junk
-        { $$ = new yy.LinearFunction(null, '+', $1); }
+        { $$ = new yy.LinearFunction(null, $1); }
     ;
 
 n_val
     : signed_integer N junk
         { $$ = new yy.NValue($1) }
     | N junk
-        { $$ = new yy.NValue('1') }
+        { $$ = new yy.NValue(1) }
     ;
 
 declaration_list
-    : declaration_list junk declaration
-        { $$ = $1; $$.push($2); }
+    : declaration_list junk ';' junk declaration
+        { $$ = $1; $$.push($5); }
     | declaration
         { $$ = [$1]; }
     ;
 
 declaration
-    : declaration_inner junk optional_important optional_semicolon
+    : declaration_inner junk optional_important
         { $$ = $1; yy.extend($$, $2); }
     ;
 
@@ -404,8 +504,8 @@ optional_important
     ;
 
 declaration_inner
-    : FILTER junk ':' junk ie_filter_blob
-        { $$ = new yy.IEFilter($5); }
+    : IE_FILTER
+        { $$ = new yy.IEFilter($1); }
     | IDENT junk ':' junk expr
         { $$ = new yy.Declaration($1, $5); }
     ;
@@ -416,14 +516,20 @@ expr
     ;
 
 expr_chain
-    : expr_chain EXPR_OPERATOR junk term junk
+    : expr_chain ',' junk term junk
+        { $$ = $1; $$.push([$2, $4]); }
+    | expr_chain '/' junk term junk
         { $$ = $1; $$.push([$2, $4]); }
     | expr_chain term junk
         { $$ = $1; $$.push([null, $2]); }
-    | EXPR_OPERATOR junk term junk
+    | ',' junk term junk
+        { $$ = [[$1, $3]]; }
+    | '/' junk term junk
         { $$ = [[$1, $3]]; }
     | term junk
         { $$ = [[null, $1]]; }
+    |
+        { $$ = []; }
     ;
 
 term
@@ -437,6 +543,10 @@ term
         { $$ = $1; }
     | hexcolor
         { $$ = $1; }
+    | TO
+        { $$ = $1; }
+    | FROM
+        { $$ = $1; }
     ;
 
 uri
@@ -449,14 +559,17 @@ unit
         { $$ = new yy.Dimension($1, $2); }
     | '(' junk math_expr junk ')'
         { $$ = $3; }
-    | vendor_prefix CALC '(' junk math_expr junk ')'
-        { $$ = new yy.Func('calc', $5, $1); }
     | CALC '(' junk math_expr junk ')'
         { $$ = new yy.Func('calc', $5, null); }
     | attr_expression
         { $$ = $1; }
-    | FUNCTION_IDENT junk expr junk ')'
-        { $$ = new yy.Func($1, $4); }
+    | function
+        { $$ = $1; }
+    ;
+
+function
+    : FUNCTION_IDENT junk expr junk ')'
+        { $$ = new yy.Func($1.substr(0, $1.length - 2), $3); }
     ;
 
 unit_dim
@@ -478,10 +591,11 @@ attr_expression
         { $$ = new yy.Func('attr', [$4]);}
     ;
 
-
 math_expr
-    : math_expr UNARY_OPERATOR junk math_product
-        { $$ = $1; $$.push([$3, $5]); }
+    : math_expr '+' junk math_product
+        { $$ = $1; $$.push([$2, $4]); }
+    | math_expr '-' junk math_product
+        { $$ = $1; $$.push([$2, $4]); }
     | math_product
         { $$ = [[null, $1]]; }
     ;
@@ -496,39 +610,33 @@ math_product
     ;
 
 hexcolor
-    : '#' hex hex hex hex hex hex
-        { $$ = new yy.HexColor('#' + $2 + $3 + $4 + $5 + $6 + $7); }
-    | '#' hex hex hex
-        { $$ = new yy.HexColor('#' + $2 + $3 + $4); }
-    ;
-
-ie_filter_blob
-    : ie_filter_blob IE_PROGID
-        { $$ = $1 + $3; }
-    | IE_PROGID
-        { $$ = $1; }
+    : HEX_SHORT
+        { $$ = new yy.HexColor($1); }
+    | HEX_LONG
+        { $$ = new yy.HexColor($2); }
     ;
 
 signed_integer
-    : UNARY_OPERATOR INTEGER
-        { $$ = new yy.Integer($2, $1); }
-    | INTEGER
-        { $$ = new yy.Integer($1, '+'); }
+    : '+' integer
+        { $$ = $2; $$.applySign($1); }
+    | '-' integer
+        { $$ = $2; $$.applySign($1); }
+    | integer
+        { $$ = $1; }
+    ;
+
+integer
+    : INTEGER
+        { $$ = new yy.Number($1); }
     ;
 
 num
     : signed_integer
         { $$ = $1; }
-    | UNARY_OPERATOR FLOAT
-        { $$ = new yy.Float($2, $1); }
+    | '+' FLOAT
+        { $$ = new yy.Number($2); $$.applySign($1); }
+    | '-' FLOAT
+        { $$ = new yy.Number($2); $$.applySign($1); }
     | FLOAT
-        { $$ = new yy.Float($1, '+'); }
+        { $$ = new yy.Number($1); }
     ;
-
-optional_semicolon
-    : ';'
-        { $$ = null; }
-    |
-        { $$ = null; }
-    ;
-

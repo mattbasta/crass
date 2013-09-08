@@ -457,8 +457,8 @@ pseudo_selector
         { $$ = new yy.NthSelector($1.substr(1), $4); }
     | ':' NOT '(' junk selector_list junk ')'
         { $$ = new yy.NotSelector($5); }
-    | ':' IDENT '(' junk expr junk ')'
-        { $$ = new yy.PseudoSelectorFunction($2, $5); }
+    | ':' FUNCTION_IDENT junk expr junk ')'
+        { $$ = new yy.PseudoSelectorFunction($2.substring(0, $2.length - 1), $4); }
     | PSEUDO_CLASS
         { $$ = new yy.PseudoClassSelector($1.substr(1)); }
     | ':' IDENT

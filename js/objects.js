@@ -276,8 +276,14 @@ scope.SelectorList = function(selectors) {
     };
     this.pretty = function(indent) {};
     this.optimize = function(kw) {
-        // TODO(opt): Merge, order, and de-duplicate selectors.
         this.selectors = optimization.optimizeList(this.selectors, kw);
+        // OPT: Sort selector lists.
+        this.selectors = this.selectors.sort(function(a, b) {
+            var ats = a.toString();
+            var bts = b.toString();
+            return ats < bts ? -1 : 1;
+        });
+        // TODO(opt): Merge and de-duplicate selectors.
         return this;
     };
 };
@@ -346,7 +352,11 @@ scope.ElementSelector = function(ident, ns) {
         }
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {return this;};
+    this.optimize = function(kw) {
+        // OPT: Lowercase element names.
+        this.ident = this.ident.toLowerCase();
+        return this;
+    };
 };
 
 scope.AttributeSelector = function(ident, comparison, value) {
@@ -363,7 +373,11 @@ scope.AttributeSelector = function(ident, comparison, value) {
         }
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        // OPT: Lowercase attribute names.
+        this.ident = this.ident.toLowerCase();
+        return this;
+    };
 };
 
 scope.PseudoElementSelector = function(ident) {
@@ -371,7 +385,11 @@ scope.PseudoElementSelector = function(ident) {
 
     this.toString = function() {return '::' + this.ident;};
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {return this;};
+    this.optimize = function(kw) {
+        // OPT: Lowercase pseudo element names.
+        this.ident = this.ident.toLowerCase();
+        return this;
+    };
 };
 
 scope.NthSelector = function(func_name, linear_func) {
@@ -410,6 +428,8 @@ scope.PseudoSelectorFunction = function(func_name, expr) {
     };
     this.pretty = function(indent) {};
     this.optimize = function(kw) {
+        // OPT: Lowercase pseudo function names.
+        this.func_name = this.func_name.toLowerCase();
         this.expr = this.expr.optimize(kw);
         return this;
     };
@@ -420,7 +440,11 @@ scope.PseudoClassSelector = function(ident) {
 
     this.toString = function() {return ':' + this.ident;};
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {return this;};
+    this.optimize = function(kw) {
+        // OPT: Lowercase pseudo class names.
+        this.ident = this.ident.toLowerCase();
+        return this;
+    };
 };
 
 scope.LinearFunction = function(n_val, offset) {
@@ -478,6 +502,8 @@ scope.Declaration = function(ident, expr) {
     };
     this.pretty = function(indent) {};
     this.optimize = function(kw) {
+        // OPT: Lowercase descriptor names.
+        this.ident = this.ident.toLowerCase();
         this.expr = this.expr.optimize(kw);
         return this;
     };
@@ -539,7 +565,11 @@ scope.Dimension = function(number, unit) {
             return this.number.toString();
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {return this;};
+    this.optimize = function(kw) {
+        // OPT: Lowercase units.
+        this.unit = this.unit.toLowerCase();
+        return this;
+    };
 };
 
 scope.Func = function(name, content) {
@@ -551,6 +581,8 @@ scope.Func = function(name, content) {
     };
     this.pretty = function(indent) {};
     this.optimize = function(kw) {
+        // OPT: Lowercase function names.
+        this.name = this.name.toLowerCase();
         this.content = this.content.optimize(kw);
         return this;
     };
@@ -570,6 +602,8 @@ scope.HexColor = function(color) {
     };
     this.pretty = function(indent) {};
     this.optimize = function(kw) {
+        // OPT: Lowercase hex colors.
+        this.color = this.color.toLowerCase();
         // TODO(opt): convert hexcolors
         return this;
     };

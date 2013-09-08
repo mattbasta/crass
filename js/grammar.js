@@ -232,7 +232,7 @@ case 74: this.$ = new yy.FontFace($$[$0-1]);
 break;
 case 75: this.$ = new yy.Keyframes($$[$0-5], $$[$0-1]); 
 break;
-case 76: this.$ = new yy.Keyframes($$[$0-5], $$[$0-1], $$[$0-7].substring(1, $$[$0-7].length - 10)); 
+case 76: this.$ = new yy.Keyframes($$[$0-5], $$[$0-1], $$[$0-7].substring(1, $$[$0-7].length - 9)); 
 break;
 case 77: this.$ = $$[$0-1]; this.$.push($$[$0]); 
 break;

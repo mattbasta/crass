@@ -338,7 +338,7 @@ keyframes_block
     : BLOCK_KEYFRAMES junk IDENT junk '{' junk keyframe_list '}'
         { $$ = new yy.Keyframes($3, $7); }
     | BLOCK_VENDOR_KEYFRAMES junk IDENT junk '{' junk keyframe_list '}'
-        { $$ = new yy.Keyframes($3, $7, $1.substring(1, $1.length - 10)); }
+        { $$ = new yy.Keyframes($3, $7, $1.substring(1, $1.length - 9)); }
     ;
 
 keyframe_list

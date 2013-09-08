@@ -55,4 +55,19 @@ describe('Sort', function() {
     it('selector lists', function() {
         parseCompare('b,a,d,c{$$}', 'a,b,c,d{$$}');
     });
+    it('declarations', function() {
+        parseCompare('a{c:1;a:2;b:3}', 'a{a:2;b:3;a:1}');
+    });
+});
+
+describe('Remove', function() {
+    it('duplicate declarations', function() {
+        parseCompare('a{a:1;a:foo;a:lol;a:2;b:abc}', 'a{a:2;b:abc}');
+    });
+});
+
+describe('Replace', function() {
+    it('nth-selector (2n+1) to (odd)', function() {
+        parseCompare(':nth-child(2n+1){$$}', ':nth-child(odd){$$}');
+    });
 });

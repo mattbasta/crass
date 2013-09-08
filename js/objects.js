@@ -402,6 +402,12 @@ scope.NthSelector = function(func_name, linear_func) {
     this.pretty = function(indent) {};
     this.optimize = function(kw) {
         this.linear_func = this.linear_func.optimize(kw);
+
+        // OPT: nth-selectors (2n+1) to (odd)
+        if (this.linear_func.toString() === '2n+1') {
+            return new scope.NthSelector('odd');
+        }
+
         return this;
     };
 };
@@ -561,6 +567,8 @@ scope.Dimension = function(number, unit) {
     this.toString = function() {
         if (this.unit)
             return this.number.toString() + this.unit;
+        else if (this.number.value === 0)
+            return '0';
         else
             return this.number.toString();
     };

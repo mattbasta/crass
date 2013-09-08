@@ -214,9 +214,9 @@ media_inner_list
     ;
 
 media_inner
-    : media_block
+    : media_block scc
         { $$ = $1; }
-    | ruleset
+    | ruleset scc
         { $$ = $1; }
     ;
 

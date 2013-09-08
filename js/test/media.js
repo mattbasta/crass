@@ -34,6 +34,9 @@ describe('@media', function() {
         parity('@media not screen and (min-width:450px){$$}');
         parity('@media mobile,not screen{$$}');
     });
+    it('should parse media with weird constraints', function() {
+    	parity('@media only screen and (-webkit-min-device-pixel-ratio:2){$$}');
+    });
 });
 
 describe('nested @media', function() {

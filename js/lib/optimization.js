@@ -6,5 +6,10 @@ var optimizeList = module.exports.optimizeList = function(list, kw) {
 
 module.exports.optimizeBlocks = function(content, kw) {
 	// TODO: Add reordering/de-duplicating/etc. here
-	return optimizeBlocks(content, kw);
+	return optimizeList(content, kw);
+}
+
+module.exports.optimizeDeclarations = function(content, kw) {
+	// TODO: Add reordering/de-duplicating/etc. here
+	return optimizeList(content, kw);
 }

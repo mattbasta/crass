@@ -155,7 +155,10 @@ scope.Page = function(name, content) {
         return '@page ' + this.name + '{' + utils.joinAll(this.content) + '}';
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.content = optimization.optimizeBlocks(this.content, kw);
+        return this;
+    };
 };
 
 scope.PageMargin = function(margin, content) {
@@ -166,7 +169,10 @@ scope.PageMargin = function(margin, content) {
         return '@' + this.margin + '{' + utils.joinAll(this.content) + '}';
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.content = optimization.optimizeDeclarations(this.content, kw);
+        return this;
+    };
 };
 
 scope.FontFace = function(content) {
@@ -176,7 +182,10 @@ scope.FontFace = function(content) {
         return '@font-face{' + utils.joinAll(this.content) + '}';
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.content = optimization.optimizeDeclarations(this.content, kw);
+        return this;
+    };
 };
 
 scope.Keyframes = function(name, content, vendor_prefix) {
@@ -196,7 +205,20 @@ scope.Keyframes = function(name, content, vendor_prefix) {
         return output;
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        var orig_prefix = kw.vendor_prefix;
+        if (orig_prefix && this.vendor_prefix && this.vendor_prefix !== orig_prefix) {
+            // OPT: Eliminate keyframes that don't match media query.
+            return;
+        } else if (this.vendor_prefix) {
+            kw.vendor_prefix = this.vendor_prefix;
+        }
+        this.content = optimization.optimizeBlocks(this.content, kw);
+        if (!orig_prefix) {
+            delete kw.vendor_prefix;
+        }
+        return this;
+    };
 };
 
 scope.Keyframe = function(stop, content) {
@@ -207,7 +229,11 @@ scope.Keyframe = function(stop, content) {
         return utils.joinAll(this.stop, ',') + '{' + utils.joinAll(this.content) + '}';
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.stop = this.stop.optimize(kw);
+        this.content = optimization.optimizeBlocks(this.content, kw);
+        return this;
+    };
 };
 
 scope.KeyframeSelector = function(stop) {
@@ -217,7 +243,10 @@ scope.KeyframeSelector = function(stop) {
         return this.stop;
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        // TODO(opt): Convert to/from into percents and vise versa.
+        return this;
+    };
 };
 
 scope.Ruleset = function(selector, content) {
@@ -228,7 +257,11 @@ scope.Ruleset = function(selector, content) {
         return this.selector.toString() + '{' + utils.joinAll(this.content, ';') + '}';
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.selector = this.selector.optimize(kw);
+        this.content = optimization.optimizeDeclarations(this.content, kw);
+        return this;
+    };
 };
 
 scope.SelectorList = function(selectors) {
@@ -242,7 +275,11 @@ scope.SelectorList = function(selectors) {
         return utils.joinAll(this.selectors, ',');
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        // TODO(opt): Merge, order, and de-duplicate selectors.
+        this.selectors = optimization.optimizeList(this.selectors, kw);
+        return this;
+    };
 };
 
 scope.SimpleSelector = function(conditions) {
@@ -252,7 +289,10 @@ scope.SimpleSelector = function(conditions) {
         return utils.joinAll(this.conditions);
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.conditions = optimization.optimizeList(this.conditions, kw);
+        return this;
+    };
 };
 
 function selectorChain(type, options) {
@@ -281,7 +321,7 @@ scope.IDSelector = function(ident) {
 
     this.toString = function() {return '#' + this.ident;};
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {return this;};
 };
 
 scope.ClassSelector = function(ident) {
@@ -289,7 +329,7 @@ scope.ClassSelector = function(ident) {
 
     this.toString = function() {return '.' + this.ident;};
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {return this;};
 };
 
 scope.ElementSelector = function(ident, ns) {
@@ -306,7 +346,7 @@ scope.ElementSelector = function(ident, ns) {
         }
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {return this;};
 };
 
 scope.AttributeSelector = function(ident, comparison, value) {
@@ -331,7 +371,7 @@ scope.PseudoElementSelector = function(ident) {
 
     this.toString = function() {return '::' + this.ident;};
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {return this;};
 };
 
 scope.NthSelector = function(func_name, linear_func) {
@@ -342,7 +382,10 @@ scope.NthSelector = function(func_name, linear_func) {
         return ':' + this.func_name + '(' + this.linear_func.toString() + ')';
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.linear_func = this.linear_func.optimize(kw);
+        return this;
+    };
 };
 
 scope.NotSelector = function(selector) {
@@ -352,7 +395,10 @@ scope.NotSelector = function(selector) {
         return ':not(' + this.selector.toString() + ')';
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.selector = this.selector.optimize(kw);
+        return this;
+    };
 };
 
 scope.PseudoSelectorFunction = function(func_name, expr) {
@@ -363,7 +409,10 @@ scope.PseudoSelectorFunction = function(func_name, expr) {
         return ':' + this.func_name + '(' + this.expr.toString() + ')';
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.expr = this.expr.optimize(kw);
+        return this;
+    };
 };
 
 scope.PseudoClassSelector = function(ident) {
@@ -371,7 +420,7 @@ scope.PseudoClassSelector = function(ident) {
 
     this.toString = function() {return ':' + this.ident;};
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {return this;};
 };
 
 scope.LinearFunction = function(n_val, offset) {
@@ -390,7 +439,10 @@ scope.LinearFunction = function(n_val, offset) {
         }
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.n_val = this.n_val.optimize(kw);
+        return this;
+    };
 };
 
 scope.NValue = function(coef) {
@@ -406,7 +458,7 @@ scope.NValue = function(coef) {
         }
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {return this;};
 };
 
 scope.IEFilter = function(blob) {
@@ -414,7 +466,7 @@ scope.IEFilter = function(blob) {
 
     this.toString = function() {return this.blob;};
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {return this;};
 };
 
 scope.Declaration = function(ident, expr) {
@@ -425,7 +477,10 @@ scope.Declaration = function(ident, expr) {
         return this.ident + ':' + this.expr.toString();
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.expr = this.expr.optimize(kw);
+        return this;
+    };
 };
 
 scope.URI = function(uri) {
@@ -450,7 +505,7 @@ scope.URI = function(uri) {
         return 'url(' + uri.toString(true) + ')';
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {return this;};
 };
 
 scope.Expression = function(chain) {
@@ -467,7 +522,10 @@ scope.Expression = function(chain) {
         return output;
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.chain = optimization.optimizeList(this.chain, kw);
+        return this;
+    };
 };
 
 scope.Dimension = function(number, unit) {
@@ -481,7 +539,7 @@ scope.Dimension = function(number, unit) {
             return this.number.toString();
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {return this;};
 };
 
 scope.Func = function(name, content) {
@@ -492,7 +550,10 @@ scope.Func = function(name, content) {
         return this.name + '(' + this.content.toString() + ')';
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        this.content = this.content.optimize(kw);
+        return this;
+    };
 };
 
 scope.HexColor = function(color) {
@@ -508,7 +569,10 @@ scope.HexColor = function(color) {
         return this.color;
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        // TODO(opt): convert hexcolors
+        return this;
+    };
 };
 
 scope.Number = function(value) {
@@ -541,7 +605,10 @@ scope.Number = function(value) {
         return post(this.value.toString());
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {
+        // TODO(opt): rounding and stuff
+        return this;
+    };
 };
 
 scope.String = function(value) {
@@ -556,5 +623,5 @@ scope.String = function(value) {
         return (single_.length < double_.length) ? single_ : double_;
     };
     this.pretty = function(indent) {};
-    this.optimize = function(kw) {};
+    this.optimize = function(kw) {return this;};
 }

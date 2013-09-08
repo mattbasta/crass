@@ -28,6 +28,12 @@ describe('@media', function() {
     it('should parse media with only a constraint', function() {
         parity('@media (min-width:450px){$$}');
     });
+    it('should parse media with prefixes', function() {
+        parity('@media only screen{$$}');
+        parity('@media not screen{$$}');
+        parity('@media not screen and (min-width:450px){$$}');
+        parity('@media mobile,not screen{$$}');
+    });
 });
 
 describe('nested @media', function() {

@@ -34,6 +34,7 @@ scope.Stylesheet = function(charset, imports, namespaces, content) {
         return output;
     };
     this.pretty = function(indent) {
+        indent = indent || 0;
         var output = '';
         if (this.charset) output += this.charset.pretty(indent);
         if (this.imports.length)
@@ -116,7 +117,7 @@ scope.Media = function(medium_list, content) {
         var output = '';
         output += utils.indent('@media ' + utils.joinAll(this.medium_list, ',', utils.prettyMap(indent)) + ' {') + '\n';
         output += this.content.map(function(line) {
-            return line.pretty(indent + 1) + ';';
+            return utils.indent(line.pretty(indent + 1) + ';', indent);
         }).join('\n') + '\n';
         output += utils.indent('}', indent) + '\n';
         return output;
@@ -199,7 +200,7 @@ scope.Page = function(name, content) {
         var output = '';
         output += utils.indent('@page ' + this.name + ' {') + '\n';
         output += this.content.map(function(line) {
-            return line.pretty(indent + 1) + ';';
+            return utils.indent(line.pretty(indent + 1) + ';', indent);
         }).join('\n') + '\n';
         output += utils.indent('}', indent) + '\n';
         return output;
@@ -221,7 +222,7 @@ scope.PageMargin = function(margin, content) {
         var output = '';
         output += utils.indent('@' + this.margin + ' {') + '\n';
         output += this.content.map(function(line) {
-            return line.pretty(indent + 1) + ';';
+            return utils.indent(line.pretty(indent + 1) + ';', indent);
         }).join('\n') + '\n';
         output += utils.indent('}', indent) + '\n';
         return output;
@@ -242,7 +243,7 @@ scope.FontFace = function(content) {
         var output = '';
         output += utils.indent('@font-face ' + this.name + ' {') + '\n';
         output += this.content.map(function(line) {
-            return line.pretty(indent + 1) + ';';
+            return utils.indent(line.pretty(indent + 1) + ';', indent);
         }).join('\n') + '\n';
         output += utils.indent('}', indent) + '\n';
         return output;
@@ -277,7 +278,7 @@ scope.Keyframes = function(name, content, vendor_prefix) {
         var output = '';
         output += utils.indent(get_block_header() + this.name + ' {') + '\n';
         output += this.content.map(function(line) {
-            return line.pretty(indent + 1) + ';';
+            return utils.indent(line.pretty(indent + 1) + ';', indent);
         }).join('\n') + '\n';
         output += utils.indent('}', indent) + '\n';
         return output;
@@ -314,7 +315,7 @@ scope.Keyframe = function(stop, content) {
             ) + ' {',
             indent) + '\n';
         output += this.content.map(function(line) {
-            return line.pretty(indent + 1) + ';';
+            return utils.indent(line.pretty(indent + 1) + ';', indent);
         }).join('\n') + '\n';
         output += utils.indent('}', indent) + '\n';
         return output;
@@ -350,7 +351,7 @@ scope.Ruleset = function(selector, content) {
         var output = '';
         output += utils.indent(this.selector.pretty(indent) + ' {', indent) + '\n';
         output += this.content.map(function(line) {
-            return line.pretty(indent + 1) + ';';
+            return utils.indent(line.pretty(indent + 1) + ';', indent + 1);
         }).join('\n') + '\n';
         output += utils.indent('}', indent) + '\n';
         return output;
@@ -618,7 +619,7 @@ scope.Declaration = function(ident, expr) {
         return this.ident + ':' + this.expr.toString();
     };
     this.pretty = function(indent) {
-        return utils.indent(this.ident + ': ' + this.expr.pretty(indent), indent);
+        return this.ident + ': ' + this.expr.pretty(indent);
     };
     this.optimize = function(kw) {
         // OPT: Lowercase descriptor names.

@@ -18,8 +18,10 @@ var opts = module.exports.opts = function(opts, defaults) {
     return out;
 };
 
-module.exports.joinAll = function(list, joiner) {
-    return list.map(function(i) {return i.toString();}).join(joiner || '');
+module.exports.joinAll = function(list, joiner, mapper) {
+    if (!list) return '';
+    mapper = mapper || function(x) {return x.toString();};
+    return list.map(mapper).join(joiner || '');
 };
 
 var identity = module.exports.identity = function(data) {return data;};
@@ -45,3 +47,38 @@ module.exports.uniq = function(lambda) {
         return true;
     };
 };
+
+module.exports.all = function(list, test) {
+    for (var i = 0; i < list.length; i++) {
+        if (!test(list[i])) return false;
+    }
+    return true;
+};
+
+module.exports.any = function(list, test) {
+    for (var i = 0; i < list.length; i++) {
+        if (test(list[i])) return true;
+    }
+    return false;
+};
+
+var isNum = module.exports.isNum = function(obj) {
+    return obj && obj.asNumber;
+};
+
+module.exports.isPositiveNum = function(obj) {
+    return isNum(obj) && obj.asNumber() >= 0;
+};
+
+module.exports.indent = function(value, indent) {
+    indent = indent || 0;
+    var output = '';
+    for (var i = 0; i < indent; i++) {
+        output += '  ';
+    }
+    return output + value;
+};
+
+module.exports.prettyMap = function(indent) {
+    return function(x) {return x.pretty(indent);};
+}

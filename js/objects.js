@@ -33,7 +33,17 @@ scope.Stylesheet = function(charset, imports, namespaces, content) {
             output += utils.joinAll(this.content);
         return output;
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        var output = '';
+        if (this.charset) output += this.charset.pretty(indent);
+        if (this.imports.length)
+            output += utils.joinAll(this.imports, null, utils.prettyMap(indent));
+        if (this.namespaces.length)
+            output += utils.joinAll(this.namespaces, null, utils.prettyMap(indent));
+        if (this.content.length)
+            output += utils.joinAll(this.content, null, utils.prettyMap(indent));
+        return output;
+    };
     this.optimize = function(kw) {
         if (this.charset) {
             this.charset = this.charset.optimize(kw);
@@ -55,7 +65,9 @@ scope.Charset = function(charset) {
     this.toString = function() {
         return '@charset ' + this.charset.toString() + ';';
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        return this.toString() + '\n';
+    };
     this.optimize = function(kw) {return this;};
 };
 
@@ -70,7 +82,9 @@ scope.Import = function(uri, medium_list) {
             return '@import ' + this.uri.asString() + ';';
         }
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        return this.toString() + '\n';
+    };
     this.optimize = function(kw) {return this;};
 };
 
@@ -85,7 +99,9 @@ scope.Namespace = function(uri, name) {
             return '@namespace ' + this.uri.toString() + ';';
         };
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        return this.toString() + '\n';
+    };
     this.optimize = function(kw) {return this;};
 };
 
@@ -96,7 +112,15 @@ scope.Media = function(medium_list, content) {
     this.toString = function() {
         return '@media ' + utils.joinAll(this.medium_list, ',') + '{' + utils.joinAll(this.content) + '}';
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        var output = '';
+        output += utils.indent('@media ' + utils.joinAll(this.medium_list, ',', utils.prettyMap(indent)) + ' {') + '\n';
+        output += this.content.map(function(line) {
+            return line.pretty(indent + 1) + ';';
+        }).join('\n') + '\n';
+        output += utils.indent('}', indent) + '\n';
+        return output;
+    };
     this.optimize = function(kw) {
         this.medium_list = optimization.optimizeList(this.medium_list);
         this.content = utils.optimizeBlocks(this.content, kw);
@@ -121,7 +145,18 @@ scope.MediaQuery = function(type, prefix, expression) {
         }
         return output.join(' ');
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        var output = [];
+        if (this.type) {
+            if (this.prefix) output.push(this.prefix);
+            output.push(this.type);
+        }
+        if (this.type && this.expression.length) output.push('and');
+        if (this.expression.length) {
+            output.push(utils.joinAll(this.expression, ' and ', utils.prettyMap(indent)));
+        }
+        return output.join(' ');
+    };
     this.optimize = function(kw) {
         // TODO(opt): sort expressions
         // TODO(opt): filter bunk expressions
@@ -140,7 +175,13 @@ scope.MediaExpression = function(descriptor, value) {
             return '(' + this.descriptor.toString() + ')';
         }
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        if (this.value) {
+            return '(' + this.descriptor.toString() + ': ' + this.value.pretty(indent) + ')';
+        } else {
+            return '(' + this.descriptor.toString() + ')';
+        }
+    };
     this.optimize = function(kw) {
         this.value = this.value.optimize(kw);
         return this;
@@ -154,7 +195,15 @@ scope.Page = function(name, content) {
     this.toString = function() {
         return '@page ' + this.name + '{' + utils.joinAll(this.content) + '}';
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        var output = '';
+        output += utils.indent('@page ' + this.name + ' {') + '\n';
+        output += this.content.map(function(line) {
+            return line.pretty(indent + 1) + ';';
+        }).join('\n') + '\n';
+        output += utils.indent('}', indent) + '\n';
+        return output;
+    };
     this.optimize = function(kw) {
         this.content = optimization.optimizeBlocks(this.content, kw);
         return this;
@@ -168,7 +217,15 @@ scope.PageMargin = function(margin, content) {
     this.toString = function() {
         return '@' + this.margin + '{' + utils.joinAll(this.content) + '}';
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        var output = '';
+        output += utils.indent('@' + this.margin + ' {') + '\n';
+        output += this.content.map(function(line) {
+            return line.pretty(indent + 1) + ';';
+        }).join('\n') + '\n';
+        output += utils.indent('}', indent) + '\n';
+        return output;
+    };
     this.optimize = function(kw) {
         this.content = optimization.optimizeDeclarations(this.content, kw);
         return this;
@@ -181,7 +238,15 @@ scope.FontFace = function(content) {
     this.toString = function() {
         return '@font-face{' + utils.joinAll(this.content) + '}';
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        var output = '';
+        output += utils.indent('@font-face ' + this.name + ' {') + '\n';
+        output += this.content.map(function(line) {
+            return line.pretty(indent + 1) + ';';
+        }).join('\n') + '\n';
+        output += utils.indent('}', indent) + '\n';
+        return output;
+    };
     this.optimize = function(kw) {
         this.content = optimization.optimizeDeclarations(this.content, kw);
         return this;
@@ -193,18 +258,30 @@ scope.Keyframes = function(name, content, vendor_prefix) {
     this.content = content;
     this.vendor_prefix = vendor_prefix;
 
+    function get_block_header() {
+        if (this.vendor_prefix)
+            return '@' + this.vendor_prefix + 'keyframes ';
+        else
+            return '@keyframes ';
+    }
+
     this.toString = function() {
-        var output = '@keyframes ';
-        if (this.vendor_prefix) {
-            output = '@' + this.vendor_prefix + 'keyframes ';
-        }
+        var output = get_block_header();
         output += this.name;
         output += '{';
         output += utils.joinAll(this.content);
         output += '}';
         return output;
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        var output = '';
+        output += utils.indent(get_block_header() + this.name + ' {') + '\n';
+        output += this.content.map(function(line) {
+            return line.pretty(indent + 1) + ';';
+        }).join('\n') + '\n';
+        output += utils.indent('}', indent) + '\n';
+        return output;
+    };
     this.optimize = function(kw) {
         var orig_prefix = kw.vendor_prefix;
         if (orig_prefix && this.vendor_prefix && this.vendor_prefix !== orig_prefix) {
@@ -228,7 +305,20 @@ scope.Keyframe = function(stop, content) {
     this.toString = function() {
         return utils.joinAll(this.stop, ',') + '{' + utils.joinAll(this.content) + '}';
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        var output = '';
+        output += utils.indent(
+            utils.joinAll(
+                this.stop, ', ',
+                function(x) {return x.pretty(indent)}
+            ) + ' {',
+            indent) + '\n';
+        output += this.content.map(function(line) {
+            return line.pretty(indent + 1) + ';';
+        }).join('\n') + '\n';
+        output += utils.indent('}', indent) + '\n';
+        return output;
+    };
     this.optimize = function(kw) {
         this.stop = this.stop.optimize(kw);
         this.content = optimization.optimizeBlocks(this.content, kw);
@@ -242,7 +332,7 @@ scope.KeyframeSelector = function(stop) {
     this.toString = function() {
         return this.stop;
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {return this.toString();};
     this.optimize = function(kw) {
         // TODO(opt): Convert to/from into percents and vise versa.
         return this;
@@ -256,7 +346,15 @@ scope.Ruleset = function(selector, content) {
     this.toString = function() {
         return this.selector.toString() + '{' + utils.joinAll(this.content, ';') + '}';
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        var output = '';
+        output += utils.indent(this.selector.pretty(indent) + ' {', indent) + '\n';
+        output += this.content.map(function(line) {
+            return line.pretty(indent + 1) + ';';
+        }).join('\n') + '\n';
+        output += utils.indent('}', indent) + '\n';
+        return output;
+    };
     this.optimize = function(kw) {
         this.selector = this.selector.optimize(kw);
         this.content = optimization.optimizeDeclarations(this.content, kw);
@@ -274,7 +372,9 @@ scope.SelectorList = function(selectors) {
     this.toString = function() {
         return utils.joinAll(this.selectors, ',');
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        return utils.joinAll(this.selectors, ', ', utils.prettyMap(indent));
+    };
     this.optimize = function(kw) {
         this.selectors = optimization.optimizeList(this.selectors, kw);
         // OPT: Sort selector lists.
@@ -294,7 +394,9 @@ scope.SimpleSelector = function(conditions) {
     this.toString = function() {
         return utils.joinAll(this.conditions);
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        return utils.joinAll(this.conditions, null, utils.prettyMap(indent));
+    };
     this.optimize = function(kw) {
         this.conditions = optimization.optimizeList(this.conditions, kw);
         return this;
@@ -310,9 +412,12 @@ function selectorChain(type, options) {
         this.descendant = descendant;
 
         this.toString = function() {
-            return ancestor.toString() + type + descendant.toString();
+            return this.ancestor.toString() + type + this.descendant.toString();
         };
-        this.pretty = options.pretty || function(indent) {};
+        this.pretty = options.pretty || function(indent) {
+            var padded_type = type === ' ' ? ' ' : (' ' + type + ' ');
+            return this.ancestor.pretty(indent) + padded_type + this.descendant.pretty(indent);
+        };
         this.optimize = options.optimize || function(kw) {};
     };
 }
@@ -326,7 +431,7 @@ scope.IDSelector = function(ident) {
     this.ident = ident;
 
     this.toString = function() {return '#' + this.ident;};
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {return this.toString();};
     this.optimize = function(kw) {return this;};
 };
 
@@ -334,7 +439,7 @@ scope.ClassSelector = function(ident) {
     this.ident = ident;
 
     this.toString = function() {return '.' + this.ident;};
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {return this.toString();};
     this.optimize = function(kw) {return this;};
 };
 
@@ -351,7 +456,7 @@ scope.ElementSelector = function(ident, ns) {
             return this.ident;
         }
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {return this.toString();};
     this.optimize = function(kw) {
         // OPT: Lowercase element names.
         this.ident = this.ident.toLowerCase();
@@ -372,7 +477,7 @@ scope.AttributeSelector = function(ident, comparison, value) {
             return '[' + this.ident + ']';
         }
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {return this.toString();};
     this.optimize = function(kw) {
         // OPT: Lowercase attribute names.
         this.ident = this.ident.toLowerCase();
@@ -384,7 +489,7 @@ scope.PseudoElementSelector = function(ident) {
     this.ident = ident;
 
     this.toString = function() {return '::' + this.ident;};
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {return this.toString();};
     this.optimize = function(kw) {
         // OPT: Lowercase pseudo element names.
         this.ident = this.ident.toLowerCase();
@@ -399,7 +504,9 @@ scope.NthSelector = function(func_name, linear_func) {
     this.toString = function() {
         return ':' + this.func_name + '(' + this.linear_func.toString() + ')';
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        return ':' + this.func_name + '(' + this.linear_func.pretty(indent) + ')';
+    };
     this.optimize = function(kw) {
         this.linear_func = this.linear_func.optimize(kw);
 
@@ -418,7 +525,9 @@ scope.NotSelector = function(selector) {
     this.toString = function() {
         return ':not(' + this.selector.toString() + ')';
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        return ':not(' + this.selector.pretty(indent) + ')';
+    };
     this.optimize = function(kw) {
         this.selector = this.selector.optimize(kw);
         return this;
@@ -432,7 +541,9 @@ scope.PseudoSelectorFunction = function(func_name, expr) {
     this.toString = function() {
         return ':' + this.func_name + '(' + this.expr.toString() + ')';
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        return ':' + this.func_name + '(' + this.expr.pretty(indent) + ')';
+    };
     this.optimize = function(kw) {
         // OPT: Lowercase pseudo function names.
         this.func_name = this.func_name.toLowerCase();
@@ -445,7 +556,7 @@ scope.PseudoClassSelector = function(ident) {
     this.ident = ident;
 
     this.toString = function() {return ':' + this.ident;};
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {return this.toString();};
     this.optimize = function(kw) {
         // OPT: Lowercase pseudo class names.
         this.ident = this.ident.toLowerCase();
@@ -457,18 +568,18 @@ scope.LinearFunction = function(n_val, offset) {
     this.n_val = n_val;
     this.offset = offset;
 
-    this.toString = function() {
+    this.toString = function(pad) {
         if (this.n_val) {
-            var operator = '+';
+            var operator = pad ? ' + ' : '+';
             if (this.offset.value < 0) {
-                operator = '-';
+                operator = pad ? ' - ' : '-';
             }
             return this.n_val.toString() + operator + this.offset.toString(true);
         } else {
             return this.offset.toString();
         }
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {return this.toString(true);};
     this.optimize = function(kw) {
         this.n_val = this.n_val.optimize(kw);
         return this;
@@ -487,7 +598,7 @@ scope.NValue = function(coef) {
             return this.coef.toString() + 'n';
         }
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {return this.toString();};
     this.optimize = function(kw) {return this;};
 };
 
@@ -495,7 +606,7 @@ scope.IEFilter = function(blob) {
     this.blob = blob;
 
     this.toString = function() {return this.blob;};
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {return this.toString();};
     this.optimize = function(kw) {return this;};
 };
 
@@ -506,7 +617,9 @@ scope.Declaration = function(ident, expr) {
     this.toString = function() {
         return this.ident + ':' + this.expr.toString();
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        return utils.indent(this.ident + ': ' + this.expr.pretty(indent), indent);
+    };
     this.optimize = function(kw) {
         // OPT: Lowercase descriptor names.
         this.ident = this.ident.toLowerCase();
@@ -536,7 +649,7 @@ scope.URI = function(uri) {
         }
         return 'url(' + uri.toString(true) + ')';
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {return this.toString();};
     this.optimize = function(kw) {return this;};
 };
 
@@ -553,7 +666,21 @@ scope.Expression = function(chain) {
         }
         return output;
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        var output = '';
+        for (var i = 0; i < this.chain.length; i++) {
+            if (i) {
+                if (this.chain[i][0] === ',')
+                    output += ', ';
+                else if (!this.chain[i][0])
+                    output += ' ';
+                else
+                    output += this.chain[i][0];
+            }
+            output += this.chain[i][1].toString();
+        }
+        return output;
+    };
     this.optimize = function(kw) {
         this.chain = optimization.optimizeList(this.chain, kw);
         return this;
@@ -572,7 +699,9 @@ scope.Dimension = function(number, unit) {
         else
             return this.number.toString();
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        return this.number.pretty(indent) + this.unit;
+    };
     this.optimize = function(kw) {
         // OPT: Lowercase units.
         this.unit = this.unit.toLowerCase();
@@ -582,16 +711,39 @@ scope.Dimension = function(number, unit) {
 
 scope.Func = function(name, content) {
     this.name = name;
-    this.content = content;
+    this.content = content || {};
 
     this.toString = function() {
         return this.name + '(' + this.content.toString() + ')';
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        return this.name + '(' + this.content.pretty(indent) + ')';
+    };
     this.optimize = function(kw) {
         // OPT: Lowercase function names.
         this.name = this.name.toLowerCase();
         this.content = this.content.optimize(kw);
+
+        if (this.content &&
+            this.content.chain &&
+            utils.all(this.content.chain, utils.isPositiveNum)) {
+
+            var converter = require('color-convert')();
+            var color;
+            switch(this.name) {
+                case 'rgb':
+                case 'hsl':
+                    if (this.content.chain.length !== 3) break;
+                    color = converter[this.name].apply(this, this.content.chain);
+                    break;
+                case 'rgba':
+                case 'hsla':
+                    if (this.content.chain.length !== 4) break;
+                    color = converter[this.name].apply(this, this.content.chain);
+                    break;
+            }
+        }
+
         return this;
     };
 };
@@ -608,7 +760,7 @@ scope.HexColor = function(color) {
     this.toString = function() {
         return this.color;
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {return this.toString();};
     this.optimize = function(kw) {
         // OPT: Lowercase hex colors.
         this.color = this.color.toLowerCase();
@@ -620,13 +772,17 @@ scope.HexColor = function(color) {
 scope.Number = function(value) {
     this.value = Number(value);
     if (Number.isNaN(this.value)) {
-        this.value = '0';
+        this.value = 0;
     }
 
     this.applySign = function(sign) {
         if (sign === '-') {
-            this.value *= '-1';
+            this.value *= -1;
         }
+    };
+
+    this.asNumber = function() {
+        return this.value;
     };
 
     this.toString = function(positive) {
@@ -646,7 +802,9 @@ scope.Number = function(value) {
         }
         return post(this.value.toString());
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {
+        return this.value.toString();
+    };
     this.optimize = function(kw) {
         // TODO(opt): rounding and stuff
         return this;
@@ -664,6 +822,6 @@ scope.String = function(value) {
         var double_ = '"' + this.value.replace(/"/g, '\\"') + '"';
         return (single_.length < double_.length) ? single_ : double_;
     };
-    this.pretty = function(indent) {};
+    this.pretty = function(indent) {return this.toString();};
     this.optimize = function(kw) {return this;};
 }

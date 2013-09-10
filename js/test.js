@@ -9,5 +9,8 @@ require('fs').readFile('../temp/github2.lines.css', function(err, data) {
         return;
     }
     var output = parser.parse(data + '');
-    console.log(output.pretty().replace(/\}/g, '}\n'));
+    // console.log(output.toString().replace(/\}/g, '}\n'));
+    console.log(output.optimize().toString().replace(/\}/g, '}\n'));
+    // console.log(output.toString());
+    // output.optimize();
 });

@@ -28,24 +28,26 @@ var identity = module.exports.identity = function(data) {return data;};
 module.exports.invoker = function(method) {
     var args = Array.prototype.slice.call(arguments, 1);
     return function(obj) {
-        return obj[method].apply(this, args);
+        return obj[method].apply(obj, args);
     };
 }
 
-module.exports.uniq = function(lambda) {
+module.exports.uniq = function(lambda, list) {
     lambda = lambda || identity;
-    var lambdas = {};
-    return function(value, index, self) {
-        if (index === 0) return true;
-        var sl = lambda(value);
-        for (var i = index + 1; i < self.length; i++) {
-            lambdas[i] = lambdas[i] || lambda(self[i]);
-            if (lambdas[i] === sl) {
-                return false;
-            }
-        }
-        return true;
-    };
+    var values = {};
+    var count = 0;
+    for (var i = 0; i < list.length; i++) {
+        var lval = lambda(list[i]);
+        if (!(lval in values))
+            count++;
+        values[lval] = i;
+    }
+    var output = [];
+    for (var key in values) {
+        if (!values.hasOwnProperty(key)) continue;
+        output.push(list[values[key]]);
+    }
+    return output;
 };
 
 module.exports.all = function(list, test) {
@@ -71,6 +73,7 @@ module.exports.isPositiveNum = function(obj) {
 };
 
 module.exports.indent = function(value, indent) {
+    if (!value) return '';
     indent = indent || 0;
     var output = '';
     for (var i = 0; i < indent; i++) {
@@ -80,5 +83,7 @@ module.exports.indent = function(value, indent) {
 };
 
 module.exports.prettyMap = function(indent) {
-    return function(x) {return x.pretty(indent);};
+    return function(x) {
+        return (x.pretty ? x.pretty(indent) : x.toString());
+    };
 }

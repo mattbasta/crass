@@ -26,3 +26,4 @@ desktop.ini
 *.sublime-project
 temp/
 crass.egg-info
+node_modules/

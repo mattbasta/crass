@@ -51,6 +51,7 @@ module.exports.uniq = function(lambda, list) {
 };
 
 module.exports.all = function(list, test) {
+    test = test || identity;
     for (var i = 0; i < list.length; i++) {
         if (!test(list[i])) return false;
     }

@@ -470,6 +470,8 @@ scope.ElementSelector = function(ident, ns) {
     this.optimize = function(kw) {
         // OPT: Lowercase element names.
         this.ident = this.ident.toLowerCase();
+        if (this.ns)
+            this.ns = this.ns.toLowerCase();
         return this;
     };
 };
@@ -482,7 +484,11 @@ scope.AttributeSelector = function(ident, comparison, value) {
     this.toString = function() {
         // TODO: Handle quoting/unquoting
         if (this.value) {
-            return '[' + this.ident + this.comparison + this.value + ']';
+            var value = this.value;
+            if (value.asString) {
+                value = value.asString(true);
+            }
+            return '[' + this.ident + this.comparison + value + ']';
         } else {
             return '[' + this.ident + ']';
         }
@@ -490,7 +496,11 @@ scope.AttributeSelector = function(ident, comparison, value) {
     this.pretty = function(indent) {return this.toString();};
     this.optimize = function(kw) {
         // OPT: Lowercase attribute names.
-        this.ident = this.ident.toLowerCase();
+        if (this.ident.toLowerCase)
+            this.ident = this.ident.toLowerCase();
+        else if (this.ident.optimize)
+            this.ident = optimization.try_(this.ident, kw);
+        this.value = optimization.try_(this.value, kw);
         return this;
     };
 };
@@ -633,7 +643,9 @@ scope.Declaration = function(ident, expr) {
     this.optimize = function(kw) {
         // OPT: Lowercase descriptor names.
         this.ident = this.ident.toLowerCase();
+        kw.declarationName = this.ident;
         this.expr = optimization.try_(this.expr, kw);
+        delete kw.declarationName;
         return this;
     };
 };
@@ -701,6 +713,52 @@ scope.Expression = function(chain) {
         }).filter(function(v) {
             return !!v[1];
         });
+
+        if (!kw.declarationName) return this;
+
+        // OPT: Try to minify lists of lengths.
+        // e.g.: `margin:0 0 0 0` -> `margin:0`
+        if (kw.declarationName in optimization.quadLists &&
+            this.chain.length > 2 &&
+            this.chain.length <= 4) {
+            var keys = this.chain.map(function(v) {
+                return v[1].toString();
+            });
+            if (keys[0] == keys[1] && keys[1] === keys[2] && keys[2] === keys[3]) {
+                this.chain = [this.chain[0]];
+                return this;
+            }
+            if (keys.length === 4 && keys[0] === keys[2] && keys[1] === keys[3]) {
+                this.chain = [this.chain[0], this.chain[1]];
+                keys = [keys[0], keys[2]];
+            } else if (keys.length === 4 && keys[1] === keys[3]) {
+                this.chain = this.chain.slice(0, 3);
+                keys = keys.slice(0, 3);
+            }
+            if (keys.length === 3 && keys[0] === keys[2]) {
+                this.chain = this.chain.slice(0, 2);
+            }
+        } else if (kw.declarationName === 'font-weight' ||
+                   kw.declarationName === 'font') {
+            this.chain = this.chain.map(function(chunk) {
+                // OPT: font/font-weight: normal -> 400
+                if (chunk[1].toString() === 'normal')
+                    return [chunk[0], '400'];
+                // OPT: font/font-weight: bold -> 700
+                else if (chunk[1].toString() === 'bold')
+                    return [chunk[0], '700'];
+                else
+                    return chunk;
+            });
+        }
+
+        if (kw.declarationName in optimization.noneables &&
+            this.chain.length === 1 &&
+            this.chain[0][1].toString() === 'none') {
+            // OPT: none -> 0 where possible.
+            this.chain[0][1] = '0';
+        }
+
         return this;
     };
 };

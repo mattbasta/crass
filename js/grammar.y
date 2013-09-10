@@ -81,6 +81,7 @@ ie_ident            [a-zA-Z0-9\.:]
 "."{ident}                          return 'CLASS_IDENT'
 {ident}"("                          return 'FUNCTION_IDENT'
 {ident}                             return 'IDENT'
+[~|^$*]"="                          return 'ATTRIBUTE_COMPARISON'
 "-"                                 return '-'
 "+"                                 return '+'
 ">"                                 return 'SEL_CHILD'
@@ -90,7 +91,6 @@ ie_ident            [a-zA-Z0-9\.:]
 ":only-of-type"                     return 'PSEUDO_CLASS'
 "::"                                return '::'
 ":"                                 return ':'
-[~|^$*]"="                          return 'ATTRIBUTE_COMPARISON'
 <<EOF>>                             return 'EOF'
 
 /lex
@@ -442,11 +442,11 @@ element_type
     ;
 
 attribute_selector
-    : '[' junk IDENT junk ']'
+    : '[' junk element_name junk ']'
         { $$ = new yy.AttributeSelector($3, null, null); }
-    | '[' junk IDENT junk '=' junk string_or_ident junk ']'
+    | '[' junk element_name junk '=' junk string_or_ident junk ']'
         { $$ = new yy.AttributeSelector($3, $5, $7); }
-    | '[' junk IDENT junk ATTRIBUTE_COMPARISON junk string_or_ident junk ']'
+    | '[' junk element_name junk ATTRIBUTE_COMPARISON junk string_or_ident junk ']'
         { $$ = new yy.AttributeSelector($3, $5, $7); }
     ;
 

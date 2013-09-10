@@ -1,5 +1,26 @@
 var utils = require('./utils');
 
+
+module.exports.quadLists = {
+    'border-color': 1,
+    'border-radius': 1,
+    'border-style': 1,
+    'border-width': 1,
+    'margin': 1,
+    'padding': 1
+};
+
+module.exports.noneables = {
+    'border': 1,
+    'border-top': 1,
+    'border-right': 1,
+    'border-bottom': 1,
+    'border-left': 1,
+    'outline': 1,
+    'background': 1,
+};
+
+
 var optimizeList = module.exports.optimizeList = function(list, kw) {
     if (!list) return list;
     return list.map(utils.invoker('optimize', kw)).filter(utils.identity);

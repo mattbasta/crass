@@ -104,3 +104,24 @@ module.exports.color = function(color, alpha) {
             return func('hsla', hslArgs(hsl).concat([alpha]));
     }
 }
+
+module.exports.combineList = function(mapper, reducer, list) {
+    mapper = mapper || utils.stringIdentity;
+    reducer = reducer || function(a, b) {
+        return a + b;
+    };
+    var values = {};
+    for (var i = 0; i < list.length; i++) {
+        var lval = mapper(list[i]);
+        if (!(lval in values))
+            values[lval] = list[i];
+        else
+            values[lval] = reducer(values[lval], list[i]);
+    }
+    var output = [];
+    for (var key in values) {
+        if (!values.hasOwnProperty(key)) continue;
+        output.push(values[key]);
+    }
+    return output;
+};

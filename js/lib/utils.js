@@ -25,6 +25,7 @@ module.exports.joinAll = function(list, joiner, mapper) {
 };
 
 var identity = module.exports.identity = function(data) {return data;};
+var stringIdentity = module.exports.stringIdentity = function(data) {return data.toString();};
 module.exports.invoker = function(method) {
     var args = Array.prototype.slice.call(arguments, 1);
     return function(obj) {
@@ -33,7 +34,7 @@ module.exports.invoker = function(method) {
 }
 
 module.exports.uniq = function(lambda, list) {
-    lambda = lambda || identity;
+    lambda = lambda || stringIdentity;
     var values = {};
     var count = 0;
     for (var i = 0; i < list.length; i++) {

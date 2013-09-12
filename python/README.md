@@ -41,9 +41,9 @@ Optimizations
 
 ### Combinations
 
-- Combine identical media queries (`screen, screen` -> `screen`)
+- Combine identical media queries
 - Combine identical @keyframes blocks
-- Combine keyframes with @keyframes blocks that have the same keyframe selector
+- Combine keyframes within @keyframes blocks that have the same keyframe selector
 
 ### Mostly Safe (activate with `--O1`)
 

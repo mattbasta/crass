@@ -490,6 +490,8 @@ n_val
 declaration_list
     : declaration_list junk ';' junk declaration
         { $$ = $1; $$.push($5); }
+    | declaration_list junk ';'
+        { $$ = $1; }
     | declaration
         { $$ = [$1]; }
     ;

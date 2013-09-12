@@ -126,6 +126,10 @@ scope.Media = function(medium_list, content) {
     this.optimize = function(kw) {
         this.medium_list = optimization.optimizeList(this.medium_list);
         this.content = optimization.optimizeBlocks(this.content, kw);
+
+        // OPT: Remove duplicate media queries.
+        this.medium_list = utils.uniq(null, this.medium_list);
+
         return this;
     };
 };
@@ -162,6 +166,8 @@ scope.MediaQuery = function(type, prefix, expression) {
     this.optimize = function(kw) {
         // TODO(opt): sort expressions
         // TODO(opt): filter bunk expressions
+        // OPT: Remove duplicate media expressions
+        this.expression = utils.uniq(null, this.expression);
         return this;
     };
 }
@@ -292,10 +298,31 @@ scope.Keyframes = function(name, content, vendor_prefix) {
         } else if (this.vendor_prefix) {
             kw.vendor_prefix = this.vendor_prefix;
         }
+
+        // OPT: Combine keyframes with identical stops.
+        this.content = optimization.combineList(
+            function(item) {return item.stop.toString();},
+            function(a, b) {
+                return new (scope.Keyframe)(a.stop, a.content.concat(b.content));
+            },
+            this.content
+        );
+        // OPT: Sort keyframes.
+        this.content = this.content.sort(function(a, b) {
+            var astr = a.stop.toString();
+            var bstr = b.stop.toString();
+            if (astr < bstr)
+                return -1;
+            else if (astr > bstr)
+                return 1;
+            return 0;
+        });
+
         this.content = optimization.optimizeBlocks(this.content, kw);
         if (!orig_prefix) {
             delete kw.vendor_prefix;
         }
+
         return this;
     };
 };
@@ -305,7 +332,7 @@ scope.Keyframe = function(stop, content) {
     this.content = content;
 
     this.toString = function() {
-        return utils.joinAll(this.stop, ',') + '{' + utils.joinAll(this.content) + '}';
+        return utils.joinAll(this.stop, ',') + '{' + utils.joinAll(this.content, ';') + '}';
     };
     this.pretty = function(indent) {
         var output = '';
@@ -323,7 +350,7 @@ scope.Keyframe = function(stop, content) {
     };
     this.optimize = function(kw) {
         this.stop = optimization.try_(this.stop, kw);
-        this.content = optimization.optimizeBlocks(this.content, kw);
+        this.content = optimization.optimizeDeclarations(this.content, kw);
         return this;
     };
 };
@@ -389,7 +416,20 @@ scope.SelectorList = function(selectors) {
             var bts = b.toString();
             return ats < bts ? -1 : 1;
         });
-        // TODO(opt): Merge and de-duplicate selectors.
+        // OPT: Remove duplicate selectors in a selector list.
+        this.selectors = utils.uniq(null, this.selectors);
+
+        // OPT(O1): `.foo, *` -> `*`
+        if (kw.o1 &&
+            this.selectors.length > 1 &&
+            utils.any(this.selectors, function(i) {return i.toString() === '*';})) {
+
+            this.selectors = [
+                new (scope.SimpleSelector)([new (scope.ElementSelector)('*')])
+            ];
+        }
+
+        // TODO(opt): Merge selectors.
         return this;
     };
 };
@@ -405,6 +445,15 @@ scope.SimpleSelector = function(conditions) {
     };
     this.optimize = function(kw) {
         this.conditions = optimization.optimizeList(this.conditions, kw);
+        // OPT: Remove duplicate conditions from a simple selector.
+        this.conditions = utils.uniq(null, this.conditions);
+
+        // OPT(O1): Remove unnecessary wildcard selectors
+        if (kw.o1 && this.conditions.length > 1) {
+            this.conditions = this.conditions.filter(function(item) {
+                return item.toString() !== '*'
+            });
+        }
         return this;
     };
 };
@@ -646,6 +695,14 @@ scope.Declaration = function(ident, expr) {
         kw.declarationName = this.ident;
         this.expr = optimization.try_(this.expr, kw);
         delete kw.declarationName;
+
+        // OPT: Remove mismatched vendor prefixes in declarations.
+        if (kw.vendor_prefix && this.ident.match(/\-[a-z]+\-.+/)) {
+            if (this.ident.substr(0, kw.vendor_prefix.length) !== kw.vendor_prefix) {
+                return null;
+            }
+        }
+
         return this;
     };
 };

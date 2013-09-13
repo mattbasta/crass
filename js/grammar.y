@@ -494,6 +494,8 @@ declaration_list
         { $$ = $1; }
     | declaration
         { $$ = [$1]; }
+    |
+        { $$ = []; }
     ;
 
 declaration

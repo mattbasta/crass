@@ -390,6 +390,11 @@ scope.Ruleset = function(selector, content) {
         else
             debugger;
         this.content = optimization.optimizeDeclarations(this.content, kw);
+
+        // OPT: Remove empty rulsets.
+        if (!this.content.length) {
+            return null;
+        }
         return this;
     };
 };

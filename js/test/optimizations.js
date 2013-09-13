@@ -78,6 +78,9 @@ describe('Remove', function() {
         parseCompare('.a.a{$$}', '.a{$$}');
         parseCompare('a:first-child:first-child{$$}', 'a:first-child{$$}');
     });
+    it('empty rulesets', function() {
+        parseCompare('a{}', '');
+    });
 
     describe('unnecessary quadList items', function() {
         it('for groups of four identical items', function() {

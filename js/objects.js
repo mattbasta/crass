@@ -244,7 +244,7 @@ scope.FontFace = function(content) {
     this.content = content;
 
     this.toString = function() {
-        return '@font-face{' + utils.joinAll(this.content) + '}';
+        return '@font-face{' + utils.joinAll(this.content, ';') + '}';
     };
     this.pretty = function(indent) {
         var output = '';
@@ -971,7 +971,7 @@ scope.Number = function(value) {
 };
 
 scope.String = function(value) {
-    this.value = value.toString().replace(/\\['"]/g, '$1');
+    this.value = value.toString().replace(/\\(['"])/g, '$1');
 
     this.asString = this.toString = function(raw) {
         if (raw && this.value.indexOf('\\') === -1) {

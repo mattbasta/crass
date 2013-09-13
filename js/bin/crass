@@ -5,9 +5,42 @@ function help() {
         'Usage:',
         '  crass <input file> [options]',
         '',
-        'Options:'
+        'Options:',
+        ' --optimize        Run optimizations on the file.',
+        ' --O1              Runs optimizations with the O1 flag.',
+        ' --pretty          Pretty prints the output.'
     ].join('\n'));
 }
 
-var opts = utils.opts(process.argv.slice(1));
+if (process.argv.length < 3) {
+    help();
+    process.exit(1);
+}
 
+var fs = require('fs');
+
+var utils = require('../lib/utils');
+var opts = utils.opts(process.argv.slice(3));
+
+var crass = require('../crass');
+fs.readFile(process.argv[2], function(err, data) {
+    if (err) {
+        console.error('Could not read file.');
+        console.error(err);
+        help();
+        process.exit(1);
+    }
+
+    var parsed = crass.parse(data);
+    if (opts.optimize && opts.O1) {
+        parsed = parsed.optimize({01: true});
+    } else if (opts.optimize) {
+        parsed = parsed.optimize();
+    }
+
+    if (opts.pretty) {
+        console.log(parsed.pretty());
+    } else {
+        console.log(parsed.toString());
+    }
+});

@@ -61,8 +61,8 @@ ie_ident            [a-zA-Z0-9\.:]
 "@right-middle"                     return 'PAGE_RIGHT_MIDDLE'
 "@right-bottom"                     return 'PAGE_RIGHT_BOTTOM'
 
-\"(?:{esc}"u"{hex}{1,7}{ws}|{esc}.|[^"{esc}])*\"  yytext = yytext.substr(1,yyleng-2); return 'STRING';
-\'(?:{esc}"u"{hex}{1,7}{ws}|{esc}.|[^'{esc}])*\'  yytext = yytext.substr(1,yyleng-2); return 'STRING';
+\"(?:\\(?:.|{ws})|[^"\\])*\"     yytext = yytext.substr(1,yyleng-2); return 'STRING';
+\'(?:\\(?:.|{ws})|[^'\\])*\'     yytext = yytext.substr(1,yyleng-2); return 'STRING';
 "only"                              return 'ONLY'
 "not-allowed"                       return 'IDENT'  // For cursor: not-allowed
 "not"                               return 'NOT'
@@ -331,7 +331,7 @@ page_margin
 
 font_face_block
     : BLOCK_FONT_FACE junk '{' junk declaration_list junk '}'
-        { $$ = new yy.FontFace($6); }
+        { $$ = new yy.FontFace($5); }
     ;
 
 keyframes_block

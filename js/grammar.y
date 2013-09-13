@@ -67,8 +67,6 @@ ie_ident            [a-zA-Z0-9\.:]
 "not-allowed"                       return 'IDENT'  // For cursor: not-allowed
 "not"                               return 'NOT'
 "and"                               return 'AND'
-"from"                              return 'FROM'
-"to"                                return 'TO'
 "odd"                               return 'ODD'
 "even"                              return 'EVEN'
 "!"                                 return '!'
@@ -80,8 +78,11 @@ ie_ident            [a-zA-Z0-9\.:]
 "#"{ident}                          return 'ID_IDENT'
 "."{ident}                          return 'CLASS_IDENT'
 {ident}"("                          return 'FUNCTION_IDENT'
+"from"                              return 'FROM'
+"to"                                return 'TO'
 {ident}                             return 'IDENT'
-[~|^$*]"="                          return 'ATTRIBUTE_COMPARISON'
+"$"                                 return '$'
+"^"                                 return '^'
 "-"                                 return '-'
 "+"                                 return '+'
 ">"                                 return 'SEL_CHILD'
@@ -446,8 +447,16 @@ attribute_selector
         { $$ = new yy.AttributeSelector($3, null, null); }
     | '[' junk element_name junk '=' junk string_or_ident junk ']'
         { $$ = new yy.AttributeSelector($3, $5, $7); }
-    | '[' junk element_name junk ATTRIBUTE_COMPARISON junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5, $7); }
+    | '[' junk element_name junk '*' '=' junk string_or_ident junk ']'
+        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); }
+    | '[' junk element_name junk '|' '=' junk string_or_ident junk ']'
+        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); }
+    | '[' junk element_name junk '^' '=' junk string_or_ident junk ']'
+        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); }
+    | '[' junk element_name junk '$' '=' junk string_or_ident junk ']'
+        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); }
+    | '[' junk element_name junk SEL_SIBLING '=' junk string_or_ident junk ']'
+        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); }
     ;
 
 pseudo_selector

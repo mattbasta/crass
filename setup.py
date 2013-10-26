@@ -9,6 +9,6 @@ setup(
     url='https://github.com/mattbasta/crass',
     packages=['crass'],
     package_dir={'crass': 'python/lib'},
-    install_requires=[p.strip() for p in open('./python/requirements.txt')],
+    install_requires=[p.strip() for p in open('./requirements.txt')],
     scripts=['python/bin/crass'],
 )

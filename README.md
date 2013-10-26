@@ -73,7 +73,7 @@ Reordering selectors and declarations significantly improves minified code sizes
 ### Benchmarks
 
 <table>
-<tr><th>CSS Source<th>Original Size<th>YUI<th>YUI gzipped<th>clean-css<th>clean-css gzipped<th>crass<th>crass gzipped
+<tr><th>CSS Source<th>Original<th>YUI<th>YUI gzip<th>clean-css<th>clean-css gzip<th>crass<th>crass gzip
 <tr><td>Firefox Marketplace<td>84446<td>84404<td>19690<td>84446*<td>19691<td>81308<td>19341
 <tr><td>Github Homepage<td>269633<td>268563<td>49811<td>267418<td>49781<td>259740<td>48332
 </table>

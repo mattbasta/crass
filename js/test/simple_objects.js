@@ -24,3 +24,19 @@ describe('Strings', function() {
         assert.equal(parseString('a{content:"\\\n"}'), 'a{content:"\\\n"}');
     });
 });
+
+
+describe('Identifiers', function() {
+    it('can be normal identifiers', function() {
+        assert.equal(parseString('a{foo:bar}'), 'a{foo:bar}');
+    });
+    it('can be n-resize', function() {
+        assert.equal(parseString('a{nearly-cursor:n-resize}'), 'a{nearly-cursor:n-resize}');
+    });
+    it('can be not-allowed', function() {
+        assert.equal(parseString('a{nearly-cursor:not-allowed}'), 'a{nearly-cursor:not-allowed}');
+    });
+    it('can be use old hacks in declaration names', function() {
+        assert.equal(parseString('a{*foo: bar;}'), 'a{*foo:bar}');
+    });
+});

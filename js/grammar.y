@@ -11,7 +11,7 @@ comment             "/*"[^*]*"*"+([^/*][^*]*"*"+)"*/"
 hex                 [a-fA-F0-9]
 ident               ([a-zA-Z_]|"-"[a-zA-Z\-]+)[a-zA-Z0-9_\-]*
 int                 ([1-9][0-9]*|"0")
-ie_junk             [a-zA-Z0-9=#, \n\r\t]
+ie_junk             [a-zA-Z0-9=#, \n\r\t'"]
 ie_ident            [a-zA-Z0-9\.:]
 
 %%
@@ -35,6 +35,8 @@ ie_ident            [a-zA-Z0-9\.:]
 "/"                                 return '/'
 "*"                                 return '*'
 "="                                 return '='
+"n-resize"                          return 'IDENT'  // For cursor: n-resize
+"not-allowed"                       return 'IDENT'  // For cursor: not-allowed
 "n"                                 return 'N'
 "@charset"                          return 'BLOCK_CHARSET'
 "@import"                           return 'BLOCK_IMPORT'
@@ -64,14 +66,15 @@ ie_ident            [a-zA-Z0-9\.:]
 \"(?:\\(?:.|{ws})|[^"\\])*\"     yytext = yytext.substr(1,yyleng-2); return 'STRING';
 \'(?:\\(?:.|{ws})|[^'\\])*\'     yytext = yytext.substr(1,yyleng-2); return 'STRING';
 "only"                              return 'ONLY'
-"not-allowed"                       return 'IDENT'  // For cursor: not-allowed
 "not"                               return 'NOT'
 "and"                               return 'AND'
 "odd"                               return 'ODD'
 "even"                              return 'EVEN'
 "!"                                 return '!'
 "important"                         return 'IMPORTANT'
-"filter"{ws}*":"({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
+"expression(".*?")"                 return 'IE_EXPRESSION'
+"filter"{ws}*":"{ws}*({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
+"-ms-filter"{ws}*":"{ws}*({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
 "url("[^)]*")"                      return 'URL_FULL'
 "calc"                              return 'CALC'
 "attr"                              return 'ATTR'
@@ -522,6 +525,8 @@ optional_important
 declaration_inner
     : IE_FILTER
         { $$ = new yy.IEFilter($1); }
+    | '*' IDENT junk ':' junk expr
+        { $$ = new yy.Declaration('*' + $2, $6); }
     | IDENT junk ':' junk expr
         { $$ = new yy.Declaration($1, $5); }
     ;
@@ -562,6 +567,8 @@ term
     | TO
         { $$ = $1; }
     | FROM
+        { $$ = $1; }
+    | IE_EXPRESSION
         { $$ = $1; }
     ;
 

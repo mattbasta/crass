@@ -844,9 +844,7 @@ scope.Dimension = function(number, unit) {
         if (!this.unit) {
             return this.number;
         }
-        // OPT: Lowercase units.
-        this.unit = this.unit.toLowerCase();
-        return this;
+        return optimization.unit(this, kw);
     };
 };
 
@@ -961,10 +959,27 @@ scope.Number = function(value) {
             }
             return str;
         }
-        if (positive) {
-            return post(Math.abs(this.value).toString());
+
+        function truncate(num) {
+            // This will truncate all numbers to four decimal places.
+            if (num % 1) {
+                if (Math.abs(Math.round(num) - num) < 0.00001) return Math.round(num).toString();
+
+                var decimal = (num % 1).toString().substr(1, 5);
+                num = Math.floor(num).toString();
+                // Trim trailing zeroes
+                while (decimal[decimal.length - 1] === '0') decimal = decimal.substr(0, decimal.length - 1);
+                if (decimal !== '.')
+                    num += decimal;
+                return num;
+            } else {
+                return num.toString();
+            }
         }
-        return post(this.value.toString());
+        if (positive) {
+            return post(truncate(Math.abs(this.value)));
+        }
+        return post(truncate(this.value));
     };
     this.pretty = function(indent) {
         return this.value.toString();

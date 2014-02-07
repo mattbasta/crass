@@ -49,9 +49,6 @@ describe('Lowercase', function() {
         parseCompare('b[FOO|BAR]{x:y}', 'b[foo|bar]{x:y}');
         parseCompare('b[FOO|BAR=bar]{x:y}', 'b[foo|bar=bar]{x:y}');
     });
-    it('dimensions', function() {
-        parseCompare('b{x:4EM}', 'b{x:4em}');
-    });
     it('functions', function() {
         parseCompare('b{x:FOO(bar)}', 'b{x:foo(bar)}');
     });

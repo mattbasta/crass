@@ -105,6 +105,98 @@ module.exports.color = function(color, alpha) {
     }
 }
 
+// Units to be optimize when using --O1 only.
+var opt_unit_o1_only = {
+    cm: true,
+    mm: true
+    // ,turn: true  // Not compatible with Chrome yet :(
+};
+var length_units = {
+    'in': 96,
+    px: 1,
+    pt: 4 / 3,
+    pc: 16,
+    cm: 37.79,
+    mm: 3.779
+};
+var angular_units = {
+    deg: 1,
+    rad: 180 / Math.PI,
+    grad: 9 / 10,
+    turn: 360
+};
+var temporal_units = {
+    s: 1000,
+    ms: 1
+};
+var frequency_units = {
+    Hz: 1,
+    kHz: 1000
+};
+var resolution_units = {
+    dpi: 1,
+    dpcm: 1 / 2.54,
+    dppx: 1 / 96
+};
+
+module.exports.unit = function(unit, kw) {
+    var objects = require('../objects');
+
+    function optimizeMin(unit, units) {
+        var versions = {};
+        var base_unit = units[unit.unit] * unit.number.asNumber();
+        var shortest;
+        var shortestLen = unit.toString().length;
+
+        var temp;
+        for (var i in units) {
+            if (!kw.o1 && i in opt_unit_o1_only || i === 'turn' || i === unit.unit) continue;
+            temp = versions[i] = new objects.Dimension(new (objects.Number)(base_unit / units[i]), i);
+            // console.log(temp.toString());
+            if (temp.toString().length < shortestLen) {
+                shortest = i;
+                shortestLen = temp.toString().length;
+            }
+        }
+        if (!shortest) return unit;
+        return versions[shortest];
+    }
+
+    switch (unit.unit) {
+        // Length units
+        case 'cm':
+        case 'mm':
+            if (!kw.o1) return unit;
+        case 'in':
+        case 'px':
+        case 'pt':
+        case 'pc':
+            return optimizeMin(unit, length_units);
+        // Angular units
+        case 'deg':
+        case 'rad':
+        case 'grad':
+        case 'turn':
+            return optimizeMin(unit, angular_units);
+        // Temporal units
+        case 's':
+        case 'ms':
+            return optimizeMin(unit, temporal_units);
+        // Frequency units
+        case 'Hz':
+        case 'kHz':
+            return optimizeMin(unit, frequency_units);
+        // Resolution units
+        case 'dpi':
+        case 'dpcm':
+        case 'dppx':
+            return optimizeMin(unit, resolution_units);
+        default:
+            return unit;
+    }
+};
+
+
 module.exports.combineList = function(mapper, reducer, list) {
     mapper = mapper || utils.stringIdentity;
     reducer = reducer || function(a, b) {

@@ -210,8 +210,8 @@ block
     ;
 
 media_block
-    : BLOCK_MEDIA junk medium_list junk '{' media_inner_list '}'
-        { $$ = new yy.Media($3, $6); }
+    : BLOCK_MEDIA junk medium_list junk '{' junk media_inner_list '}'
+        { $$ = new yy.Media($3, $7); }
     ;
 
 media_inner_list
@@ -542,7 +542,7 @@ n_val
 declaration_list
     : declaration_list junk ';' junk declaration
         { $$ = $1; $$.push($5); }
-    | declaration_list junk ';'
+    | declaration_list junk ';' junk
         { $$ = $1; }
     | declaration
         { $$ = [$1]; }
@@ -552,7 +552,7 @@ declaration_list
 
 declaration
     : declaration_inner junk optional_important
-        { $$ = $1; yy.extend($$, $2); }
+        { $$ = $1; yy.extend($$, $3); }
     ;
 
 optional_important

@@ -116,9 +116,9 @@ scope.Media = function(medium_list, content) {
     };
     this.pretty = function(indent) {
         var output = '';
-        output += utils.indent('@media ' + utils.joinAll(this.medium_list, ',', utils.prettyMap(indent)) + ' {') + '\n';
+        output += utils.indent('@media ' + utils.joinAll(this.medium_list, ', ', utils.prettyMap(indent)) + ' {') + '\n';
         output += this.content.map(function(line) {
-            return utils.indent(line.pretty(indent + 1) + ';', indent);
+            return utils.indent(line.pretty(indent + 1), indent);
         }).join('\n') + '\n';
         output += utils.indent('}', indent) + '\n';
         return output;
@@ -248,7 +248,7 @@ scope.FontFace = function(content) {
     };
     this.pretty = function(indent) {
         var output = '';
-        output += utils.indent('@font-face ' + this.name + ' {') + '\n';
+        output += utils.indent('@font-face {') + '\n';
         output += this.content.map(function(line) {
             return utils.indent(line.pretty(indent + 1) + ';', indent);
         }).join('\n') + '\n';
@@ -285,7 +285,7 @@ scope.Keyframes = function(name, content, vendor_prefix) {
         var output = '';
         output += utils.indent(this.get_block_header() + this.name + ' {') + '\n';
         output += this.content.map(function(line) {
-            return utils.indent(line.pretty(indent + 1) + ';', indent);
+            return utils.indent(line.pretty(indent + 1), indent);
         }).join('\n') + '\n';
         output += utils.indent('}', indent) + '\n';
         return output;
@@ -385,15 +385,18 @@ scope.Supports = function(condition_list, blocks) {
         return output;
     };
     this.pretty = function(indent) {
+        var condition_list = this.condition_list.pretty(indent);
+        if (this.condition_list instanceof scope.Declaration) {
+            condition_list = '(' + condition_list + ')';
+        }
+
         var output = utils.indent(
-            '@supports ' + this.condition_list.map(function(condition) {
-                return condition.pretty();
-            }) + ' {',
+            '@supports ' + condition_list + ' {',
             indent
         ) + '\n';
         output += this.blocks.map(function(line) {
-            return utils.indent(line.pretty(indent + 1) + ';', indent);
-        }).join('\n') + '\n';
+            return utils.indent(line.pretty(indent + 1), indent);
+        }).join('\n');
         output += utils.indent('}', indent) + '\n';
         return output;
     };
@@ -709,7 +712,8 @@ scope.NthSelector = function(func_name, linear_func) {
         return ':' + this.func_name + '(' + this.linear_func.toString() + ')';
     };
     this.pretty = function(indent) {
-        return ':' + this.func_name + '(' + this.linear_func.pretty(indent) + ')';
+        var lf_pretty = this.linear_func.pretty ? this.linear_func.pretty(indent) : this.linear_func.toString();
+        return ':' + this.func_name + '(' + lf_pretty + ')';
     };
     this.optimize = function(kw) {
         this.linear_func = optimization.try_(this.linear_func, kw);

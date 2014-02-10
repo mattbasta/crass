@@ -10,6 +10,7 @@ var parseCompare = function(data, expected) {
     data = data.replace(/\$\$/g, filler);
     expected = expected.replace(/\$\$/g, filler);
     assert.equal(parseString(data), expected);
+    assert.equal(parseString(crass.parse(data).pretty()), expected);
 };
 function parity(data) {
     parseCompare(data, data);

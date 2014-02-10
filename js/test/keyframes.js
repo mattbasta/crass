@@ -6,6 +6,7 @@ var filler = 'from{x:y}to{a:b}';
 var parity = function(data) {
 	data = data.replace(/\$\$/g, filler);
 	assert.equal(crass.parse(data).toString(), data);
+    assert.equal(crass.parse(crass.parse(data).pretty()).toString(), data);
 }
 
 

@@ -368,6 +368,136 @@ scope.KeyframeSelector = function(stop) {
     };
 };
 
+
+scope.Supports = function(condition_list, blocks) {
+    this.condition_list = condition_list;
+    this.blocks = blocks;
+
+    this.toString = function() {
+        var output = '@supports ';
+        var cond_is_decl = this.condition_list instanceof scope.Declaration;
+        if (cond_is_decl) output += '(';
+        output += this.condition_list.toString();
+        if (cond_is_decl) output += ')';
+        output += '{';
+        output += utils.joinAll(this.blocks);
+        output += '}';
+        return output;
+    };
+    this.pretty = function(indent) {
+        var output = utils.indent(
+            '@supports ' + this.condition_list.map(function(condition) {
+                return condition.pretty();
+            }) + ' {',
+            indent
+        ) + '\n';
+        output += this.blocks.map(function(line) {
+            return utils.indent(line.pretty(indent + 1) + ';', indent);
+        }).join('\n') + '\n';
+        output += utils.indent('}', indent) + '\n';
+        return output;
+    };
+    this.optimize = function(kw) {
+        this.condition_list = this.condition_list.optimize(kw);
+        this.blocks = this.blocks.map(function(block) {
+            return block.optimize(kw);
+        });
+        return this;
+    };
+};
+
+scope.SupportsConditionList = function(combinator, conditions) {
+    this.combinator = combinator;
+    this.conditions = conditions;
+
+    this.unshift = function(item) {
+        this.conditions.unshift(item);
+    };
+    this.push = function(item) {
+        this.conditions.push(item);
+    };
+
+    this.toString = function() {
+        return utils.joinAll(
+            this.conditions,
+            ' ' + this.combinator + ' ',
+            function(item) {
+                var output = item.toString();
+                return (item instanceof scope.SupportsConditionList && item.combinator !== this.combinator ||
+                        item instanceof scope.Declaration) ? '(' + output + ')' : output;
+            }
+        );
+    };
+    this.pretty = function(indent) {
+        return this.toString();
+    };
+    this.optimize = function(kw) {
+        this.conditions = this.conditions.map(function(condition) {
+            return condition.optimize(kw);
+        });
+        // OPT: Remove duplicate delcarations in @supports condition lists
+        this.conditions = utils.uniq(null, this.conditions);
+
+        // OPT: not(x) and not(y) and not(z) -> not(x or y or z)
+        if (utils.all(this.conditions, function(condition) {
+            return condition instanceof scope.SupportsCondition && condition.negated;
+        })) {
+            var cond = new scope.SupportsCondition(new scope.SupportsConditionList(
+                this.combinator === 'and' ? 'or' : 'and',
+                this.conditions.map(function(condition) {
+                    return condition.condition;
+                })
+            ));
+            cond.negate();
+            return cond;
+        }
+
+        return this;
+    };
+};
+scope.createSupportsConditionList = function(base, combinator, addon) {
+    if (base instanceof scope.SupportsConditionList && base.combinator === combinator) {
+        base.push(addon);
+        return base;
+    } else if (addon instanceof scope.SupportsConditionList && addon.combinator === combinator) {
+        addon.unshift(base);
+        return addon;
+    } else {
+        return new (scope.SupportsConditionList)(combinator, [base, addon]);
+    }
+};
+
+scope.SupportsCondition = function(condition) {
+    this.condition = condition;
+    this.negated = false;
+
+    this.negate = function() {
+        this.negated = !this.negated;
+    };
+
+    this.toString = function() {
+        var output = '';
+        if (this.negated) output = 'not ';
+        output += '(';
+        output += this.condition;
+        output += ')';
+        return output;
+    };
+    this.pretty = function(indent) {
+        return this.toString();
+    };
+    this.optimize = function(kw) {
+        this.condition = this.condition.optimize(kw);
+        // OPT: not(not(foo:bar)) -> (foo:bar)
+        if (this.condition instanceof scope.SupportsCondition &&
+            this.negated && this.condition.negated) {
+            return this.condition.condition;
+        }
+        return this;
+    };
+};
+
+
 scope.Ruleset = function(selector, content) {
     this.selector = selector;
     this.content = content;

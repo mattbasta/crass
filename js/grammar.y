@@ -46,6 +46,7 @@ ie_ident            [a-zA-Z0-9\.:]
 "@page"                             return 'BLOCK_PAGE'
 "@keyframes"                        return 'BLOCK_KEYFRAMES'
 "@-"[a-zA-Z]+"-keyframes"           return 'BLOCK_VENDOR_KEYFRAMES'
+"@supports"                         return 'BLOCK_SUPPORTS'
 "@top-left-corner"                  return 'PAGE_TOP_LEFT_CORNER'
 "@top-left"                         return 'PAGE_TOP_LEFT'
 "@top-center"                       return 'PAGE_TOP_CENTER'
@@ -68,6 +69,7 @@ ie_ident            [a-zA-Z0-9\.:]
 "only"                              return 'ONLY'
 "not"                               return 'NOT'
 "and"                               return 'AND'
+"or"                                return 'OR'
 "odd"                               return 'ODD'
 "even"                              return 'EVEN'
 "!"                                 return '!'
@@ -202,6 +204,8 @@ block
     | font_face_block scc
         { $$ = $1; }
     | keyframes_block scc
+        { $$ = $1; }
+    | supports_block scc
         { $$ = $1; }
     ;
 
@@ -371,6 +375,42 @@ keyframe_selector
         { $$ = new yy.KeyframeSelector('from'); }
     | TO junk
         { $$ = new yy.KeyframeSelector('to'); }
+    ;
+
+
+supports_block
+    : BLOCK_SUPPORTS junk supports_list junk '{' junk blocks junk '}'
+        { $$ = new yy.Supports($3, $7); }
+    ;
+
+supports_list
+    : supports_item OR junk supports_list
+        { $$ = yy.createSupportsConditionList($1, 'or', $4); }
+    | supports_item AND junk supports_list
+        { $$ = yy.createSupportsConditionList($1, 'and', $4); }
+    | supports_item
+        { $$ = $1; }
+    ;
+
+supports_item
+    : supports_negation
+        { $$ = $1; }
+    | '(' junk supports_parenable junk ')' junk
+        { $$ = $3; }
+    ;
+
+supports_negation
+    : NOT junk '(' junk supports_parenable junk ')' junk
+        { $$ = new yy.SupportsCondition($5); $$.negate(); }
+    | NOT junk '(' junk supports_negation junk ')' junk
+        { $$ = new yy.SupportsCondition($5); $$.negate(); }
+    ;
+
+supports_parenable
+    : supports_list
+        { $$ = $1; }
+    | declaration
+        { $$ = $1; }
     ;
 
 

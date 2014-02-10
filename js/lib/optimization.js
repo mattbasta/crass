@@ -3,6 +3,8 @@ var utils = require('./utils');
 
 module.exports.quadLists = {
     'border-color': 1,
+    '-webkit-border-radius': 1,
+    '-moz-border-radius': 1,
     'border-radius': 1,
     'border-style': 1,
     'border-width': 1,

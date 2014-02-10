@@ -85,6 +85,10 @@ describe('Remove', function() {
                 'b{margin:0 0 0 0}',
                 'b{margin:0}'
             );
+            parseCompare(
+                'b{-webkit-border-radius:0 0 0 0}',
+                'b{-webkit-border-radius:0}'
+            );
         });
         it('for two pairs of identical items', function() {
             parseCompare(

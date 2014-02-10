@@ -12,6 +12,7 @@ var parseCompare = function(data, expected, o1) {
     if (o1) {
         assert.notEqual(parseString(data), expected);
         assert.equal(parseString(data, {o1: true}), expected);
+        assert.equal(parseString(crass.parse(data).pretty(), {o1: true}), expected);
     } else {
         assert.equal(parseString(data), expected);
     }

@@ -10,7 +10,9 @@ var parseCompare = function(data, expected, o1) {
     data = data.replace(/\$\$/g, filler);
     expected = expected.replace(/\$\$/g, filler);
     if (o1) {
-        assert.notEqual(parseString(data), expected);
+        if (data !== expected) {
+            assert.notEqual(parseString(data), expected);
+        }
         assert.equal(parseString(data, {o1: true}), expected);
         assert.equal(parseString(crass.parse(data).pretty(), {o1: true}), expected);
     } else {
@@ -231,5 +233,14 @@ describe('Combine', function() {
         // Test that declaration optimization happens after merging.
         parseCompare('@keyframes foo{0%{a:b;}0%{a:c;}}',
                      '@keyframes foo{0%{a:c}}');
+    });
+    it('duplicate blocks', function() {
+        parseCompare('a{x:y}b{foo:bar}a{x:y}',
+                     'b{foo:bar}a{x:y}',
+                     true);
+        // Test that there is no change with dis-similar blocks.
+        parseCompare('a{foo:bar;x:y}b{foo:bar}a{x:y}',
+                     'a{foo:bar;x:y}b{foo:bar}a{x:y}',
+                     true);
     });
 });

@@ -29,6 +29,20 @@ var optimizeList = module.exports.optimizeList = function(list, kw) {
 };
 
 module.exports.optimizeBlocks = function(content, kw) {
+    // OPT: Remove duplicate blocks.
+    if (kw.o1) {
+        var values = {};
+        var removalMap = [];
+        for (var i = 0; i < content.length; i++) {
+            var lval = utils.stringIdentity(content[i]);
+            if (lval in values)
+                removalMap[values[lval]] = true;
+            values[lval] = i;
+        }
+        content = content.filter(function(elem, i) {
+            return !!elem && !removalMap[i];
+        });
+    }
     // TODO: Add reordering/de-duplicating/etc. here
     return optimizeList(content, kw);
 }

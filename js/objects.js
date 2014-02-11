@@ -402,9 +402,7 @@ scope.Supports = function(condition_list, blocks) {
     };
     this.optimize = function(kw) {
         this.condition_list = this.condition_list.optimize(kw);
-        this.blocks = this.blocks.map(function(block) {
-            return block.optimize(kw);
-        });
+        this.blocks = optimization.optimizeBlocks(this.blocks, kw);
         return this;
     };
 };

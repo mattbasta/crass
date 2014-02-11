@@ -7,7 +7,7 @@
 esc                 "\\"
 unary_operator      [\-\+]
 ws                  [ \n\r\t\f]
-comment             "/*"[^*]*"*"+([^/*][^*]*"*"+)"*/"
+comment             "/*".*?"*/"
 hex                 [a-fA-F0-9]
 ident               ([a-zA-Z_]|"-"[a-zA-Z\-]+)[a-zA-Z0-9_\-]*
 int                 ([1-9][0-9]*|"0")
@@ -97,6 +97,7 @@ ie_ident            [a-zA-Z0-9\.:]
 ":only-of-type"                     return 'PSEUDO_CLASS'
 "::"                                return '::'
 ":"                                 return ':'
+"\\9"                               return 'SLASH_NINE'
 <<EOF>>                             return 'EOF'
 
 /lex
@@ -551,13 +552,20 @@ declaration_list
     ;
 
 declaration
-    : declaration_inner junk optional_important
-        { $$ = $1; yy.extend($$, $3); }
+    : declaration_inner junk optional_important optional_slash_nine
+        { $$ = $1; yy.extend($$, $3); yy.extend($$, $4); }
     ;
 
 optional_important
     : '!' junk IMPORTANT junk
         { $$ = {important: true}; }
+    |
+        { $$ = {}; }
+    ;
+
+optional_slash_nine
+    : SLASH_NINE junk
+        { $$ = {slash_nine: true}; }
     |
         { $$ = {}; }
     ;

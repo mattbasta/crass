@@ -833,12 +833,18 @@ scope.IEFilter = function(blob) {
 scope.Declaration = function(ident, expr) {
     this.ident = ident;
     this.expr = expr;
+    this.important = false;
+    this.slash_nine = false;
 
     this.toString = function() {
-        return this.ident + ':' + this.expr.toString();
+        return this.ident + ':' + this.expr.toString() +
+            (this.important ? '!important' : '') +
+            (this.slash_nine ? '\\9' : '');
     };
     this.pretty = function(indent) {
-        return this.ident + ': ' + this.expr.pretty(indent);
+        return this.ident + ': ' + this.expr.pretty(indent) +
+            (this.important ? ' !important' : '') +
+            (this.slash_nine ? ' \\9' : '');
     };
     this.optimize = function(kw) {
 

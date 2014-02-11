@@ -11,6 +11,7 @@ var extend = scope.extend = function(base, extension) {
     }
 };
 
+var colors = require('./lib/colors');
 var utils = require('./lib/utils');
 var identity = utils.identity;
 var invoker = utils.invoker;
@@ -959,6 +960,13 @@ scope.Expression = function(chain) {
             this.chain[0][1] = '0';
         }
 
+        // OPT: Convert color names to hex when possible.
+        this.chain.forEach(function(term) {
+            if (typeof term[1] === 'string' && term[1] in colors.COLOR_TO_HEX) {
+                term[1] = new scope.HexColor(colors.COLOR_TO_HEX[term[1]]);
+            }
+        });
+
         return this;
     };
 };
@@ -1065,6 +1073,11 @@ scope.HexColor = function(color) {
         this.color = this.color.toLowerCase();
         // OPT: Shorten hex colors
         this.color = optimization.shortenHexColor(this.color);
+        // OPT: Convert hex -> name when possible.
+        if (this.color in colors.HEX_TO_COLOR) {
+            return colors.HEX_TO_COLOR[this.color];
+        }
+
         return this;
     };
 };

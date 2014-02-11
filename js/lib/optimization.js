@@ -1,3 +1,4 @@
+var colors = require('./colors');
 var objects = require('../objects');
 var utils = require('./utils');
 
@@ -167,6 +168,8 @@ module.exports.color = function(color, alpha) {
     var hsl = color.hsl();
     var rgb = color.rgb();
 
+    var objects = require('../objects');
+
     if (alpha === 1) {
         var hex = '#' + rgb.map(function(c) {
             var str = c.toString(16);
@@ -174,9 +177,15 @@ module.exports.color = function(color, alpha) {
                 str = '0' + str;
             return str;
         }).join('');
-        hex = shortenHexColor(hex);
+        hex = shortenHexColor(hex).toLowerCase();
+
+        // OPT: Return the color name instead of hex value when shorter.
+        if (hex in colors.HEX_TO_COLOR) {
+            return colors.HEX_TO_COLOR[hex];
+        }
+
         // We'll never convert to hsl() or rgb(), they're always longer.
-        return new (require('../objects').HexColor)(hex.toLowerCase());
+        return new objects.HexColor(hex.toLowerCase());
     } else {
         var rgba = 'rgba(' + rgb.join(',') + ',' + alpha + ')';
         var hsla = 'hsla(' + hsl.join('%,') + ',' + alpha + ')';

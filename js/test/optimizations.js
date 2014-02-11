@@ -168,15 +168,29 @@ describe('Replace', function() {
                 'b{color:#fffffe}'
             );
         });
+        it('rgb with name', function() {
+            parseCompare(
+                'b{color:rgb(255,0,0)}',
+                'b{color:red}'
+            );
+        });
+        it('hex with name', function() {
+            parseCompare(
+                'b{color:#f00}',
+                'b{color:red}'
+            );
+        });
+        it('name with hex', function() {
+            parseCompare(
+                'b{color:blanchedalmond}',
+                'b{color:#ffebcd}'
+            );
+        });
 
         it('hsl with short hex', function() {
             parseCompare(
                 'b{color:hsl(0,0%,100%)}',
                 'b{color:#fff}'
-            );
-            parseCompare(
-                'b{color:hsl(0,100%,50%)}',
-                'b{color:#f00}'
             );
         });
         it('hsl with long hex', function() {
@@ -190,6 +204,13 @@ describe('Replace', function() {
             parseCompare(
                 'b{color:rgba(255,255,255,.1)}',
                 'b{color:hsla(0,0%,100%,.1)}'
+            );
+        });
+
+        it('rgba with name', function() {
+            parseCompare(
+                'b{color:rgba(255,0,0,1)}',
+                'b{color:red}'
             );
         });
     });

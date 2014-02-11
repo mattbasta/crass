@@ -83,6 +83,8 @@ exports.supportsDeclaration = function(declaration, kw) {
 
 exports.supportsKeyframe = function(prefix, kw) {
     if (!kw.browser_min || !(prefix in exports.KEYFRAMES_PREFIX_REMOVED)) return true;
+    // IE never supported a @-ms-keyframes block.
+    if (prefix === '-ms-') return false;
 
     return match_browser(exports.KEYFRAMES_PREFIX_REMOVED[prefix], kw);
 };

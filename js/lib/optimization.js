@@ -1,3 +1,4 @@
+var objects = require('../objects');
 var utils = require('./utils');
 
 
@@ -28,7 +29,48 @@ var optimizeList = module.exports.optimizeList = function(list, kw) {
     return list.map(utils.invoker('optimize', kw)).filter(utils.identity);
 };
 
+function _combineAdjacentRulesets(content, kw) {
+    var didCombineAdjacent = false;
+    var newContent = [];
+    var lastPushed;
+    for (var i = 0; i < content.length; i++) {
+        if (lastPushed &&
+            content[i] instanceof objects.Ruleset &&
+            lastPushed instanceof objects.Ruleset &&
+            lastPushed.contentToString() === content[i].contentToString()) {
+
+            // Step 1: Merge the selectors
+            if (lastPushed.selector instanceof objects.SelectorList) {
+                if (content[i].selector instanceof objects.SelectorList) {
+                    lastPushed.selector.selectors = lastPushed.selector.selectors.concat(content[i].selector.selectors);
+                } else {
+                    lastPushed.selector.selectors.push(lastPushed.selector);
+                }
+            } else if (content[i].selector instanceof objects.SelectorList) {
+                content[i].selector.selectors.push(lastPushed.selector);
+                lastPushed.selector = content[i].selector;
+            } else {
+                lastPushed.selector = new (objects.SelectorList)([
+                    lastPushed.selector,
+                    content[i].selector
+                ]);
+            }
+            // Step 2: Optimize the new selector
+            lastPushed.selector = lastPushed.selector.optimize(kw);
+
+            didCombineAdjacent = true;
+            continue;
+        }
+        newContent.push(lastPushed = content[i]);
+    }
+
+    return didCombineAdjacent ? newContent : content;
+}
+
 module.exports.optimizeBlocks = function(content, kw) {
+
+    content = optimizeList(content, kw);
+
     // OPT: Remove duplicate blocks.
     if (kw.o1) {
         var values = {};
@@ -39,12 +81,17 @@ module.exports.optimizeBlocks = function(content, kw) {
                 removalMap[values[lval]] = true;
             values[lval] = i;
         }
-        content = content.filter(function(elem, i) {
-            return !!elem && !removalMap[i];
-        });
+        if (removalMap.length) {  // Don't create a new array if nothing changed.
+            content = content.filter(function(elem, i) {
+                return !removalMap[i];
+            });
+        }
     }
-    // TODO: Add reordering/de-duplicating/etc. here
-    return optimizeList(content, kw);
+
+    // OPT: Combine adjacent similar rulesets.
+    content = _combineAdjacentRulesets(content, kw);
+
+    return content;
 }
 
 module.exports.optimizeDeclarations = function(content, kw) {

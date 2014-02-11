@@ -36,16 +36,12 @@ module.exports.invoker = function(method) {
 module.exports.uniq = function(lambda, list) {
     lambda = lambda || stringIdentity;
     var values = {};
-    var count = 0;
     for (var i = 0; i < list.length; i++) {
         var lval = lambda(list[i]);
-        if (!(lval in values))
-            count++;
         values[lval] = i;
     }
     var output = [];
     for (var key in values) {
-        if (!values.hasOwnProperty(key)) continue;
         output.push(list[values[key]]);
     }
     return output;

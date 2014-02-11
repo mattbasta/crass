@@ -503,8 +503,12 @@ scope.Ruleset = function(selector, content) {
     this.selector = selector;
     this.content = content;
 
+    this.contentToString = function() {
+        return utils.joinAll(this.content, ';');
+    };
+
     this.toString = function() {
-        return this.selector.toString() + '{' + utils.joinAll(this.content, ';') + '}';
+        return this.selector.toString() + '{' + this.contentToString() + '}';
     };
     this.pretty = function(indent) {
         var output = '';

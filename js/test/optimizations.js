@@ -243,4 +243,9 @@ describe('Combine', function() {
                      'a{foo:bar;x:y}b{foo:bar}a{x:y}',
                      true);
     });
+    it('similar adjacent blocks', function() {
+        parseCompare('a{x:y}b{x:y}', 'a,b{x:y}');
+        // Test that siblings are not modified.
+        parseCompare('a{x:y} foo{asdf:qwer} b{x:y}', 'a{x:y}foo{asdf:qwer}b{x:y}');
+    });
 });

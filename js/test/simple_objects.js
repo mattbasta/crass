@@ -40,3 +40,10 @@ describe('Identifiers', function() {
         assert.equal(parseString('a{*foo: bar;}'), 'a{*foo:bar}');
     });
 });
+
+
+describe('Math Expressions', function() {
+    it('are parsed', function() {
+        assert.equal(parseString('a{foo:calc(50% - 100px)}'), 'a{foo:calc(50%-100px)}');
+    });
+});

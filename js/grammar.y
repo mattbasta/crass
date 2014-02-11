@@ -631,7 +631,7 @@ unit
     | '(' junk math_expr junk ')'
         { $$ = $3; }
     | CALC '(' junk math_expr junk ')'
-        { $$ = new yy.Func('calc', $5, null); }
+        { $$ = new yy.Func('calc', $4, null); }
     | attr_expression
         { $$ = $1; }
     | function
@@ -664,20 +664,20 @@ attr_expression
 
 math_expr
     : math_expr '+' junk math_product
-        { $$ = $1; $$.push([$2, $4]); }
+        { $$ = new yy.MathSum($1, $2, $4); }
     | math_expr '-' junk math_product
-        { $$ = $1; $$.push([$2, $4]); }
+        { $$ = new yy.MathSum($1, $2, $4); }
     | math_product
-        { $$ = [[null, $1]]; }
+        { $$ = $1; }
     ;
 
 math_product
     : math_product '*' junk unit junk
-        { $$ = $1; $$.push(['*', $4]); }
+        { $$ = new yy.MathProduct($1, $2, $4); }
     | math_product '/' junk num junk
-        { $$ = $1; $$.push(['/', $4]); }
+        { $$ = new yy.MathProduct($1, $2, $4); }
     | unit junk
-        { $$ = [[null, $1]]; }
+        { $$ = $1; }
     ;
 
 hexcolor

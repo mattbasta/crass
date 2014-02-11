@@ -4,6 +4,10 @@ var crass = require('../crass');
 var parseString = function(data) {
     return crass.parse(data).toString();
 };
+var parity = function(data, expected) {
+    assert.equal(crass.parse(data).toString(), expected || data);
+    assert.equal(crass.parse(crass.parse(data).pretty()).toString(), expected || data);
+}
 
 
 describe('filter', function() {
@@ -43,5 +47,13 @@ describe('expressions', function() {
     });
     it('can contain maths', function() {
         assert.equal(parseString('a{foo: expression(document.innerWidth / 2 - foo.innerWidth / 2)}'), 'a{foo:expression(document.innerWidth / 2 - foo.innerWidth / 2)}');
+    });
+});
+
+
+describe('slash 9', function() {
+    it('is parsed', function() {
+        parity('a{foo:bar\\9}');
+        parity('a{foo:bar \\9}', 'a{foo:bar\\9}');
     });
 });

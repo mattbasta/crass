@@ -1024,8 +1024,9 @@ scope.Func = function(name, content) {
     this.pretty = function(indent) {
         if (this.content.pretty)
             return this.name + '(' + this.content.pretty(indent) + ')';
-        else
-            return this.toString();
+        else {
+            console.log(this.content);return this.name + '(' + this.content.toString() + ')';
+        }
     };
     this.optimize = function(kw) {
         // OPT: Lowercase function names.
@@ -1077,6 +1078,58 @@ scope.Func = function(name, content) {
             );
         }
 
+        return this;
+    };
+};
+
+scope.MathSum = function(base, operator, term) {
+    this.base = base;
+    this.operator = operator;
+    this.term = term;
+
+    this.toString = function(pad) {
+        var output = '';
+        var base = this.base.toString();
+        var term = this.term.toString();
+        output += this.base instanceof scope.MathProduct ? '(' + base + ')' : base;
+        if (pad) output += ' ';
+        output += this.operator;
+        if (pad) output += ' ';
+        output += this.term instanceof scope.MathProduct ? '(' + term + ')' : term;
+        return output;
+    };
+    this.pretty = function(indent) {
+        return this.toString(true);
+    };
+    this.optimize = function(kw) {
+        this.base = this.base.optimize(kw);
+        this.term = this.term.optimize(kw);
+        return this;
+    };
+};
+
+scope.MathProduct = function(base, operator, term) {
+    this.base = base;
+    this.operator = operator;
+    this.term = term;
+
+    this.toString = function(pad) {
+        var output = '';
+        var base = this.base.toString();
+        var term = this.term.toString();
+        output += this.base instanceof scope.MathSum ? '(' + base + ')' : base;
+        if (pad) output += ' ';
+        output += this.operator;
+        if (pad) output += ' ';
+        output += this.term instanceof scope.MathSum ? '(' + term + ')' : term;
+        return output;
+    };
+    this.pretty = function(indent) {
+        return this.toString(true);
+    };
+    this.optimize = function(kw) {
+        this.base = this.base.optimize(kw);
+        this.term = this.term.optimize(kw);
         return this;
     };
 };

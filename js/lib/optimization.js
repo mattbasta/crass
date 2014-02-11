@@ -33,10 +33,14 @@ function _combineAdjacentRulesets(content, kw) {
     var didCombineAdjacent = false;
     var newContent = [];
     var lastPushed;
+
+    var areAdjacentRulesets;
     for (var i = 0; i < content.length; i++) {
-        if (lastPushed &&
-            content[i] instanceof objects.Ruleset &&
-            lastPushed instanceof objects.Ruleset &&
+        areAdjacentRulesets = (lastPushed &&
+                               content[i] instanceof objects.Ruleset &&
+                               lastPushed instanceof objects.Ruleset);
+
+        if (areAdjacentRulesets &&
             lastPushed.contentToString() === content[i].contentToString()) {
 
             // Step 1: Merge the selectors
@@ -55,12 +59,27 @@ function _combineAdjacentRulesets(content, kw) {
                     content[i].selector
                 ]);
             }
+
             // Step 2: Optimize the new selector
             lastPushed.selector = lastPushed.selector.optimize(kw);
 
             didCombineAdjacent = true;
             continue;
+
+        } else if (areAdjacentRulesets &&
+                   lastPushed.selector.toString() === content[i].selector.toString()) {
+
+            // Step 1: Combine the content of the adjacent rulesets.
+            lastPushed.content = lastPushed.content.concat(content[i].content);
+
+            // Step 2: Re-optimize the ruleset body.
+            lastPushed.optimizeContent(kw);
+
+            didCombineAdjacent = true;
+            continue;
+
         }
+
         newContent.push(lastPushed = content[i]);
     }
 
@@ -88,7 +107,7 @@ module.exports.optimizeBlocks = function(content, kw) {
         }
     }
 
-    // OPT: Combine adjacent similar rulesets.
+    // OPT: Combine adjacent similar rulesets or selectors.
     content = _combineAdjacentRulesets(content, kw);
 
     return content;

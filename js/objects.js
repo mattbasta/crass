@@ -519,12 +519,14 @@ scope.Ruleset = function(selector, content) {
         output += utils.indent('}', indent) + '\n';
         return output;
     };
+    this.optimizeContent = function(kw) {
+        this.content = optimization.optimizeDeclarations(this.content, kw);
+    };
     this.optimize = function(kw) {
         if (this.selector)
             this.selector = optimization.try_(this.selector, kw);
-        else
-            debugger;
-        this.content = optimization.optimizeDeclarations(this.content, kw);
+
+        this.optimizeContent(kw);
 
         // OPT: Remove empty rulsets.
         if (!this.content.length) {

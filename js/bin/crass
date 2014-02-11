@@ -8,7 +8,13 @@ function help() {
         'Options:',
         ' --optimize        Run optimizations on the file.',
         ' --O1              Runs optimizations with the O1 flag.',
-        ' --pretty          Pretty prints the output.'
+        ' --pretty          Pretty prints the output.',
+        ' --min xxx[[,xxx]] Sets browser minimum versions.',
+        '',
+        'Browser versions:',
+        ' - Must start with browser name',
+        ' - Followed by version',
+        ' - E.g.: chr28 ie9 fx16 op15'
     ].join('\n'));
 }
 
@@ -19,6 +25,7 @@ if (process.argv.length < 3) {
 
 var fs = require('fs');
 
+var browser_support = require('../lib/browser_support');
 var utils = require('../lib/utils');
 var opts = utils.opts(process.argv.slice(3));
 
@@ -32,10 +39,19 @@ fs.readFile(process.argv[2], function(err, data) {
     }
 
     var parsed = crass.parse(data);
-    if (opts.optimize && opts.O1) {
-        parsed = parsed.optimize({01: true});
-    } else if (opts.optimize) {
-        parsed = parsed.optimize();
+
+    var kw = {};
+    if ('min' in opts) {
+        var min_plats = opts.min.split(',').map(browser_support.parseBrowser);
+        kw.browser_min = {};
+        min_plats.forEach(function(plat) {
+            kw.browser_min[plat.browser] = plat.version;
+        });
+    }
+
+    if (opts.optimize) {
+        if (opts.o1) kw.O1 = true;
+        parsed = parsed.optimize(kw);
     }
 
     if (opts.pretty) {

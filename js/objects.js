@@ -11,6 +11,7 @@ var extend = scope.extend = function(base, extension) {
     }
 };
 
+var browser_support = require('./lib/browser_support');
 var colors = require('./lib/colors');
 var utils = require('./lib/utils');
 var identity = utils.identity;
@@ -293,6 +294,12 @@ scope.Keyframes = function(name, content, vendor_prefix) {
     };
     this.optimize = function(kw) {
         var orig_prefix = kw.vendor_prefix;
+
+        // OPT: Remove unsupported keyframes blocks.
+        if (!browser_support.supportsKeyframe(orig_prefix, kw)) {
+            return null;
+        }
+
         if (orig_prefix && this.vendor_prefix && this.vendor_prefix !== orig_prefix) {
             // OPT: Eliminate keyframes that don't match media query.
             return;
@@ -834,8 +841,15 @@ scope.Declaration = function(ident, expr) {
         return this.ident + ': ' + this.expr.pretty(indent);
     };
     this.optimize = function(kw) {
+
         // OPT: Lowercase descriptor names.
         this.ident = this.ident.toLowerCase();
+
+        // OPT: Remove unsupported declarations.
+        if (!browser_support.supportsDeclaration(this.ident, kw)) {
+            return null;
+        }
+
         kw.declarationName = this.ident;
         this.expr = optimization.try_(this.expr, kw);
         delete kw.declarationName;

@@ -555,7 +555,7 @@ scope.SelectorList = function(selectors) {
         return utils.joinAll(this.selectors, ',');
     };
     this.pretty = function(indent) {
-        var separator = this.toString().length < 80 ? ', ' : ',\n';
+        var separator = this.toString().length < 80 ? ', ' : ',\n' + utils.indent(' ', indent).substr(1);
         return utils.joinAll(this.selectors, separator, utils.prettyMap(indent));
     };
     this.optimize = function(kw) {

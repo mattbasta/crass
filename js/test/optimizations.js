@@ -250,5 +250,6 @@ describe('Combine', function() {
     });
     it('adjacent blocks with similar selectors', function() {
         parseCompare('a{foo:bar}a{def:ghi}', 'a{def:ghi;foo:bar}');
+        parseCompare('a{foo:bar}a{foo:baz}', 'a{foo:baz}');
     });
 });

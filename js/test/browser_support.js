@@ -56,4 +56,7 @@ describe('supportsKeyframe', function() {
     it('should return true for recognized browsers', function() {
         assert(!browser_support.supportsKeyframe('-webkit-', getMins('ie1,fx1,chr1000')));
     });
+    it('should return false for known invalid prefixes', function() {
+        assert(!browser_support.supportsKeyframe('-ms-', {}));
+    });
 });

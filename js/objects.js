@@ -823,11 +823,18 @@ scope.NValue = function(coef) {
 };
 
 scope.IEFilter = function(blob) {
+    this.ident = 'filter';  // Hack so that we can duck-type this as a Declaration.
     this.blob = blob;
 
     this.toString = function() {return this.blob;};
     this.pretty = function(indent) {return this.toString();};
-    this.optimize = function(kw) {return this;};
+    this.optimize = function(kw) {
+        if (kw.browser_min && kw.browser_min.ie && kw.browser_min.ie > 9) {
+            return null;
+        }
+
+        return this;
+    };
 };
 
 scope.Declaration = function(ident, expr) {
@@ -1024,9 +1031,8 @@ scope.Func = function(name, content) {
     this.pretty = function(indent) {
         if (this.content.pretty)
             return this.name + '(' + this.content.pretty(indent) + ')';
-        else {
-            console.log(this.content);return this.name + '(' + this.content.toString() + ')';
-        }
+        else
+            return this.name + '(' + this.content.toString() + ')';
     };
     this.optimize = function(kw) {
         // OPT: Lowercase function names.
@@ -1070,8 +1076,6 @@ scope.Func = function(name, content) {
             var components = this.content.chain.slice(0, 3).map(function(v) {
                 return asRealNum(v[1]);
             });
-            // console.log('foo');
-            // console.log('comp', this.toString(), components);
             return optimization.color(
                 converter_func.apply(converter, components),
                 this.content.chain[3] !== undefined ? asRealNum(this.content.chain[3][1]) : 1

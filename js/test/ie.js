@@ -32,6 +32,16 @@ describe('filter', function() {
     it('can be prefixed', function() {
         assert.equal(parseString('a{-ms-filter: alpha(opacity=50)}'), 'a{-ms-filter: alpha(opacity=50)}');
     });
+
+    it('is removed in IE10+', function() {
+        var ie10_min = {browser_min: {ie: 10}};
+        assert.equal(crass.parse('a{filter:foo;zip:zap}').optimize(ie10_min).toString(), 'a{zip:zap}');
+    });
+
+    it('is removed when the -ms-filter variant is used in IE10', function() {
+        var ie10_min = {browser_min: {ie: 10}};
+        assert.equal(crass.parse('a{-ms-filter:foo;zip:zap}').optimize(ie10_min).toString(), 'a{zip:zap}');
+    });
 });
 
 

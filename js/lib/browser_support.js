@@ -57,6 +57,10 @@ exports.DECLARATIONS_REMOVED = {
     '-o-animation-name': {opera: 13},
     '-o-animation-play-state': {opera: 13},
     '-o-animation-timing-function': {opera: 13},
+
+    '-ms-filter': {ie: 10},
+    'filter': {ie: 10},
+    // '-ms-interpolation-mode': {ie: 10}  // Deprecated but not removed?
 };
 
 exports.KEYFRAMES_PREFIX_REMOVED = {

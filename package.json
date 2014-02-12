@@ -1,10 +1,10 @@
 {
   "name": "crass",
-  "version": "0.5.1",
-  "description": "A CSS utility library for JS and Python",
-  "main": "js/crass.js",
+  "version": "0.5.5",
+  "description": "A CSS utility library for JS",
+  "main": "crass.js",
   "scripts": {
-    "test": "cd js && mocha"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",

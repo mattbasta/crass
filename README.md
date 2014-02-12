@@ -1,6 +1,6 @@
 # crass
 
-A CSS3 utility library for Python and JS.
+A CSS3 utility library for JS.
 
 ## API
 
@@ -26,20 +26,10 @@ Improvements on the API will be made in the future.
 
 ## Command Line Interface
 
-### JS
-
 If you `npm install -g crass`, you'll get `crass` on your PATH.
 
 ```bash
 crass input.css [--optimize [--O1]] [--min x,y,z] [--pretty]
-```
-
-### Python
-
-If you `pip install crass`, you'll get `crass` on your PATH.
-
-```bash
-crass input.css [--optimize [--O1] [--O2] [--no-reorder]] [--pretty]
 ```
 
 ## Minification

@@ -8,7 +8,7 @@ setup(
     author_email='me@mattbasta.com',
     url='https://github.com/mattbasta/crass',
     packages=['crass'],
-    package_dir={'crass': 'python/lib'},
+    package_dir={'crass': 'lib'},
     install_requires=[p.strip() for p in open('./requirements.txt')],
-    scripts=['python/bin/crass'],
+    scripts=['bin/crass'],
 )

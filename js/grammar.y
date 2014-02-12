@@ -422,9 +422,9 @@ ruleset
 
 selector_list
     : selector_list ',' junk selector_chunk_list
-        { $$ = $1; $$.push($4); }
+        { $$ = yy.createSelectorList($1, $4); }
     | selector_chunk_list
-        { $$ = new yy.SelectorList([$1]); }
+        { $$ = $1; }
     ;
 
 selector_chunk_list

@@ -31,9 +31,13 @@ var optimizeList = module.exports.optimizeList = function(list, kw) {
 };
 
 function _combineAdjacentRulesets(content, kw) {
-    var didCombineAdjacent = false;
+    var didChange = false;
     var newContent = [];
     var lastPushed;
+
+    // A map of selectors to rulesets in this block.
+    var selectorMap = {};
+    var temp;
 
     var areAdjacentRulesets;
     for (var i = 0; i < content.length; i++) {
@@ -64,7 +68,7 @@ function _combineAdjacentRulesets(content, kw) {
             // Step 2: Optimize the new selector
             lastPushed.selector = lastPushed.selector.optimize(kw);
 
-            didCombineAdjacent = true;
+            didChange = true;
             continue;
 
         } else if (areAdjacentRulesets &&
@@ -76,15 +80,52 @@ function _combineAdjacentRulesets(content, kw) {
             // Step 2: Re-optimize the ruleset body.
             lastPushed.optimizeContent(kw);
 
-            didCombineAdjacent = true;
+            didChange = true;
             continue;
 
         }
 
         newContent.push(lastPushed = content[i]);
+        // OPT: Remove declarations that are overridden later in the stylesheet.
+        if (lastPushed instanceof objects.Ruleset) {
+            var hasSelectorList = lastPushed.selector instanceof objects.SelectorList;
+            temp = {
+                ruleset: lastPushed,
+                index: newContent.length - 1,
+                canRemoveFrom: !hasSelectorList
+            };
+            function pushSel(sel) {
+                var strSel = sel.toString();
+
+                if (!(strSel in selectorMap))
+                    selectorMap[strSel] = [];
+                else {
+                    selectorMap[strSel].forEach(function(ruleset) {
+                        var firstRuleset = ruleset.ruleset;
+                        // We can't remove declarations from a ruleset that's shared by multiple selectors.
+                        if (!ruleset.canRemoveFrom) return;
+                        var intersection = lastPushed.declarationIntersections(firstRuleset);
+                        // If there's no overlap, there's nothing to do.
+                        if (!intersection.length) return;
+                        // Remove each of the intersected declarations from the initial ruleset.
+                        intersection.forEach(firstRuleset.removeDeclaration.bind(firstRuleset));
+                        // Re-run optimize() on the original ruleset.
+                        newContent[ruleset.index] = ruleset.ruleset = firstRuleset.optimize(kw);
+                        // Mark that a change did occur.
+                        didChange = true;
+                    });
+                }
+                selectorMap[strSel].push(temp);
+            }
+            if (hasSelectorList) {
+                lastPushed.selector.selectors.forEach(pushSel);
+            } else {
+                pushSel(lastPushed.selector);
+            }
+        }
     }
 
-    return didCombineAdjacent ? newContent : content;
+    return didChange ? newContent.filter(utils.identity) : content;
 }
 
 module.exports.optimizeBlocks = function(content, kw) {

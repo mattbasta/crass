@@ -257,15 +257,6 @@ describe('Combine', function() {
         parseCompare('@keyframes foo{0%{a:b;}0%{a:c;}}',
                      '@keyframes foo{0%{a:c}}');
     });
-    it('duplicate blocks', function() {
-        parseCompare('a{x:y}b{foo:bar}a{x:y}',
-                     'b{foo:bar}a{x:y}',
-                     true);
-        // Test that there is no change with dis-similar blocks.
-        parseCompare('a{foo:bar;x:y}b{foo:bar}a{x:y}',
-                     'a{foo:bar;x:y}b{foo:bar}a{x:y}',
-                     true);
-    });
     it('adjacent blocks with similar bodies', function() {
         parseCompare('a{x:y}b{x:y}', 'a,b{x:y}');
         // Test that siblings are not modified.
@@ -274,5 +265,14 @@ describe('Combine', function() {
     it('adjacent blocks with similar selectors', function() {
         parseCompare('a{foo:bar}a{def:ghi}', 'a{def:ghi;foo:bar}');
         parseCompare('a{foo:bar}a{foo:baz}', 'a{foo:baz}');
+    });
+
+    it('nearby blocks with identical selectors and intersection', function() {
+        parseCompare('a{foo:bar}b{x:y}a{foo:zap}', 'b{x:y}a{foo:zap}');
+        parseCompare('a{foo:bar;other:one}b{x:y}a{foo:zap}', 'a{other:one}b{x:y}a{foo:zap}');
+        // Selector may be part of a selector list:
+        parseCompare('a{foo:bar;other:one}b{x:y}a,foo{foo:zap}', 'a{other:one}b{x:y}a,foo{foo:zap}');
+        // Original ruleset's selector may not be part of a selector list:
+        parseCompare('a,xxx{foo:bar;other:one}b{x:y}a{foo:zap}', 'a,xxx{foo:bar;other:one}b{x:y}a{foo:zap}');
     });
 });

@@ -514,6 +514,23 @@ scope.Ruleset = function(selector, content) {
     this.contentToString = function() {
         return utils.joinAll(this.content, ';');
     };
+    this.declarationIntersections = function(ruleset) {
+        var myDeclarations = this.content.map(function(decl) {
+            return decl.ident;
+        });
+        var intersection = [];
+        for (var i = 0; i < this.content.length; i++) {
+            if (myDeclarations.indexOf(this.content[i].ident) !== -1) {
+                intersection.push(this.content[i].ident);
+            }
+        }
+        return intersection;
+    };
+    this.removeDeclaration = function(declaration) {
+        this.content = this.content.filter(function(decl) {
+            return decl.ident !== declaration;
+        });
+    };
 
     this.toString = function() {
         return this.selector.toString() + '{' + this.contentToString() + '}';
@@ -582,6 +599,14 @@ scope.SelectorList = function(selectors) {
         // TODO(opt): Merge selectors.
         return this;
     };
+};
+scope.createSelectorList = function(base, addon) {
+    if (base instanceof scope.SelectorList) {
+        base.push(addon);
+        return base;
+    } else {
+        return new scope.SelectorList([base, addon]);
+    }
 };
 
 scope.SimpleSelector = function(conditions) {

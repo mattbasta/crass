@@ -43,6 +43,13 @@ describe('supportsDeclaration', function() {
         assert.equal(crass.parse('a{-moz-border-radius:0}').optimize(kw).toString(), '');
         assert.equal(crass.parse('a{-moz-border-radius:0;foo:bar}').optimize(kw).toString(), 'a{foo:bar}');
     });
+
+    it('should handle ie5/6 hacks', function() {
+        var oldIE = getMins('ie1,fx1,chr1');
+        var newIE = getMins('ie7,fx1,chr1');
+        assert(browser_support.supportsDeclaration('_font-face', oldIE));
+        assert(!browser_support.supportsDeclaration('_font-face', newIE));
+    });
 });
 
 

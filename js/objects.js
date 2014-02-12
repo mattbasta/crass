@@ -14,8 +14,6 @@ var extend = scope.extend = function(base, extension) {
 var browser_support = require('./lib/browser_support');
 var colors = require('./lib/colors');
 var utils = require('./lib/utils');
-var identity = utils.identity;
-var invoker = utils.invoker;
 var optimization = require('./lib/optimization');
 
 scope.Stylesheet = function(charset, imports, namespaces, content) {

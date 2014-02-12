@@ -27,7 +27,14 @@ module.exports.noneables = {
 
 var optimizeList = module.exports.optimizeList = function(list, kw) {
     if (!list) return list;
-    return list.map(utils.invoker('optimize', kw)).filter(utils.identity);
+    var output = [];
+    var temp;
+    for (var i = 0; i < list.length; i++) {
+        temp = list[i].optimize(kw);
+        if (!temp) continue;
+        output.push(temp);
+    }
+    return output;
 };
 
 function _combineAdjacentRulesets(content, kw) {
@@ -53,13 +60,13 @@ function _combineAdjacentRulesets(content, kw) {
                 if (content[i].selector instanceof objects.SelectorList) {
                     lastPushed.selector.selectors = lastPushed.selector.selectors.concat(content[i].selector.selectors);
                 } else {
-                    lastPushed.selector.selectors.push(lastPushed.selector);
+                    lastPushed.selector.selectors.push(content[i].selector);
                 }
             } else if (content[i].selector instanceof objects.SelectorList) {
                 content[i].selector.selectors.push(lastPushed.selector);
                 lastPushed.selector = content[i].selector;
             } else {
-                lastPushed.selector = new (objects.SelectorList)([
+                lastPushed.selector = new objects.SelectorList([
                     lastPushed.selector,
                     content[i].selector
                 ]);
@@ -100,20 +107,28 @@ function _combineAdjacentRulesets(content, kw) {
                 if (!(strSel in selectorMap))
                     selectorMap[strSel] = [];
                 else {
-                    selectorMap[strSel].forEach(function(ruleset) {
-                        var firstRuleset = ruleset.ruleset;
+                    var firstRuleset, ruleset;
+                    var j;
+                    for (var i = 0; i < selectorMap[strSel].length; i++) {
+                        ruleset = selectorMap[strSel][i];
+                        firstRuleset = ruleset.ruleset;
+                        if (!firstRuleset) continue;
                         // We can't remove declarations from a ruleset that's shared by multiple selectors.
                         if (!ruleset.canRemoveFrom) return;
                         var intersection = lastPushed.declarationIntersections(firstRuleset);
                         // If there's no overlap, there's nothing to do.
                         if (!intersection.length) return;
                         // Remove each of the intersected declarations from the initial ruleset.
-                        intersection.forEach(firstRuleset.removeDeclaration.bind(firstRuleset));
-                        // Re-run optimize() on the original ruleset.
-                        newContent[ruleset.index] = ruleset.ruleset = firstRuleset.optimize(kw);
+                        for (j = 0; j < intersection.length; j++) {
+                            firstRuleset.removeDeclaration(intersection[i]);
+                        }
+
+                        if (!firstRuleset.content.length) {
+                            newContent[ruleset.index] = ruleset.ruleset = null;
+                        }
                         // Mark that a change did occur.
                         didChange = true;
-                    });
+                    };
                 }
                 selectorMap[strSel].push(temp);
             }

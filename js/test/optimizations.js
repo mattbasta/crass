@@ -123,15 +123,17 @@ describe('Remove', function() {
 
             // Deletes mismatched prefixes
             parseCompare(
-                '@-ms-keyframes test{from,to{a:b;-webkit-foo:bar}}',
-                '@-ms-keyframes test{from,to{a:b}}'
-            );
-            // Preserves matching prefixes
-            parseCompare(
-                '@-ms-keyframes test{from,to{-ms-foo:bar;a:b}}',
-                '@-ms-keyframes test{from,to{-ms-foo:bar;a:b}}'
+                '@-foo-keyframes test{from,to{a:b;-bar-foo:bar}}',
+                '@-foo-keyframes test{from,to{a:b}}'
             );
         });
+    });
+
+    it('should remove invalid keyframes prefixes', function() {
+        parseCompare(
+            '@-ms-keyframes test{from,to{-ms-foo:bar;a:b}}',
+            ''
+        );
     });
 });
 

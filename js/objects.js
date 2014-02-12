@@ -296,7 +296,7 @@ scope.Keyframes = function(name, content, vendor_prefix) {
         var orig_prefix = kw.vendor_prefix;
 
         // OPT: Remove unsupported keyframes blocks.
-        if (!browser_support.supportsKeyframe(orig_prefix, kw)) {
+        if (!browser_support.supportsKeyframe(this.vendor_prefix, kw)) {
             return null;
         }
 

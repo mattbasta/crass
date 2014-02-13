@@ -47,3 +47,11 @@ describe('Math Expressions', function() {
         assert.equal(parseString('a{foo:calc(50% - 100px)}'), 'a{foo:calc(50%-100px)}');
     });
 });
+
+
+describe('Units', function() {
+    it('should strip the unit if the value is 0', function() {
+        assert.equal(parseString('a{foo:0px}'), 'a{foo:0}');
+        assert.equal(parseString('a{foo:0kHz}'), 'a{foo:0}');
+    });
+});

@@ -10,14 +10,19 @@
     "type": "git",
     "url": "git://github.com/mattbasta/crass.git"
   },
+  "bin": {
+    "mocha": "./bin/crass"
+  },
   "keywords": [
     "css3",
     "css"
   ],
   "author": "Matt Basta",
   "license": "BSD",
-  "gitHead": "b2b3699a00961982eae181c0ea2fe0f0e78173e6",
   "dependencies": {
     "color-convert": "0.3.x"
+  },
+  "devDependencies": {
+    "mocha": "1.18.x"
   }
 }

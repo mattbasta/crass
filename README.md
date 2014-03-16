@@ -2,6 +2,8 @@
 
 A CSS3 utility library for JS.
 
+[![Build Status](https://travis-ci.org/mattbasta/crass.png?branch=master)](https://travis-ci.org/mattbasta/crass)
+
 ## API
 
 ```js
@@ -80,10 +82,6 @@ Reordering selectors and declarations significantly improves minified code sizes
 
 Yes, it's in progress.
 
-### The encoding is weird.
-
-I'm working on it.
-
 ### What about comments? Docblocks?
 
 They're stripped at the moment, but I'm planning to add a mode to preserve them.
@@ -91,7 +89,3 @@ They're stripped at the moment, but I'm planning to add a mode to preserve them.
 ### What about following `@import` statements?
 
 I'm not sure what I want to do with this yet, since `@imports` are not necessarily relative to the open file. For now, crass doesn't have any remote file logic.
-
-### Feature X is implemented for platform Y but not platform Z / Bug X exists in platform Y
-
-Please file an issue, I'll get around to it eventually.

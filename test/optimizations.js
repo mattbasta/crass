@@ -205,7 +205,7 @@ describe('Replace', function() {
         it('rgba with hsla', function() {
             parseCompare(
                 'b{color:rgba(255,255,255,.1)}',
-                'b{color:hsla(0,0%,100%,.1)}'
+                'b{color:hsla(0,0,100%,.1)}'
             );
         });
 

@@ -11,7 +11,7 @@
     "url": "git://github.com/mattbasta/crass.git"
   },
   "bin": {
-    "mocha": "./bin/crass"
+    "crass": "./bin/crass"
   },
   "keywords": [
     "css3",

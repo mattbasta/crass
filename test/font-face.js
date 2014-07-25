@@ -14,4 +14,10 @@ describe('@font-face', function() {
     it('should parse font-face blocks', function() {
         parity('@font-face{$$}');
     });
+    it('should optimize', function() {
+        assert.equal(
+            crass.parse('@font-face{font-weight:bold}').optimize().toString(),
+            '@font-face{font-weight:700}'
+        );
+    });
 });

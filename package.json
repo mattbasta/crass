@@ -20,7 +20,8 @@
   "author": "Matt Basta",
   "license": "BSD",
   "dependencies": {
-    "color-convert": "0.3.x"
+    "color-convert": "0.3.x",
+    "jison": "^0.4.13"
   },
   "devDependencies": {
     "mocha": "1.18.x"

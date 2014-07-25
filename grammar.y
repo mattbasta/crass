@@ -282,7 +282,7 @@ page_name
     : IDENT ':' IDENT
         { $$ = $1 + ':' + $3; }
     | ':' IDENT
-        { $$ = ':' + $3; }
+        { $$ = ':' + $2; }
     | IDENT
         { $$ = $1; }
     |
@@ -290,16 +290,20 @@ page_name
     ;
 
 page_declaration_list
-    : page_declaration_list junk ';' junk page_declaration
-        { $$ = $1; $$.push($5); }
-    | page_declaration
-        { $$ = [$1]; }
+    : page_declaration_list junk declaration
+        { $$ = $1; $$.push($3); }
+    | page_declaration_list junk page_margin_declaration
+        { $$ = $1; $$.push($3); }
+    | page_declaration_list junk ';'
+        { $$ = $1; }
+    | page_declaration_list junk
+        { $$ = $1; }
+    |
+        { $$ = []; }
     ;
 
-page_declaration
-    : declaration
-        { $$ = $1; }
-    | page_margin junk '{' junk declaration_list junk '}'
+page_margin_declaration
+    : page_margin junk '{' junk declaration_list junk '}'
         { $$ = new yy.PageMargin($1.substr(1), $5); }
     ;
 

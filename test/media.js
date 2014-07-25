@@ -4,8 +4,8 @@ var crass = require('../crass');
 
 var filler = 'a{x:y}';
 var parity = function(data) {
-	data = data.replace(/\$\$/g, filler);
-	assert.equal(crass.parse(data).toString(), data);
+    data = data.replace(/\$\$/g, filler);
+    assert.equal(crass.parse(data).toString(), data);
     assert.equal(crass.parse(crass.parse(data).pretty()).toString(), data);
 }
 
@@ -43,7 +43,7 @@ describe('@media', function() {
     });
 
     it('should parse media with weird constraints', function() {
-    	parity('@media only screen and (-webkit-min-device-pixel-ratio:2){$$}');
+        parity('@media only screen and (-webkit-min-device-pixel-ratio:2){$$}');
     });
 
     it('should optimize media expressions', function() {

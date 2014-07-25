@@ -27,3 +27,4 @@ desktop.ini
 temp/
 crass.egg-info
 node_modules/
+coverage/

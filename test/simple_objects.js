@@ -26,6 +26,16 @@ describe('Strings', function() {
 });
 
 
+describe('Numbers', function() {
+    it('should omit a leading 0 in negative floating point numbers', function() {
+        assert.equal(parseString('a{foo:-0.5}'), 'a{foo:-.5}');
+    });
+    it('should not optimize', function() {
+        assert.equal(crass.parse('a{foo:-.5}').optimize().toString(), 'a{foo:-.5}');
+    });
+});
+
+
 describe('Identifiers', function() {
     it('can be normal identifiers', function() {
         assert.equal(parseString('a{foo:bar}'), 'a{foo:bar}');
@@ -43,8 +53,26 @@ describe('Identifiers', function() {
 
 
 describe('Math Expressions', function() {
-    it('are parsed', function() {
+    it('should parse', function() {
         assert.equal(parseString('a{foo:calc(50% - 100px)}'), 'a{foo:calc(50%-100px)}');
+    });
+    it('should parse with products', function() {
+        assert.equal(parseString('a{foo:calc(50% * 100px)}'), 'a{foo:calc(50%*100px)}');
+        assert.equal(parseString('a{foo:calc(5px + 50% * 100px)}'), 'a{foo:calc(5px+50%*100px)}');
+    });
+    it('should parse with sums in products', function() {
+        assert.equal(parseString('a{foo:calc((5px + 50%) * 100px)}'), 'a{foo:calc((5px+50%)*100px)}');
+        assert.equal(parseString('a{foo:calc(100px * (5px + 50%))}'), 'a{foo:calc(100px*(5px+50%))}');
+    });
+    it('should pretty print', function() {
+        assert.equal(
+            crass.parse('a{foo:calc(50% * 100px)}').pretty(),
+            'a {\n  foo: calc(50% * 100px);\n}\n'
+        );
+        assert.equal(
+            crass.parse('a{foo:calc(50% * 100px+5px)}').pretty(),
+            'a {\n  foo: calc(50% * 100px + 5px);\n}\n'
+        );
     });
 });
 

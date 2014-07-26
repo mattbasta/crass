@@ -54,6 +54,7 @@ describe('Lowercase', function() {
     });
     it('functions', function() {
         parseCompare('b{x:FOO(bar)}', 'b{x:foo(bar)}');
+        parseCompare('b{x:FOO(123,456,789)}', 'b{x:foo(123,456,789)}');
     });
 });
 
@@ -68,7 +69,7 @@ describe('Sort', function() {
 
 describe('Remove', function() {
     it('duplicate declarations', function() {
-        parseCompare('a{a:1;a:foo;a:lol;a:2;b:abc}', 'a{a:2;b:abc}');
+        parseCompare('a{a:1;a:1;a:lol;a:1;b:abc}', 'a{a:1;a:lol;b:abc}');
     });
     it('duplicate selectors in a selector list', function() {
         parseCompare('a,a{$$}', 'a{$$}');
@@ -103,6 +104,12 @@ describe('Remove', function() {
             parseCompare(
                 'b{padding:#fff #000 #123 #000}',
                 'b{padding:#fff #000 #123}'
+            );
+        });
+        it('for identical first and third items', function() {
+            parseCompare(
+                'b{padding:#fff #000 #fff}',
+                'b{padding:#fff #000}'
             );
         });
         it('except when on an unsupported declaration', function() {
@@ -205,7 +212,14 @@ describe('Replace', function() {
         it('rgba with hsla', function() {
             parseCompare(
                 'b{color:rgba(255,255,255,.1)}',
-                'b{color:hsla(0,0,100%,.1)}'
+                'b{color:hsla(0,0%,100%,.1)}'
+            );
+        });
+
+        it('hsla with rgba', function() {
+            parseCompare(
+                'b{color:hsla(255,99%,10%,.1)}',
+                'b{color:rgba(13,0,51,.1)}'
             );
         });
 
@@ -213,6 +227,17 @@ describe('Replace', function() {
             parseCompare(
                 'b{color:rgba(255,0,0,1)}',
                 'b{color:red}'
+            );
+        });
+
+        it('should not mangle invalid colors', function() {
+            parseCompare(
+                'b{color:rgb(255,0,0,5%)}',
+                'b{color:rgb(255,0,0,5%)}'
+            );
+            parseCompare(
+                'b{color:rgba(255,0,0)}',
+                'b{color:rgba(255,0,0)}'
             );
         });
     });
@@ -255,7 +280,7 @@ describe('Combine', function() {
                      '@keyframes foo{0%{a:b;c:d}}');
         // Test that declaration optimization happens after merging.
         parseCompare('@keyframes foo{0%{a:b;}0%{a:c;}}',
-                     '@keyframes foo{0%{a:c}}');
+                     '@keyframes foo{0%{a:b;a:c}}');
     });
     it('adjacent blocks with similar bodies', function() {
         parseCompare('a{x:y}b{x:y}', 'a,b{x:y}');
@@ -264,7 +289,7 @@ describe('Combine', function() {
     });
     it('adjacent blocks with similar selectors', function() {
         parseCompare('a{foo:bar}a{def:ghi}', 'a{def:ghi;foo:bar}');
-        parseCompare('a{foo:bar}a{foo:baz}', 'a{foo:baz}');
+        parseCompare('a{foo:bar}a{foo:baz}', 'a{foo:bar;foo:baz}');
     });
 
     it('nearby blocks with identical selectors and intersection', function() {

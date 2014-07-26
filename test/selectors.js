@@ -43,6 +43,10 @@ describe('Attribute Selectors', function() {
     it('should strip quotes when possible', function() {
         parity('[foo=bar]{$$}');
         parity('[foo="ba\\\\r"]{$$}');
+        assert.equal(
+            crass.parse('[foo="bar"]{a:b}').toString(),
+            '[foo=bar]{a:b}'
+        )
     });
     it('should allow namespaces', function() {
         parity('[foo|bar]{$$}');
@@ -93,6 +97,26 @@ describe('Selector Lists', function() {
         parity('a,b,c{$$}');
         parity('.a,#b,c{$$}');
         parity('.a #b,c{$$}');
+    });
+    it('should pretty print', function() {
+        assert.equal(
+            crass.parse('a,b,c{foo:bar}').pretty(),
+            'a, b, c {\n  foo: bar;\n}\n'
+        );
+    });
+    it('should pretty print with long lines', function() {
+        assert.equal(
+            crass.parse('thisisareallylongselector, thisisanotherreallylongselector, thisisathirdreallylongselector{foo:bar}').pretty(),
+            'thisisareallylongselector,\nthisisanotherreallylongselector,\nthisisathirdreallylongselector {\n  foo: bar;\n}\n'
+        );
+    });
+    it('should pretty print with long lines when indented', function() {
+        assert.equal(
+            crass.parse(
+                '@media (min-width:4){thisisareallylongselector, thisisanotherreallylongselector, thisisathirdreallylongselector{foo:bar}}'
+            ).pretty(),
+            '@media (min-width: 4) {\n  thisisareallylongselector,\n  thisisanotherreallylongselector,\n  thisisathirdreallylongselector {\n    foo: bar;\n  }\n\n}\n'
+        );
     });
 });
 

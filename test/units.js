@@ -8,6 +8,14 @@ var parseString = function(data, o1) {
 };
 
 
+describe('Units', function() {
+    it('should strip the unit if the value is 0', function() {
+        assert.equal(parseString('a{foo:0px}'), 'a{foo:0}');
+        assert.equal(parseString('a{foo:0kHz}'), 'a{foo:0}');
+    });
+});
+
+
 describe('Length', function() {
     it('should convert in', function() {
         assert.equal(parseString('a{width:96px}'), 'a{width:1in}');
@@ -25,6 +33,16 @@ describe('Length', function() {
     it('should convert mm', function() {
         // Only on O1
         assert.equal(parseString('a{width:3.779px}', true), 'a{width:1mm}');
+    });
+    it('should convert cm', function() {
+        // Only on O1
+        assert.equal(parseString('a{width:1.0007cm}', true), 'a{width:.3939in}');
+        assert.equal(parseString('a{width:1.0007cm}'), 'a{width:1.0007cm}');
+    });
+    it('should convert mm', function() {
+        // Only on O1
+        assert.equal(parseString('a{width:1.0007mm}', true), 'a{width:.1cm}');
+        assert.equal(parseString('a{width:1.0007mm}'), 'a{width:1.0007mm}');
     });
 });
 
@@ -64,7 +82,7 @@ describe('Frequency', function() {
 
 describe('Resolution', function() {
     it('should convert dpi', function() {
-        assert.equal(parseString('a{foo:96dppx}'), 'a{foo:1dpi}');
+        assert.equal(parseString('a{foo:1dpi}'), 'a{foo:1dpi}');
     });
     it('should convert dpcm', function() {
         assert.equal(parseString('a{foo:2.54dpcm}'), 'a{foo:1dpi}');

@@ -33,6 +33,12 @@ describe('Numbers', function() {
     it('should not optimize', function() {
         assert.equal(crass.parse('a{foo:-.5}').optimize().toString(), 'a{foo:-.5}');
     });
+    it('should strip units when the dimension is zero', function() {
+        assert.equal(crass.parse('a{foo:0px}').toString(), 'a{foo:0}');
+    });
+    it('should not strip units when the dimension is zero percent', function() {
+        assert.equal(crass.parse('a{foo:0%}').toString(), 'a{foo:0%}');
+    });
 });
 
 
@@ -74,12 +80,16 @@ describe('Math Expressions', function() {
             'a {\n  foo: calc(50% * 100px + 5px);\n}\n'
         );
     });
-});
-
-
-describe('Units', function() {
-    it('should strip the unit if the value is 0', function() {
-        assert.equal(parseString('a{foo:0px}'), 'a{foo:0}');
-        assert.equal(parseString('a{foo:0kHz}'), 'a{foo:0}');
+    it('should optimize the terms of a product', function() {
+        assert.equal(
+            crass.parse('a{foo:calc(12pt * 96px)}').optimize().toString(),
+            'a{foo:calc(1pc*1in)}'
+        );
+    });
+    it('should optimize the terms of a sum', function() {
+        assert.equal(
+            crass.parse('a{foo:calc(12pt + 96px)}').optimize().toString(),
+            'a{foo:calc(1pc+1in)}'
+        );
     });
 });

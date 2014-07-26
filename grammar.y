@@ -400,22 +400,19 @@ supports_list
 supports_item
     : supports_negation
         { $$ = $1; }
-    | '(' junk supports_parenable junk ')' junk
+    | '(' junk declaration junk ')' junk
+        { $$ = new yy.SupportsCondition($3); }
+    | '(' junk supports_list junk ')' junk
         { $$ = $3; }
     ;
 
 supports_negation
-    : NOT junk '(' junk supports_parenable junk ')' junk
+    : NOT junk '(' junk supports_list junk ')' junk
+        { $$ = new yy.SupportsCondition($5); $$.negate(); }
+    | NOT junk '(' junk declaration junk ')' junk
         { $$ = new yy.SupportsCondition($5); $$.negate(); }
     | NOT junk '(' junk supports_negation junk ')' junk
         { $$ = new yy.SupportsCondition($5); $$.negate(); }
-    ;
-
-supports_parenable
-    : supports_list
-        { $$ = $1; }
-    | declaration
-        { $$ = $1; }
     ;
 
 

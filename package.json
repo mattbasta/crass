@@ -1,6 +1,6 @@
 {
   "name": "crass",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "A CSS utility library for JS",
   "main": "crass.js",
   "scripts": {
@@ -20,10 +20,10 @@
   "author": "Matt Basta",
   "license": "BSD",
   "dependencies": {
-    "color-convert": "0.3.x",
-    "jison": "^0.4.13"
+    "color-convert": "0.3.x"
   },
   "devDependencies": {
-    "mocha": "1.18.x"
+    "mocha": "1.18.x",
+    "jison": "^0.4.13"
   }
 }

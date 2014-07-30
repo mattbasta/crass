@@ -7,7 +7,7 @@
 esc                 "\\"
 unary_operator      [\-\+]
 ws                  [ \n\r\t\f]
-comment             "/*".*?"*/"
+comment             "/*"(.|\n|\r)*?"*/"
 hex                 [a-fA-F0-9]
 ident               ([a-zA-Z_]|"-"[a-zA-Z\-]+)[a-zA-Z0-9_\-]*
 int                 ([1-9][0-9]*|"0")

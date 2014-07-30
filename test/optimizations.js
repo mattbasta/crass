@@ -68,6 +68,10 @@ describe('Sort', function() {
 });
 
 describe('Remove', function() {
+    it('duplicate keyframes', function() {
+        var kf = '@keyframes foo{from{x:y}to{x:a}}'
+        parseCompare(kf + kf, kf, true);
+    });
     it('duplicate declarations', function() {
         parseCompare('a{a:1;a:1;a:lol;a:1;b:abc}', 'a{a:1;a:lol;b:abc}');
     });
@@ -284,6 +288,9 @@ describe('Combine', function() {
     });
     it('adjacent blocks with similar bodies', function() {
         parseCompare('a{x:y}b{x:y}', 'a,b{x:y}');
+        parseCompare('a,b{x:y}a,b{x:y}', 'a,b{x:y}');
+        parseCompare('a{x:y}a,b{x:y}', 'a,b{x:y}');
+        parseCompare('a,b{x:y}a{x:y}', 'a,b{x:y}');
         // Test that siblings are not modified.
         parseCompare('a{x:y} foo{asdf:qwer} b{x:y}', 'a{x:y}foo{asdf:qwer}b{x:y}');
     });

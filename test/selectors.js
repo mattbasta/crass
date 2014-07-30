@@ -17,6 +17,18 @@ function parity(data) {
 }
 
 
+describe('Element Selectors', function() {
+    it('should parse properly', function() {
+        parity('foo{$$}');
+        parity('foo bar{$$}');
+    });
+    it('should allow namespaces', function() {
+        parity('foo|namespace{$$}');
+        parity('|namespace{$$}');
+        parity('foo|namespace bar{$$}');
+    });
+});
+
 describe('ID Selectors', function() {
     it('should work', function() {
         parity('#foo{$$}');
@@ -71,6 +83,11 @@ describe('Pseudo', function() {
         parity('foo:nth-last-child(n){$$}');
         parity('foo:nth-of-type(n){$$}');
         parity('foo:nth-last-of-type(n){$$}');
+
+        assert.equal(
+            crass.parse('foo:nth-child(n){x:y}').optimize().toString(),
+            'foo:nth-child(n){x:y}'
+        );
     });
     it('nth-func syntax', function() {
         parity(':nth-child(2n){$$}');
@@ -85,6 +102,11 @@ describe('Pseudo', function() {
         parity('foo:not(.foo){$$}');
         parity('foo:not(.foo .bar){$$}');
         parity(':not(:another){$$}');
+
+        assert.equal(
+            crass.parse('foo:not(bar){x:y}').optimize().toString(),
+            'foo:not(bar){x:y}'
+        );
     });
     it('function', function() {
         parity(':whatever(1em #fff ident){$$}');

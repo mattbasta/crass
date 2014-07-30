@@ -46,6 +46,8 @@ ie_ident            [a-zA-Z0-9\.:]
 "@page"                             return 'BLOCK_PAGE'
 "@keyframes"                        return 'BLOCK_KEYFRAMES'
 "@-"[a-zA-Z]+"-keyframes"           return 'BLOCK_VENDOR_KEYFRAMES'
+"@-viewport"                        return 'BLOCK_VIEWPORT'
+"@-"[a-zA-Z]+"-viewport"            return 'BLOCK_VENDOR_VIEWPORT'
 "@supports"                         return 'BLOCK_SUPPORTS'
 "@top-left-corner"                  return 'PAGE_TOP_LEFT_CORNER'
 "@top-left"                         return 'PAGE_TOP_LEFT'
@@ -205,6 +207,8 @@ block
     | font_face_block scc
         { $$ = $1; }
     | keyframes_block scc
+        { $$ = $1; }
+    | viewport_block scc
         { $$ = $1; }
     | supports_block scc
         { $$ = $1; }
@@ -380,6 +384,13 @@ keyframe_selector
         { $$ = new yy.KeyframeSelector('from'); }
     | TO junk
         { $$ = new yy.KeyframeSelector('to'); }
+    ;
+
+viewport_block
+    : BLOCK_VIEWPORT junk '{' junk declaration_list '}'
+        { $$ = new yy.Viewport($5); }
+    | BLOCK_VENDOR_VIEWPORT junk '{' junk declaration_list '}'
+        { $$ = new yy.Viewport($5, $1.substring(1, $1.length - 8)); }
     ;
 
 

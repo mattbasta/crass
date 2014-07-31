@@ -271,9 +271,9 @@ media_query_expr
     ;
 
 media_expr
-    : '(' junk IDENT junk ':' junk expr ')'
+    : '(' junk IDENT junk ':' junk expr ')' junk
         { $$ = new yy.MediaExpression($3, $7); }
-    | '(' junk IDENT junk ')'
+    | '(' junk IDENT junk ')' junk
         { $$ = new yy.MediaExpression($3, null); }
     ;
 

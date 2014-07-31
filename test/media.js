@@ -35,6 +35,10 @@ describe('@media', function() {
         parity('@media (min-width:450px){$$}');
     });
 
+    it('should parse media block with no media type', function() {
+        parity('@media (min-width:768px) and (max-width:991px){$$}');
+    });
+
     it('should parse media with prefixes', function() {
         parity('@media only screen{$$}');
         parity('@media not screen{$$}');

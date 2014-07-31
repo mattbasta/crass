@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "mocha": "1.18.x",
-    "jison": "^0.4.13"
+    "jison": "^0.4.13",
+    "browserify": "^5.9.1"
   }
 }

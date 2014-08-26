@@ -16,12 +16,16 @@
   <body>
     <textarea id="body"></textarea>
     <button class="minify">Minify</button>
+    <button class="minify_o1">Minify + O1</button>
     <button class="beautify">Beautify</button>
     <script src="crass.min.js"></script>
     <script>
       var text = document.querySelector('#body');
       document.querySelector('.minify').addEventListener('click', function(e) {
         body.value = crass.parse(body.value).optimize().toString();
+      });
+      document.querySelector('.minify_o1').addEventListener('click', function(e) {
+        body.value = crass.parse(body.value).optimize({O1: true}).toString();
       });
       document.querySelector('.beautify').addEventListener('click', function(e) {
         body.value = crass.parse(body.value).pretty();

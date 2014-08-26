@@ -21,10 +21,10 @@
     <script>
       var text = document.querySelector('#body');
       document.querySelector('.minify').addEventListener('click', function(e) {
-        body.value = require('crass').parse(body.value).optimize().toString();
+        body.value = crass.parse(body.value).optimize().toString();
       });
       document.querySelector('.beautify').addEventListener('click', function(e) {
-        body.value = require('crass').parse(body.value).pretty();
+        body.value = crass.parse(body.value).pretty();
       });
     </script>
   </body>

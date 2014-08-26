@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Crass - A CSS minification and optimization tool</title>
+    <style>
+    body {
+      font-family: sans-serif;
+    }
+    textarea {
+      display: block;
+      height: 500px;
+      width: 500px;
+    }
+    </style>
+  </head>
+  <body>
+    <textarea id="body"></textarea>
+    <button class="minify">Minify</button>
+    <button class="beautify">Beautify</button>
+    <script src="crass.min.js"></script>
+    <script>
+      var text = document.querySelector('#body');
+      document.querySelector('.minify').addEventListener('click', function(e) {
+        body.value = require('crass').parse(body.value).optimize().toString();
+      });
+      document.querySelector('.beautify').addEventListener('click', function(e) {
+        body.value = require('crass').parse(body.value).pretty();
+      });
+    </script>
+  </body>
+</html>

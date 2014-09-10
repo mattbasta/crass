@@ -74,6 +74,7 @@ describe('Remove', function() {
     });
     it('duplicate declarations', function() {
         parseCompare('a{a:1;a:1;a:lol;a:1;b:abc}', 'a{a:1;a:lol;b:abc}');
+        parseCompare('a{color:#ffffff;color:white}', 'a{color:#fff}');
     });
     it('duplicate selectors in a selector list', function() {
         parseCompare('a,a{$$}', 'a{$$}');

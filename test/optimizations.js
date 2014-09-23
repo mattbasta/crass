@@ -69,8 +69,8 @@ describe('Sort', function() {
 
 describe('Remove', function() {
     it('duplicate keyframes', function() {
-        var kf = '@keyframes foo{from{x:y}to{x:a}}'
-        parseCompare(kf + kf, kf, true);
+        var kf = '@keyframes foo{from{x:y}to{x:a}}';
+        parseCompare(kf + kf, '@keyframes foo{0{x:y}to{x:a}}', true);
     });
     it('duplicate declarations', function() {
         parseCompare('a{a:1;a:1;a:lol;a:1;b:abc}', 'a{a:1;a:lol;b:abc}');
@@ -130,13 +130,13 @@ describe('Remove', function() {
             // Base case
             parseCompare(
                 '@keyframes test{from,to{$$}}',
-                '@keyframes test{from,to{$$}}'
+                '@keyframes test{0,to{$$}}'
             );
 
             // Deletes mismatched prefixes
             parseCompare(
                 '@-foo-keyframes test{from,to{a:b;-bar-foo:bar}}',
-                '@-foo-keyframes test{from,to{a:b}}'
+                '@-foo-keyframes test{0,to{a:b}}'
             );
         });
     });
@@ -282,10 +282,10 @@ describe('Combine', function() {
     });
     it('keyframes with identical stops', function() {
         parseCompare('@keyframes foo{0%{a:b;}0%{c:d;}}',
-                     '@keyframes foo{0%{a:b;c:d}}');
+                     '@keyframes foo{0{a:b;c:d}}');
         // Test that declaration optimization happens after merging.
         parseCompare('@keyframes foo{0%{a:b;}0%{a:c;}}',
-                     '@keyframes foo{0%{a:b;a:c}}');
+                     '@keyframes foo{0{a:b;a:c}}');
     });
     it('adjacent blocks with similar bodies', function() {
         parseCompare('a{x:y}b{x:y}', 'a,b{x:y}');

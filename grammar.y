@@ -382,7 +382,7 @@ keyframe_selector
         { $$ = new yy.KeyframeSelector($1 + '%'); }
     | num junk
         {
-            if ($1.asNumber() !== 0) throw new SyntaxError('Invalid keyframe selector: ' + $1.toString()};
+            if ($1.asNumber() !== 0) throw new SyntaxError('Invalid keyframe selector: ' + $1.toString());
             $$ = new yy.KeyframeSelector($1.toString());
         }
     | FROM junk

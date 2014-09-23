@@ -20,11 +20,11 @@ describe('@keyframes', function() {
     });
 
     it('should parse keyframe selectors', function() {
-        parity('@-webkit-keyframes foo{0%{a:b}100%{c:d}}');
+        parity('@-webkit-keyframes foo{0{a:b}to{c:d}}');
     });
 
     it('should parse multiple keyframe selectors', function() {
-        parity('@-webkit-keyframes foo{0%,100%{c:d}}');
+        parity('@-webkit-keyframes foo{0,100%{c:d}}');
     });
 
     it('should optimize keyframe contents', function() {
@@ -32,14 +32,14 @@ describe('@keyframes', function() {
             crass.parse(
                 '@-webkit-keyframes foo{to{bbb:foo;aaa:bar;}from{ccc:zip;ddd:zap}}'
             ).optimize().toString(),
-            '@-webkit-keyframes foo{from{ccc:zip;ddd:zap}to{aaa:bar;bbb:foo}}'
+            '@-webkit-keyframes foo{0{ccc:zip;ddd:zap}to{aaa:bar;bbb:foo}}'
         );
     });
 
     it('should not optimize keyframe selectors', function() {
         assert.equal(
             crass.parse('@-webkit-keyframes foo{0%{a:b}100%{c:d}}').optimize().toString(),
-            '@-webkit-keyframes foo{0%{a:b}100%{c:d}}'
+            '@-webkit-keyframes foo{0{a:b}to{c:d}}'
         );
     });
 

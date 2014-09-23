@@ -1,6 +1,6 @@
 {
   "name": "crass",
-  "version": "0.6.6",
+  "version": "0.7.0",
   "description": "A CSS utility library for JS",
   "main": "crass.js",
   "scripts": {

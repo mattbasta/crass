@@ -400,7 +400,7 @@ viewport_block
 
 
 supports_block
-    : BLOCK_SUPPORTS junk supports_list junk '{' junk blocks junk '}'
+    : BLOCK_SUPPORTS junk supports_list junk '{' junk blocks '}'
         { $$ = new yy.Supports($3, $7); }
     ;
 

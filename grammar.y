@@ -1,7 +1,6 @@
 // CSS grammar based on CSS3 specification
 // Written by Matt Basta
-// Copyright 2013
-
+// Copyright 2014
 
 %lex
 esc                 "\\"
@@ -155,7 +154,7 @@ stylesheet
 
 charset_block
     : BLOCK_CHARSET junk string junk ';' scc
-        { $$ = new yy.Charset($3); }
+        { $$ = new yy.Charset($3); $$.range = @$; }
     |
         { $$ = null; }
     ;
@@ -169,9 +168,9 @@ import_list
 
 import_block
     : BLOCK_IMPORT junk string_or_uri junk
-        { $$ = new yy.Import($3, null); }
+        { $$ = new yy.Import($3, null); $$.range = @$; }
     | BLOCK_IMPORT junk string_or_uri junk medium_list junk
-        { $$ = new yy.Import($3, $5); }
+        { $$ = new yy.Import($3, $5); $$.range = @$; }
     ;
 
 namespace_list
@@ -183,9 +182,9 @@ namespace_list
 
 namespace_block
     : BLOCK_NAMESPACE junk string junk
-        { $$ = new yy.Namespace($3, null); }
+        { $$ = new yy.Namespace($3, null); $$.range = @$; }
     | BLOCK_NAMESPACE junk IDENT junk string junk
-        { $$ = new yy.Namespace($5, $3); }
+        { $$ = new yy.Namespace($5, $3); $$.range = @$; }
     ;
 
 blocks
@@ -216,7 +215,7 @@ block
 
 media_block
     : BLOCK_MEDIA junk medium_list junk '{' junk media_inner_list '}'
-        { $$ = new yy.Media($3, $7); }
+        { $$ = new yy.Media($3, $7); $$.range = @$; }
     ;
 
 media_inner_list
@@ -244,16 +243,16 @@ media_query
     : media_query_type
         { $$ = $1; }
     | media_query_expr
-        { $$ = new yy.MediaQuery(null, null, $1); }
+        { $$ = new yy.MediaQuery(null, null, $1); $$.range = @$; }
     ;
 
 media_query_type
     : ONLY junk IDENT junk optional_media_query_expression
-        { $$ = new yy.MediaQuery($3, 'only', $5); }
+        { $$ = new yy.MediaQuery($3, 'only', $5); $$.range = @$; }
     | NOT junk IDENT junk optional_media_query_expression
-        { $$ = new yy.MediaQuery($3, 'not', $5); }
+        { $$ = new yy.MediaQuery($3, 'not', $5); $$.range = @$; }
     | IDENT junk optional_media_query_expression
-        { $$ = new yy.MediaQuery($1, null, $3); }
+        { $$ = new yy.MediaQuery($1, null, $3); $$.range = @$; }
     ;
 
 optional_media_query_expression
@@ -272,14 +271,14 @@ media_query_expr
 
 media_expr
     : '(' junk IDENT junk ':' junk expr ')' junk
-        { $$ = new yy.MediaExpression($3, $7); }
+        { $$ = new yy.MediaExpression($3, $7); $$.range = @$; }
     | '(' junk IDENT junk ')' junk
-        { $$ = new yy.MediaExpression($3, null); }
+        { $$ = new yy.MediaExpression($3, null); $$.range = @$; }
     ;
 
 page_block
     : BLOCK_PAGE junk page_name junk '{' junk page_declaration_list junk '}'
-        { $$ = new yy.Page($3, $7); }
+        { $$ = new yy.Page($3, $7); $$.range = @$; }
     ;
 
 page_name
@@ -348,14 +347,14 @@ page_margin
 
 font_face_block
     : BLOCK_FONT_FACE junk '{' junk declaration_list junk '}'
-        { $$ = new yy.FontFace($5); }
+        { $$ = new yy.FontFace($5); $$.range = @$; }
     ;
 
 keyframes_block
     : BLOCK_KEYFRAMES junk IDENT junk '{' junk keyframe_list '}'
-        { $$ = new yy.Keyframes($3, $7); }
+        { $$ = new yy.Keyframes($3, $7); $$.range = @$; }
     | BLOCK_VENDOR_KEYFRAMES junk IDENT junk '{' junk keyframe_list '}'
-        { $$ = new yy.Keyframes($3, $7, $1.substring(1, $1.length - 9)); }
+        { $$ = new yy.Keyframes($3, $7, $1.substring(1, $1.length - 9)); $$.range = @$; }
     ;
 
 keyframe_list
@@ -367,7 +366,7 @@ keyframe_list
 
 keyframe
     : keyframe_selector_list '{' junk declaration_list junk '}' junk
-        { $$ = new yy.Keyframe($1, $4); }
+        { $$ = new yy.Keyframe($1, $4); $$.range = @$; }
     ;
 
 keyframe_selector_list
@@ -379,29 +378,29 @@ keyframe_selector_list
 
 keyframe_selector
     : num '%' junk
-        { $$ = new yy.KeyframeSelector($1 + '%'); }
+        { $$ = new yy.KeyframeSelector($1 + '%'); $$.range = @$; }
     | num junk
         {
             if ($1.asNumber() !== 0) throw new SyntaxError('Invalid keyframe selector: ' + $1.toString());
             $$ = new yy.KeyframeSelector($1.toString());
         }
     | FROM junk
-        { $$ = new yy.KeyframeSelector('from'); }
+        { $$ = new yy.KeyframeSelector('from'); $$.range = @$; }
     | TO junk
-        { $$ = new yy.KeyframeSelector('to'); }
+        { $$ = new yy.KeyframeSelector('to'); $$.range = @$; }
     ;
 
 viewport_block
     : BLOCK_VIEWPORT junk '{' junk declaration_list '}'
-        { $$ = new yy.Viewport($5); }
+        { $$ = new yy.Viewport($5); $$.range = @$; }
     | BLOCK_VENDOR_VIEWPORT junk '{' junk declaration_list '}'
-        { $$ = new yy.Viewport($5, $1.substring(1, $1.length - 8)); }
+        { $$ = new yy.Viewport($5, $1.substring(1, $1.length - 8)); $$.range = @$; }
     ;
 
 
 supports_block
     : BLOCK_SUPPORTS junk supports_list junk '{' junk blocks '}'
-        { $$ = new yy.Supports($3, $7); }
+        { $$ = new yy.Supports($3, $7); $$.range = @$; }
     ;
 
 supports_list
@@ -417,24 +416,24 @@ supports_item
     : supports_negation
         { $$ = $1; }
     | '(' junk declaration junk ')' junk
-        { $$ = new yy.SupportsCondition($3); }
+        { $$ = new yy.SupportsCondition($3); $$.range = @$; }
     | '(' junk supports_list junk ')' junk
         { $$ = $3; }
     ;
 
 supports_negation
     : NOT junk '(' junk supports_list junk ')' junk
-        { $$ = new yy.SupportsCondition($5); $$.negate(); }
+        { $$ = new yy.SupportsCondition($5); $$.range = @$; $$.negate(); }
     | NOT junk '(' junk declaration junk ')' junk
-        { $$ = new yy.SupportsCondition($5); $$.negate(); }
+        { $$ = new yy.SupportsCondition($5); $$.range = @$; $$.negate(); }
     | NOT junk '(' junk supports_negation junk ')' junk
-        { $$ = new yy.SupportsCondition($5); $$.negate(); }
+        { $$ = new yy.SupportsCondition($5); $$.range = @$; $$.negate(); }
     ;
 
 
 ruleset
     : selector_list junk '{' junk declaration_list junk '}'
-        { $$ = new yy.Ruleset($1, $5); }
+        { $$ = new yy.Ruleset($1, $5); $$.range = @$; $$.range = @$; }
     ;
 
 selector_list
@@ -446,22 +445,22 @@ selector_list
 
 selector_chunk_list
     : selector_chunk_list '+' junk simple_selector junk
-        { $$ = new yy.AdjacentSelector($1, $4); }
+        { $$ = new yy.AdjacentSelector($1, $4); $$.range = @$; }
     | selector_chunk_list SEL_CHILD junk simple_selector junk
-        { $$ = new yy.DirectDescendantSelector($1, $4); }
+        { $$ = new yy.DirectDescendantSelector($1, $4); $$.range = @$; }
     | selector_chunk_list SEL_SIBLING junk simple_selector junk
-        { $$ = new yy.SiblingSelector($1, $4); }
+        { $$ = new yy.SiblingSelector($1, $4); $$.range = @$; }
     | selector_chunk_list simple_selector junk
-        { $$ = new yy.DescendantSelector($1, $2); }
+        { $$ = new yy.DescendantSelector($1, $2); $$.range = @$; }
     | simple_selector junk
         { $$ = $1; }
     ;
 
 simple_selector
     : element_name simple_selector_part_list
-        { $$ = new yy.SimpleSelector([$1].concat($2)); }
+        { $$ = new yy.SimpleSelector([$1].concat($2)); $$.range = @$; }
     | simple_selector_part_list
-        { $$ = new yy.SimpleSelector($1); }
+        { $$ = new yy.SimpleSelector($1); $$.range = @$; }
     ;
 
 simple_selector_part_list
@@ -489,11 +488,11 @@ simple_selector_part_list
 
 element_name
     : element_type '|' IDENT
-        { $$ = new yy.ElementSelector($1, $3); }
+        { $$ = new yy.ElementSelector($1, $3); $$.range = @$; }
     | element_type
-        { $$ = new yy.ElementSelector($1, null); }
+        { $$ = new yy.ElementSelector($1, null); $$.range = @$; }
     | '|' IDENT
-        { $$ = new yy.ElementSelector(null, $2); }
+        { $$ = new yy.ElementSelector(null, $2); $$.range = @$; }
     ;
 
 element_type
@@ -505,41 +504,41 @@ element_type
 
 attribute_selector
     : '[' junk element_name junk ']'
-        { $$ = new yy.AttributeSelector($3, null, null); }
+        { $$ = new yy.AttributeSelector($3, null, null); $$.range = @$; }
     | '[' junk element_name junk '=' junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5, $7); }
+        { $$ = new yy.AttributeSelector($3, $5, $7); $$.range = @$; }
     | '[' junk element_name junk '*' '=' junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); }
+        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); $$.range = @$; }
     | '[' junk element_name junk '|' '=' junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); }
+        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); $$.range = @$; }
     | '[' junk element_name junk '^' '=' junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); }
+        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); $$.range = @$; }
     | '[' junk element_name junk '$' '=' junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); }
+        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); $$.range = @$; }
     | '[' junk element_name junk SEL_SIBLING '=' junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); }
+        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); $$.range = @$; }
     ;
 
 pseudo_selector
     : '::' IDENT
-        { $$ = new yy.PseudoElementSelector($2); }
+        { $$ = new yy.PseudoElementSelector($2); $$.range = @$; }
     | NTH_FUNC '(' junk nth ')'
-        { $$ = new yy.NthSelector($1.substr(1), $4); }
+        { $$ = new yy.NthSelector($1.substr(1), $4); $$.range = @$; }
     | ':' NOT '(' junk selector_list junk ')'
-        { $$ = new yy.NotSelector($5); }
+        { $$ = new yy.NotSelector($5); $$.range = @$; }
     | ':' FUNCTION_IDENT junk expr junk ')'
-        { $$ = new yy.PseudoSelectorFunction($2.substring(0, $2.length - 1), $4); }
+        { $$ = new yy.PseudoSelectorFunction($2.substring(0, $2.length - 1), $4); $$.range = @$; }
     | PSEUDO_CLASS
-        { $$ = new yy.PseudoClassSelector($1.substr(1)); }
+        { $$ = new yy.PseudoClassSelector($1.substr(1)); $$.range = @$; }
     | ':' IDENT
-        { $$ = new yy.PseudoClassSelector($2); }
+        { $$ = new yy.PseudoClassSelector($2); $$.range = @$; }
     ;
 
 nth
     : n_val '+' junk integer junk
-        { $4.applySign($2); $$ = new yy.LinearFunction($1, $4); }
+        { $4.applySign($2); $$ = new yy.LinearFunction($1, $4); $$.range = @$; }
     | n_val '-' junk integer junk
-        { $4.applySign($2); $$ = new yy.LinearFunction($1, $4); }
+        { $4.applySign($2); $$ = new yy.LinearFunction($1, $4); $$.range = @$; }
     | n_val
         { $$ = $1; }
     | ODD junk
@@ -547,14 +546,14 @@ nth
     | EVEN junk
         { $$ = 'even'; }
     | signed_integer junk
-        { $$ = new yy.LinearFunction(null, $1); }
+        { $$ = new yy.LinearFunction(null, $1); $$.range = @$; }
     ;
 
 n_val
     : signed_integer N junk
-        { $$ = new yy.NValue($1) }
+        { $$ = new yy.NValue($1); $$.range = @$; }
     | N junk
-        { $$ = new yy.NValue(1) }
+        { $$ = new yy.NValue(1); $$.range = @$; }
     ;
 
 declaration_list
@@ -589,16 +588,16 @@ optional_slash_nine
 
 declaration_inner
     : IE_FILTER
-        { $$ = new yy.IEFilter($1); }
+        { $$ = new yy.IEFilter($1); $$.range = @$; }
     | '*' IDENT junk ':' junk expr
-        { $$ = new yy.Declaration('*' + $2, $6); }
+        { $$ = new yy.Declaration('*' + $2, $6); $$.range = @$; }
     | IDENT junk ':' junk expr
-        { $$ = new yy.Declaration($1, $5); }
+        { $$ = new yy.Declaration($1, $5); $$.range = @$; }
     ;
 
 expr
     : term junk expr_chain
-        { $$ = new yy.Expression([[null, $1]].concat($3)); }
+        { $$ = new yy.Expression([[null, $1]].concat($3)); $$.range = @$; }
     ;
 
 expr_chain
@@ -639,16 +638,16 @@ term
 
 uri
     : URL_FULL
-        { $$ = new yy.URI($1.substr(4, $1.length - 5)); }
+        { $$ = new yy.URI($1.substr(4, $1.length - 5)); $$.range = @$; }
     ;
 
 unit
     : num unit_dim
-        { $$ = new yy.Dimension($1, $2); }
+        { $$ = new yy.Dimension($1, $2); $$.range = @$; }
     | '(' junk math_expr junk ')'
         { $$ = $3; }
     | CALC '(' junk math_expr junk ')'
-        { $$ = new yy.Func('calc', $4, null); }
+        { $$ = new yy.Func('calc', $4, null); $$.range = @$; }
     | attr_expression
         { $$ = $1; }
     | function
@@ -657,7 +656,7 @@ unit
 
 function
     : FUNCTION_IDENT junk expr junk ')'
-        { $$ = new yy.Func($1.substr(0, $1.length - 1), $3); }
+        { $$ = new yy.Func($1.substr(0, $1.length - 1), $3); $$.range = @$; }
     ;
 
 unit_dim
@@ -672,36 +671,36 @@ unit_dim
 
 attr_expression
     : ATTR '(' junk element_name junk IDENT junk ',' junk unit junk ')'
-        { $$ = new yy.Func('attr', [$4, $6, $10]);}
+        { $$ = new yy.Func('attr', [$4, $6, $10]); $$.range = @$;}
     | ATTR '(' junk element_name junk IDENT junk  ')'
-        { $$ = new yy.Func('attr', [$4, $6]);}
+        { $$ = new yy.Func('attr', [$4, $6]); $$.range = @$; }
     | ATTR '(' junk element_name junk ')'
-        { $$ = new yy.Func('attr', [$4]);}
+        { $$ = new yy.Func('attr', [$4]); $$.range = @$; }
     ;
 
 math_expr
     : math_expr '+' junk math_product
-        { $$ = new yy.MathSum($1, $2, $4); }
+        { $$ = new yy.MathSum($1, $2, $4); $$.range = @$; }
     | math_expr '-' junk math_product
-        { $$ = new yy.MathSum($1, $2, $4); }
+        { $$ = new yy.MathSum($1, $2, $4); $$.range = @$; }
     | math_product
         { $$ = $1; }
     ;
 
 math_product
     : math_product '*' junk unit junk
-        { $$ = new yy.MathProduct($1, $2, $4); }
+        { $$ = new yy.MathProduct($1, $2, $4); $$.range = @$; }
     | math_product '/' junk num junk
-        { $$ = new yy.MathProduct($1, $2, $4); }
+        { $$ = new yy.MathProduct($1, $2, $4); $$.range = @$; }
     | unit junk
         { $$ = $1; }
     ;
 
 hexcolor
     : HEX_SHORT
-        { $$ = new yy.HexColor($1); }
+        { $$ = new yy.HexColor($1); $$.range = @$; }
     | HEX_LONG
-        { $$ = new yy.HexColor($1); }
+        { $$ = new yy.HexColor($1); $$.range = @$; }
     ;
 
 signed_integer
@@ -715,16 +714,16 @@ signed_integer
 
 integer
     : INTEGER
-        { $$ = new yy.Number($1); }
+        { $$ = new yy.Number($1); $$.range = @$; }
     ;
 
 num
     : signed_integer
         { $$ = $1; }
     | '+' FLOAT
-        { $$ = new yy.Number($2); $$.applySign($1); }
+        { $$ = new yy.Number($2); $$.range = @$; $$.applySign($1); }
     | '-' FLOAT
-        { $$ = new yy.Number($2); $$.applySign($1); }
+        { $$ = new yy.Number($2); $$.range = @$; $$.applySign($1); }
     | FLOAT
-        { $$ = new yy.Number($1); }
+        { $$ = new yy.Number($1); $$.range = @$; }
     ;

@@ -219,8 +219,8 @@ media_block
     ;
 
 media_inner_list
-    : media_inner media_inner_list
-        { $$ = $2; $$.unshift($1); }
+    : media_inner_list media_inner
+        { $$ = $1; $$.push($2); }
     | media_inner
         { $$ = [$1]; }
     ;
@@ -446,8 +446,8 @@ supports_negation_base
 
 
 ruleset
-    : selector_list junk '{' junk declaration_list '}'
-        { $$ = new yy.Ruleset($1, $5); $$.range = @$; $$.range = @$; }
+    : selector_list '{' junk declaration_list '}'
+        { $$ = new yy.Ruleset($1, $4); $$.range = @$; }
     ;
 
 selector_list
@@ -538,7 +538,7 @@ pseudo_selector
         { $$ = new yy.PseudoElementSelector($2); $$.range = @$; }
     | NTH_FUNC '(' junk nth ')'
         { $$ = new yy.NthSelector($1.substr(1), $4); $$.range = @$; }
-    | ':' NOT '(' junk selector_list junk ')'
+    | ':' NOT '(' junk selector_list ')'
         { $$ = new yy.NotSelector($5); $$.range = @$; }
     | ':' FUNCTION_IDENT junk expr ')'
         { $$ = new yy.PseudoSelectorFunction($2.substring(0, $2.length - 1), $4); $$.range = @$; }

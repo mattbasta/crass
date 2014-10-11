@@ -36,10 +36,17 @@ describe('@keyframes', function() {
         );
     });
 
-    it('should not optimize keyframe selectors', function() {
+    it('should optimize keyframe selectors', function() {
         assert.equal(
             crass.parse('@-webkit-keyframes foo{0%{a:b}100%{c:d}}').optimize().toString(),
             '@-webkit-keyframes foo{0{a:b}to{c:d}}'
+        );
+    });
+
+    it('should dedupe selectors', function() {
+        assert.equal(
+            crass.parse('@-webkit-keyframes foo{0{a:b}50%{a:b}100%{c:d}}').optimize({o1: true}).toString(),
+            '@-webkit-keyframes foo{0,50%{a:b}to{c:d}}'
         );
     });
 

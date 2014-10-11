@@ -16,6 +16,7 @@ ie_ident            [a-zA-Z0-9\.:]
 %%
 "#"{hex}{hex}{hex}{hex}{hex}{hex}   return 'HEX_LONG'
 "#"{hex}{hex}{hex}                  return 'HEX_SHORT'
+{int}"e"("+"|"-")?{int}             return 'SCINOT'
 {int}?"."[0-9]+                     return 'FLOAT'
 {int}                               return 'INTEGER'
 ({ws}|{comment})+                   return 'S'
@@ -730,6 +731,22 @@ signed_integer
 integer
     : INTEGER
         { $$ = new yy.Number($1); $$.range = @$; }
+    | SCINOT
+        {
+            var parts = $1.split('e');
+            var base = parseInt(parts[0], 10);
+            var exp = parts[1];
+            var sign = 1;
+            switch (exp[0]) {
+                case '-':
+                    sign = -1;
+                case '+':
+                    exp = exp.substr(1);
+            }
+            exp = parseInt(exp, 10);
+            $$ = new yy.Number(base * Math.pow(10, sign * exp));
+            $$.range = @$;
+        }
     ;
 
 num

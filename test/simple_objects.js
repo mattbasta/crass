@@ -30,6 +30,12 @@ describe('Numbers', function() {
     it('should omit a leading 0 in negative floating point numbers', function() {
         assert.equal(parseString('a{foo:-0.5}'), 'a{foo:-.5}');
     });
+    it('should support scientific notation', function() {
+        assert.equal(crass.parse('a{foo:3e1}').toString(), 'a{foo:30}');
+        assert.equal(crass.parse('a{foo:3e2}').toString(), 'a{foo:300}');
+        assert.equal(crass.parse('a{foo:3e+2}').toString(), 'a{foo:300}');
+        assert.equal(crass.parse('a{foo:3e-2}').toString(), 'a{foo:.03}');
+    });
     it('should not optimize', function() {
         assert.equal(crass.parse('a{foo:-.5}').optimize().toString(), 'a{foo:-.5}');
     });

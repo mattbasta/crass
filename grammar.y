@@ -39,6 +39,7 @@ ie_ident            [a-zA-Z0-9\.:]
 "not-allowed"                       return 'IDENT'  // For cursor: not-allowed
 "n"                                 return 'N'
 "@charset"                          return 'BLOCK_CHARSET'
+"@counter-style"                    return 'BLOCK_COUNTERSTYLE'
 "@import"                           return 'BLOCK_IMPORT'
 "@namespace"                        return 'BLOCK_NAMESPACE'
 "@media"                            return 'BLOCK_MEDIA'
@@ -211,6 +212,8 @@ block
     | viewport_block scc
         { $$ = $1; }
     | supports_block scc
+        { $$ = $1; }
+    | counter_styles_block scc
         { $$ = $1; }
     ;
 
@@ -443,6 +446,11 @@ supports_negation
 supports_negation_base
     : NOT junk '(' junk
         { $$ = null; }
+    ;
+
+counter_styles_block
+    : BLOCK_COUNTERSTYLE junk IDENT junk '{' junk declaration_list '}'
+        { $$ = new yy.CounterStyle($3, $7); $$.range = @$; }
     ;
 
 

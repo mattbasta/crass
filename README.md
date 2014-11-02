@@ -80,12 +80,16 @@ Reordering selectors and declarations significantly improves minified code sizes
 
 ### Will there be a version that runs in the browser?
 
-Yes, it's in progress.
+Check out the Github pages for Crass for a simple browser-ready version.
+
+http://mattbasta.github.io/crass
 
 ### What about comments? Docblocks?
 
-They're stripped at the moment, but I'm planning to add a mode to preserve them.
+All comments are ignored at the moment.
 
 ### What about following `@import` statements?
 
-I'm not sure what I want to do with this yet, since `@imports` are not necessarily relative to the open file. For now, crass doesn't have any remote file logic.
+Crass does not follow import statements. Except when run from the command line, Crass has no concept of the file system. Consequently, mapping imports to other CSS files is a very difficult (or even impossible) task.
+
+It is trivial, however, for an implementor to add import following on top of crass if the file system structure is known. After parsing, simply iterate the imports on the `Stylesheet` object, recursively parse and process each in turn, and inject their contents into the head of the `Stylesheet`. Building this is left as an exercise to the user.

@@ -105,6 +105,7 @@ describe('Pseudo', function() {
         parity(':nth-child(-2n-1){$$}');
         parity(':nth-child(-2){$$}');
         parity(':nth-child(+2){$$}', ':nth-child(2){$$}');
+        parity(':nth-child(0n){$$}', ':nth-child(0){$$}');
         parity(':nth-child(even){$$}');
         parity(':nth-child(odd){$$}');
     });

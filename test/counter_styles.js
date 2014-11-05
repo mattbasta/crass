@@ -14,6 +14,9 @@ describe('@counter-styles', function() {
     it('should parse blocks', function() {
         parity('@counter-style foo{$$}');
     });
+    it('should optimize away empty counter styles', function() {
+        assert.ok(!crass.parse('@counter-style foo{}').optimize().toString());
+    });
 
     it('should optimize declarations', function() {
         assert.equal(

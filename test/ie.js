@@ -11,11 +11,14 @@ var parity = function(data, expected) {
 
 
 describe('filter', function() {
+    var ie10_min = {browser_min: {ie: 10}};
+    var ie9_min = {browser_min: {ie: 9}};
+
     it('can be vanilla', function() {
         assert.equal(parseString('a{filter:foo}'), 'a{filter:foo}');
     });
     it('can be short', function() {
-        assert.equal(parseString('a{filter: alpha(opacity=50)}'), 'a{filter: alpha(opacity=50)}');
+        parity('a{filter:alpha(opacity=50)}');
     });
     it('can be old-style', function() {
         assert.equal(parseString('a{filter:progid:DXImageTransform.Microsoft.filtername(strength=50)}'), 'a{filter:progid:DXImageTransform.Microsoft.filtername(strength=50)}');
@@ -34,7 +37,7 @@ describe('filter', function() {
     });
 
     it('is removed in IE10+', function() {
-        var ie10_min = {browser_min: {ie: 10}};
+        assert.equal(crass.parse('a{filter:foo;zip:zap}').optimize(ie9_min).toString(), 'a{filter:foo;zip:zap}');
         assert.equal(crass.parse('a{filter:foo;zip:zap}').optimize(ie10_min).toString(), 'a{zip:zap}');
         assert.equal(crass.parse('a{filter:progid:DXBlahBlahBlah.foo.bar(lol=omg);zip:zap}').optimize(ie10_min).toString(), 'a{zip:zap}');
     });
@@ -48,7 +51,7 @@ describe('filter', function() {
 
 describe('expressions', function() {
     it('can be vanilla', function() {
-        assert.equal(parseString('a{foo: expression(document.innerWidth)}'), 'a{foo:expression(document.innerWidth)}');
+        parity('a{foo:expression(document.innerWidth)}');
     });
     it('are treated as terms', function() {
         assert.equal(parseString('a{foo:3px expression(document.innerWidth) auto}'), 'a{foo:3px expression(document.innerWidth) auto}');

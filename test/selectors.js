@@ -12,8 +12,8 @@ var parseCompare = function(data, expected) {
     assert.equal(parseString(data), expected);
     assert.equal(parseString(crass.parse(data).pretty()), expected);
 };
-function parity(data) {
-    parseCompare(data, data);
+function parity(data, comp) {
+    parseCompare(data, comp || data);
 }
 
 
@@ -32,6 +32,10 @@ describe('Element Selectors', function() {
 describe('ID Selectors', function() {
     it('should work', function() {
         parity('#foo{$$}');
+        parity('#f00{$$}'); // Short hex
+        parity('#f00asdf{$$}'); // Short hex w/ident
+        parity('#f00bad{$$}'); // Long hex
+        parity('#f00badasdf{$$}'); // Long hex w/ident
         parity('#foo #bar{$$}');
         // Technically won't match anything, but not invalid.
         parity('#foo#bar{$$}');
@@ -50,6 +54,10 @@ describe('Attribute Selectors', function() {
     it('should work', function() {
         parity('[foo]{$$}');
         parity('[foo=bar]{$$}');
+        parity('[foo*=bar]{$$}');
+        parity('[foo|=bar]{$$}');
+        parity('[foo^=bar]{$$}');
+        parity('[foo$=bar]{$$}');
         parity('[foo~=bar]{$$}');
     });
     it('should strip quotes when possible', function() {
@@ -95,6 +103,8 @@ describe('Pseudo', function() {
         parity(':nth-child(2n-1){$$}');
         parity(':nth-child(-2n+1){$$}');
         parity(':nth-child(-2n-1){$$}');
+        parity(':nth-child(-2){$$}');
+        parity(':nth-child(+2){$$}', ':nth-child(2){$$}');
         parity(':nth-child(even){$$}');
         parity(':nth-child(odd){$$}');
     });

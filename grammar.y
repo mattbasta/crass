@@ -31,6 +31,7 @@ ie_ident            [a-zA-Z0-9\.:]
 ")"                                 return ')'
 "%"                                 return '%'
 "*"                                 return '*'
+"|="                                return '|='
 "|"                                 return '|'
 "/"                                 return '/'
 "*"                                 return '*'
@@ -532,8 +533,8 @@ attribute_selector
         { $$ = new yy.AttributeSelector($3, $5, $7); $$.range = @$; }
     | '[' junk element_name junk '*' '=' junk string_or_ident junk ']'
         { $$ = new yy.AttributeSelector($3, $5 + $6, $8); $$.range = @$; }
-    | '[' junk element_name junk '|' '=' junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); $$.range = @$; }
+    | '[' junk element_name junk '|=' junk string_or_ident junk ']'
+        { $$ = new yy.AttributeSelector($3, $5, $7); $$.range = @$; }
     | '[' junk element_name junk '^' '=' junk string_or_ident junk ']'
         { $$ = new yy.AttributeSelector($3, $5 + $6, $8); $$.range = @$; }
     | '[' junk element_name junk '$' '=' junk string_or_ident junk ']'
@@ -694,11 +695,13 @@ unit_dim
 
 attr_expression
     : ATTR '(' junk element_name junk IDENT junk ',' junk unit junk ')'
-        { $$ = new yy.Func('attr', [$4, $6, $10]); $$.range = @$;}
+        { $$ = new yy.Func('attr', new yy.Expression([[null, $4], [null, $6], [',', $10]])); $$.range = @$; }
+    | ATTR '(' junk element_name junk ',' junk unit junk ')'
+        { $$ = new yy.Func('attr', new yy.Expression([[null, $4], [',', $8]])); $$.range = @$; }
     | ATTR '(' junk element_name junk IDENT junk  ')'
-        { $$ = new yy.Func('attr', [$4, $6]); $$.range = @$; }
+        { $$ = new yy.Func('attr', new yy.Expression([[null, $4], [null, $6]])); $$.range = @$; }
     | ATTR '(' junk element_name junk ')'
-        { $$ = new yy.Func('attr', [$4]); $$.range = @$; }
+        { $$ = new yy.Func('attr', $4); $$.range = @$; }
     ;
 
 math_expr
@@ -729,7 +732,7 @@ hexcolor
 
 signed_integer
     : '+' integer
-        { $$ = $2; $$.applySign($1); }
+        { $$ = $2; }
     | '-' integer
         { $$ = $2; $$.applySign($1); }
     | integer

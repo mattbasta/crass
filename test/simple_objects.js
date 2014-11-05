@@ -36,6 +36,9 @@ describe('Numbers', function() {
         assert.equal(crass.parse('a{foo:3e+2}').toString(), 'a{foo:300}');
         assert.equal(crass.parse('a{foo:3e-2}').toString(), 'a{foo:.03}');
     });
+    it('should support unary plus', function() {
+        assert.equal(crass.parse('a{foo:+.5}').optimize().toString(), 'a{foo:.5}');
+    });
     it('should not optimize', function() {
         assert.equal(crass.parse('a{foo:-.5}').optimize().toString(), 'a{foo:-.5}');
     });
@@ -60,6 +63,22 @@ describe('Identifiers', function() {
     });
     it('can be use old hacks in declaration names', function() {
         assert.equal(parseString('a{*foo: bar;}'), 'a{*foo:bar}');
+    });
+});
+
+
+describe('Attribute functions', function() {
+    it('can contain an attribute name', function() {
+        assert.equal(parseString('a{foo:attr(data-foo)}'), 'a{foo:attr(data-foo)}');
+    });
+    it('can contain an element name with a unit', function() {
+        assert.equal(parseString('a{foo:attr(data-foo px)}'), 'a{foo:attr(data-foo px)}');
+    });
+    it('can contain an element name with a unit with a fallback', function() {
+        assert.equal(parseString('a{foo:attr(data-foo px, 123px)}'), 'a{foo:attr(data-foo px,123px)}');
+    });
+    it('can contain an element name and a fallback without a dimension', function() {
+        assert.equal(parseString('a{foo:attr(data-foo, 123px)}'), 'a{foo:attr(data-foo,123px)}');
     });
 });
 

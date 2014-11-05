@@ -19,6 +19,12 @@ describe('@keyframes', function() {
         parity('@-webkit-keyframes foo{$$}');
     });
 
+    it('should throw errors when a number has no unit and it is not zero', function() {
+        assert.throws(function() {
+            parity('@-webkit-keyframes foo{123{a:b}}');
+        }, Error);
+    });
+
     it('should parse keyframe selectors', function() {
         parity('@-webkit-keyframes foo{0{a:b}to{c:d}}');
     });

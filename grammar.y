@@ -81,7 +81,7 @@ ie_ident            [a-zA-Z0-9\.:]
 "expression(".*?")"                 return 'IE_EXPRESSION'
 "filter"{ws}*":"{ws}*({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
 "-ms-filter"{ws}*":"{ws}*({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
-"url("[^)]*")"                      return 'URL_FULL'
+"url("(\"(?:\\(?:.|{ws})|[^"\\])*\"|\'(?:\\(?:.|{ws})|[^'\\])*\'|[^)]*)")"                      return 'URL_FULL'
 "calc"                              return 'CALC'
 "attr"                              return 'ATTR'
 "#"{ident}                          return 'ID_IDENT'

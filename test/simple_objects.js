@@ -26,6 +26,23 @@ describe('Strings', function() {
 });
 
 
+describe('URIs', function() {
+    it('can be double quote', function() {
+        assert.equal(parseString('a{content:url("foo")}'), 'a{content:url(foo)}');
+    });
+    it('can be single quote', function() {
+        assert.equal(parseString('a{content:url(\'foo\')}'), 'a{content:url(foo)}');
+    });
+    it('does not optimize', function() {
+        assert.equal(crass.parse('a{content:url(\'foo\')}').optimize({o1: true}).toString(), 'a{content:url(foo)}');
+    });
+    it('can retain quotes', function() {
+        assert.equal(parseString('a{content:url("foo)")}'), 'a{content:url("foo)")}');
+        assert.equal(parseString('a{content:url(\'foo)\')}'), 'a{content:url("foo)")}');
+    });
+});
+
+
 describe('Numbers', function() {
     it('should omit a leading 0 in negative floating point numbers', function() {
         assert.equal(parseString('a{foo:-0.5}'), 'a{foo:-.5}');
@@ -79,42 +96,5 @@ describe('Attribute functions', function() {
     });
     it('can contain an element name and a fallback without a dimension', function() {
         assert.equal(parseString('a{foo:attr(data-foo, 123px)}'), 'a{foo:attr(data-foo,123px)}');
-    });
-});
-
-
-describe('Math Expressions', function() {
-    it('should parse', function() {
-        assert.equal(parseString('a{foo:calc(50% - 100px)}'), 'a{foo:calc(50%-100px)}');
-    });
-    it('should parse with products', function() {
-        assert.equal(parseString('a{foo:calc(50% * 100px)}'), 'a{foo:calc(50%*100px)}');
-        assert.equal(parseString('a{foo:calc(5px + 50% * 100px)}'), 'a{foo:calc(5px+50%*100px)}');
-    });
-    it('should parse with sums in products', function() {
-        assert.equal(parseString('a{foo:calc((5px + 50%) * 100px)}'), 'a{foo:calc((5px+50%)*100px)}');
-        assert.equal(parseString('a{foo:calc(100px * (5px + 50%))}'), 'a{foo:calc(100px*(5px+50%))}');
-    });
-    it('should pretty print', function() {
-        assert.equal(
-            crass.parse('a{foo:calc(50% * 100px)}').pretty(),
-            'a {\n  foo: calc(50% * 100px);\n}\n'
-        );
-        assert.equal(
-            crass.parse('a{foo:calc(50% * 100px+5px)}').pretty(),
-            'a {\n  foo: calc(50% * 100px + 5px);\n}\n'
-        );
-    });
-    it('should optimize the terms of a product', function() {
-        assert.equal(
-            crass.parse('a{foo:calc(12pt * 96px)}').optimize().toString(),
-            'a{foo:calc(1pc*1in)}'
-        );
-    });
-    it('should optimize the terms of a sum', function() {
-        assert.equal(
-            crass.parse('a{foo:calc(12pt + 96px)}').optimize().toString(),
-            'a{foo:calc(1pc+1in)}'
-        );
     });
 });

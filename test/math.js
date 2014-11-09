@@ -12,6 +12,7 @@ describe('Math Expressions', function() {
     });
     it('should parse with products', function() {
         assert.equal(parseString('a{foo:calc(50% * 100px)}'), 'a{foo:calc(50%*100px)}');
+        assert.equal(parseString('a{foo:calc(50% / 100px)}'), 'a{foo:calc(50%/100px)}');
         assert.equal(parseString('a{foo:calc(5px + 50% * 100px)}'), 'a{foo:calc(5px+50%*100px)}');
     });
     it('should parse with sums in products', function() {

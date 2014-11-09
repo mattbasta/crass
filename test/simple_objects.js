@@ -84,6 +84,19 @@ describe('Identifiers', function() {
 });
 
 
+describe('Expressions', function() {
+    it('can be parsed with spaces', function() {
+        assert.equal(parseString('a{b:1 2 3}'), 'a{b:1 2 3}');
+    });
+    it('can be parsed with slashes', function() {
+        assert.equal(parseString('a{b:1 2 / 3}'), 'a{b:1 2/3}');
+    });
+    it('can be parsed with commas', function() {
+        assert.equal(parseString('a{b:1 2 , 3}'), 'a{b:1 2,3}');
+    });
+});
+
+
 describe('Attribute functions', function() {
     it('can contain an attribute name', function() {
         assert.equal(parseString('a{foo:attr(data-foo)}'), 'a{foo:attr(data-foo)}');

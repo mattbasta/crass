@@ -646,10 +646,6 @@ term
         { $$ = $1; }
     | hexcolor
         { $$ = $1; }
-    | TO
-        { $$ = $1; }
-    | FROM
-        { $$ = $1; }
     | IE_EXPRESSION
         { $$ = $1; }
     ;

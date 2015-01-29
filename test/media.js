@@ -56,10 +56,19 @@ describe('@media', function() {
             '@media (min-width:1pc){x{y:z}}'
         );
     });
+
+    describe('nested @media', function() {
+        it('should parse properly', function() {
+            parity('@media screen{@media (min-width:450px){$$}}');
+        });
+    });
+
+
+    describe('with @page', function() {
+        it('should parse properly', function() {
+            parity('@media screen{@page{margin:auto}}');
+        });
+    });
+
 });
 
-describe('nested @media', function() {
-    it('should parse properly', function() {
-        parity('@media screen{@media (min-width:450px){$$}}');
-    });
-});

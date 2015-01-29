@@ -27,6 +27,12 @@ describe('Strings', function() {
 
 
 describe('URIs', function() {
+    it('can contain data uris', function() {
+        assert.equal(
+            parseString('a{content:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeD0iMTJweCIgeT0iMHB4IiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIzcHgiIHZpZXdCb3g9Ij==)}'),
+            'a{content:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeD0iMTJweCIgeT0iMHB4IiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIzcHgiIHZpZXdCb3g9Ij==)}'
+        );
+    });
     it('can be double quote', function() {
         assert.equal(parseString('a{content:url("foo")}'), 'a{content:url(foo)}');
     });
@@ -93,6 +99,9 @@ describe('Expressions', function() {
     });
     it('can be parsed with commas', function() {
         assert.equal(parseString('a{b:1 2 , 3}'), 'a{b:1 2,3}');
+    });
+    it('can contain "to" inside functions', function() {
+        assert.equal(parseString('a{b:linear-gradient(to bottom,#65a4e1,#3085d6)}'), 'a{b:linear-gradient(to bottom,#65a4e1,#3085d6)}');
     });
 });
 

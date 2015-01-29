@@ -233,6 +233,8 @@ media_inner_list
 media_inner
     : media_block scc
         { $$ = $1; }
+    | page_block scc
+        { $$ = $1; }
     | ruleset scc
         { $$ = $1; }
     ;
@@ -287,16 +289,16 @@ media_expr_base
     ;
 
 page_block
-    : BLOCK_PAGE junk page_name junk '{' junk page_declaration_list '}'
-        { $$ = new yy.Page($3, $7); $$.range = @$; }
+    : BLOCK_PAGE junk page_name '{' junk page_declaration_list '}'
+        { $$ = new yy.Page($3, $6); $$.range = @$; }
     ;
 
 page_name
-    : IDENT ':' IDENT
+    : IDENT ':' IDENT junk
         { $$ = $1 + ':' + $3; }
-    | ':' IDENT
+    | ':' IDENT junk
         { $$ = ':' + $2; }
-    | IDENT
+    | IDENT junk
         { $$ = $1; }
     |
         { $$ = null; }
@@ -641,6 +643,8 @@ term
     | unit
         { $$ = $1; }
     | string
+        { $$ = $1; }
+    | TO
         { $$ = $1; }
     | IDENT
         { $$ = $1; }

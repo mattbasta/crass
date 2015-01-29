@@ -88,6 +88,16 @@ describe('Remove', function() {
         parseCompare('a{}', '');
     });
 
+    describe('overridden declarations', function() {
+        it('with a single overrider', function() {
+            parseCompare('a{font-size:100%;font:inherit}', 'a{font:inherit}');
+        });
+        it('with multiple overriders', function() {
+            parseCompare('a{border-bottom-color:#fff;border-color:#000;border:1px solid red}', 'a{border:1px solid red}');
+        });
+    });
+
+
     describe('unnecessary quadList items', function() {
         it('for groups of four identical items', function() {
             parseCompare(

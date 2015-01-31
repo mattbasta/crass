@@ -4,7 +4,7 @@
   "description": "A CSS utility library for JS",
   "main": "crass.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --recursive"
   },
   "repository": {
     "type": "git",

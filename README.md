@@ -31,7 +31,7 @@ Improvements on the API will be made in the future.
 If you `npm install -g crass`, you'll get `crass` on your PATH.
 
 ```bash
-crass input.css [--optimize [--O1]] [--min x,y,z] [--pretty]
+crass input.css [--optimize [--O1]] [--min x,y,z] [--pretty] [--saveie]
 ```
 
 ## Minification
@@ -39,6 +39,8 @@ crass input.css [--optimize [--O1]] [--min x,y,z] [--pretty]
 Outputting a crass object as a string will perform the equivalent of most CSS minification tools. The corresponding styles are output in the minimum amount of CSS possible, without any whitespace.
 
 Some minifiers also perform basic replacement and removal operations to replace certain patterns with other patterns. Using the `--optimize` and `--O1` flags on the command line and `.optimize()` and `.optimize({o1: true})` in the API will perform many of these operations along with additional optimizations that are not possible with traditional minification tools.
+
+By default, sneaky techniques used to trick old IE (IE6 and below) are ignored entirely, as old browsers have no place on the modern web. If you need to support IE6 or below, use the `--saveie` option.
 
 Additionally, if browsers are specified for the `--min` argument, minimum browser support will be enabled and recognized declarations and blocks that target older browser versions will be filtered out. For instance, `--min fx25,chr28` will remove any feature that explicitly targets versions of Firefox below 25 and versions of Chrome below 28.
 

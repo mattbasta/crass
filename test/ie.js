@@ -1,12 +1,21 @@
 var assert = require("assert");
 
 var crass = require('../crass');
-var parseString = function(data) {
+
+function parseString(data) {
     return crass.parse(data).toString();
-};
-var parity = function(data, expected) {
+}
+function parity(data, expected) {
     assert.equal(crass.parse(data).toString(), expected || data);
     assert.equal(crass.parse(crass.parse(data).pretty()).toString(), expected || data);
+}
+function parityOpt(data, expected) {
+    assert.equal(crass.parse(data).optimize({o1: true}).toString(), expected);
+    assert.equal(crass.parse(crass.parse(data).optimize({o1: true}).pretty()).toString(), expected);
+}
+function paritySaveIE(data) {
+    assert.equal(crass.parse(data).optimize({o1: true, saveie: true}).toString(), data);
+    assert.equal(crass.parse(crass.parse(data).optimize({o1: true, saveie: true}).pretty()).toString(), data);
 }
 
 
@@ -69,5 +78,37 @@ describe('slash 9', function() {
     it('is parsed', function() {
         parity('a{foo:bar\\9}');
         parity('a{foo:bar \\9}', 'a{foo:bar\\9}');
+    });
+    it('is ignored by default on optimizations', function() {
+        parityOpt('a{foo:bar\\9}', '');
+        paritySaveIE('a{foo:bar\\9}');
+    });
+});
+
+
+describe('star hack', function() {
+    it('is ignored by default on optimizations', function() {
+        parityOpt('a{*foo:bar}', '');
+        paritySaveIE('a{*foo:bar}');
+    });
+});
+
+
+describe('* html hack', function() {
+    it('is ignored by default on optimizations', function() {
+        parityOpt('* html{foo:bar}', '');
+        paritySaveIE('* html{foo:bar}');
+    });
+    it('is ignored by default on optimizations with descendants', function() {
+        parityOpt('* html foo{foo:bar}', '');
+        paritySaveIE('* html foo{foo:bar}');
+    });
+    it('is ignored as part of a selector list by default on optimizations', function() {
+        parityOpt('* html,bar{foo:bar}', 'bar{foo:bar}');
+        paritySaveIE('* html,bar{foo:bar}');
+    });
+    it('is ignored as part of a selector list by default on optimizations with descendants', function() {
+        parityOpt('* html foo,bar{foo:bar}', 'bar{foo:bar}');
+        paritySaveIE('* html foo,bar{foo:bar}');
     });
 });

@@ -68,6 +68,9 @@ ie_ident            [a-zA-Z0-9\.:]
 "@right-middle"                     return 'PAGE_RIGHT_MIDDLE'
 "@right-bottom"                     return 'PAGE_RIGHT_BOTTOM'
 
+'U+'{hex}+'-'{hex}+                 return 'UNICODE_RANGE'
+'U+'{hex}+'?'*                      return 'UNICODE_RANGE'
+
 \"(?:\\(?:.|{ws})|[^"\\])*\"     yytext = yytext.substr(1,yyleng-2); return 'STRING';
 \'(?:\\(?:.|{ws})|[^'\\])*\'     yytext = yytext.substr(1,yyleng-2); return 'STRING';
 "only"                              return 'ONLY'
@@ -645,6 +648,8 @@ term
     | string
         { $$ = $1; }
     | TO
+        { $$ = $1; }
+    | UNICODE_RANGE
         { $$ = $1; }
     | IDENT
         { $$ = $1; }

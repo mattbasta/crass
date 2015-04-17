@@ -45,12 +45,14 @@ ie_ident            [a-zA-Z0-9\.:]
 "@namespace"                        return 'BLOCK_NAMESPACE'
 "@media"                            return 'BLOCK_MEDIA'
 "@font-face"                        return 'BLOCK_FONT_FACE'
+"@font-feature-values"              return 'BLOCK_FONT_FEATURE_VALUES'
 "@page"                             return 'BLOCK_PAGE'
 "@keyframes"                        return 'BLOCK_KEYFRAMES'
 "@-"[a-zA-Z]+"-keyframes"           return 'BLOCK_VENDOR_KEYFRAMES'
 "@-viewport"                        return 'BLOCK_VIEWPORT'
 "@-"[a-zA-Z]+"-viewport"            return 'BLOCK_VENDOR_VIEWPORT'
 "@supports"                         return 'BLOCK_SUPPORTS'
+
 "@top-left-corner"                  return 'PAGE_TOP_LEFT_CORNER'
 "@top-left"                         return 'PAGE_TOP_LEFT'
 "@top-center"                       return 'PAGE_TOP_CENTER'
@@ -67,6 +69,13 @@ ie_ident            [a-zA-Z0-9\.:]
 "@right-top"                        return 'PAGE_RIGHT_TOP'
 "@right-middle"                     return 'PAGE_RIGHT_MIDDLE'
 "@right-bottom"                     return 'PAGE_RIGHT_BOTTOM'
+
+"@swash"                            return 'FFV_SWASH'
+"@annotation"                       return 'FFV_ANNOTATION'
+"@ornaments"                        return 'FFV_ORNAMENTS'
+"@stylistic"                        return 'FFV_STYLISTIC'
+"@styleset"                         return 'FFV_STYLESET'
+"@character-variant"                return 'FFV_CHARACTER_VARIANT'
 
 'U+'{hex}+'-'{hex}+                 return 'UNICODE_RANGE'
 'U+'{hex}+'?'*                      return 'UNICODE_RANGE'
@@ -210,6 +219,8 @@ block
     | page_block scc
         { $$ = $1; }
     | font_face_block scc
+        { $$ = $1; }
+    | font_feature_values_block scc
         { $$ = $1; }
     | keyframes_block scc
         { $$ = $1; }
@@ -367,6 +378,47 @@ page_margin
 font_face_block
     : BLOCK_FONT_FACE junk '{' junk declaration_list '}'
         { $$ = new yy.FontFace($5); $$.range = @$; }
+    ;
+
+font_feature_values_block
+    : BLOCK_FONT_FEATURE_VALUES junk font_feature_name '{' junk font_feature_values_contents '}'
+        { $$ = new yy.FontFeatureValues($3, $6); $$.range = @$; }
+    ;
+
+font_feature_name
+    : font_feature_name IDENT junk
+        { $$ = $1 + ' ' + $2; }
+    | IDENT junk
+        { $$ = $1; }
+    ;
+
+font_feature_values_contents
+    : font_feature_values_contents font_feature_values_inner_block junk
+        { $$ = $1.concat([$2]); }
+    | font_feature_values_inner_block junk
+        { $$ = [$1]; }
+    |
+        { $$ = []; }
+    ;
+
+font_feature_values_inner_block
+    : font_feature_values_content_block junk '{' junk declaration_list '}'
+        { $$ = new yy.FontFeatureValuesBlock($1, $5); $$.range = @$; }
+    ;
+
+font_feature_values_content_block
+    : FFV_SWASH
+        { $$ = $1; }
+    | FFV_ANNOTATION
+        { $$ = $1; }
+    | FFV_ORNAMENTS
+        { $$ = $1; }
+    | FFV_STYLISTIC
+        { $$ = $1; }
+    | FFV_STYLESET
+        { $$ = $1; }
+    | FFV_CHARACTER_VARIANT
+        { $$ = $1; }
     ;
 
 keyframes_block

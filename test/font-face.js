@@ -36,3 +36,24 @@ describe('@font-face', function() {
     });
 
 });
+
+describe('@font-feature-values', function() {
+
+    it('should parse each of the inner blocks', function() {
+        parity('@font-feature-values my font{@swash{$$}}');
+        parity('@font-feature-values my font{@annotation{$$}}');
+        parity('@font-feature-values my font{@ornaments{$$}}');
+        parity('@font-feature-values my font{@stylistic{$$}}');
+        parity('@font-feature-values my font{@styleset{$$}}');
+        parity('@font-feature-values my font{@character-variant{$$}}');
+    });
+
+    it('should parse multiple inner blocks', function() {
+        parity('@font-feature-values my font{@annotation{$$}@swash{$$}}');
+    });
+
+    it('should parse FFVs with no inner blocks', function() {
+        parity('@font-feature-values my font{}');
+    });
+
+});

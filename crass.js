@@ -1,12 +1,12 @@
+var grammar = require('./grammar');
 var objects = require('./lib/objects');
 
-module.exports.parse = function(data) {
-    var p = require('./grammar');
-    var parser = new p.Parser();
+exports.parse = function parse(data) {
+    var parser = new grammar.Parser();
     parser.lexer.options.ranges = true;
     parser.yy = objects;
 
     return parser.parse(data + '');
 };
 
-module.exports.objects = objects;
+exports.objects = objects;

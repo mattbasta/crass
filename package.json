@@ -4,8 +4,8 @@
   "description": "A CSS utility library for JS",
   "main": "crass.js",
   "scripts": {
-    "test": "mocha --recursive --reporter=dots "
-  }, 
+    "test": "mocha --recursive --reporter=dot"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/mattbasta/crass.git"

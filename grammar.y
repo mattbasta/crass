@@ -662,7 +662,7 @@ optional_important
 
 optional_slash_nine
     : SLASH_NINE junk
-        { $$ = {slash_nine: true}; }
+        { $$ = {slashNine: true}; }
     |
         { $$ = {}; }
     ;

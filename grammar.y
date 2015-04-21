@@ -123,7 +123,7 @@ ie_ident            [a-zA-Z0-9\.:]
 %%
 
 file
-    : junk stylesheet EOF
+    : scc stylesheet EOF
         { return $2; }
     ;
 
@@ -147,9 +147,9 @@ string_or_uri
     ;
 
 junk
-    :
+    : S
         { $$ = null; }
-    | S
+    |
         { $$ = null; }
     ;
 
@@ -175,17 +175,22 @@ charset_block
     ;
 
 import_list
-    : import_block ';' scc import_list
-        { $$ = $4; $$.unshift($1); }
+    : BLOCK_IMPORT junk import_block ';' scc import_list
+        { $$ = $6; $$.unshift($3); }
     |
         { $$ = []; }
     ;
 
 import_block
-    : BLOCK_IMPORT junk string_or_uri junk
-        { $$ = new yy.Import($3, null); $$.range = @$; }
-    | BLOCK_IMPORT junk string_or_uri junk medium_list junk
-        { $$ = new yy.Import($3, $5); $$.range = @$; }
+    : string_or_uri junk optional_medium_list
+        { $$ = new yy.Import($1, $3); $$.range = @$; }
+    ;
+
+optional_medium_list
+    : medium_list junk
+        { $$ = $1; }
+    |
+        { $$ = null; }
     ;
 
 namespace_list
@@ -203,10 +208,8 @@ namespace_block
     ;
 
 blocks
-    : blocks block
-        { $$ = $1; $$.push($2); }
-    | block
-        { $$ = [$1]; }
+    : block blocks
+        { $$ = $2; $2.unshift($1); }
     |
         { $$ = []; }
     ;
@@ -238,10 +241,10 @@ media_block
     ;
 
 media_inner_list
-    : media_inner_list media_inner
-        { $$ = $1; $$.push($2); }
-    | media_inner
-        { $$ = [$1]; }
+    : media_inner media_inner_list
+        { $$ = $2; $$.unshift($1); }
+    |
+        { $$ = []; }
     ;
 
 media_inner
@@ -254,10 +257,15 @@ media_inner
     ;
 
 medium_list
-    : medium_list junk ',' junk media_query
-        { $$ = $1; $$.push($5); }
-    | media_query
-        { $$ = [$1]; }
+    : media_query medium_list_extended
+        { $$ = $2; $$.unshift($1); }
+    ;
+
+medium_list_extended
+    : ',' junk medium_list
+        { $$ = $3; }
+    |
+        { $$ = []; }
     ;
 
 media_query
@@ -284,22 +292,27 @@ optional_media_query_expression
     ;
 
 media_query_expr
-    : media_query_expr AND junk media_expr
-        { $$ = $1; $$.push($4); }
-    | media_expr
-        { $$ = [$1]; }
+    : media_expr media_query_expr_and
+        { $$ = $2; $$.unshift($1); }
+    ;
+
+media_query_expr_and
+    : 'AND' junk media_query_expr
+        { $$ = $3; }
+    |
+        { $$ = []; }
     ;
 
 media_expr
-    : media_expr_base ':' junk expr ')' junk
-        { $$ = new yy.MediaExpression($1, $4); $$.range = @$; }
-    | media_expr_base ')' junk
-        { $$ = new yy.MediaExpression($1, null); $$.range = @$; }
+    : '(' junk IDENT junk media_expr_value ')' junk
+        { $$ = new yy.MediaExpression($3, $5); $$.range = @$; }
     ;
 
-media_expr_base
-    : '(' junk IDENT junk
+media_expr_value
+    : ':' junk expr
         { $$ = $3; }
+    |
+        { $$ = null; }
     ;
 
 page_block
@@ -308,19 +321,22 @@ page_block
     ;
 
 page_name
-    : IDENT ':' IDENT junk
-        { $$ = $1 + ':' + $3; }
-    | ':' IDENT junk
-        { $$ = ':' + $2; }
-    | IDENT junk
+    : IDENT page_name_optional_pseudo junk
+        { $$ = $1 + $2; }
+    | page_name_optional_pseudo junk
         { $$ = $1; }
+    ;
+
+page_name_optional_pseudo
+    : ':' IDENT
+        { $$ = ':' + $2; }
     |
-        { $$ = null; }
+        { $$ = ''; }
     ;
 
 page_declaration_list
-    : page_declaration_list page_declaration
-        { $$ = $1; if ($2 !== null) {$$.push($2);} }
+    : page_declaration page_declaration_list
+        { $$ = $2; if ($1 !== null) {$$.unshift($1);} }
     |
         { $$ = []; }
     ;
@@ -386,17 +402,20 @@ font_feature_values_block
     ;
 
 font_feature_name
-    : font_feature_name IDENT junk
-        { $$ = $1 + ' ' + $2; }
-    | IDENT junk
-        { $$ = $1; }
+    : IDENT junk font_feature_name_extended
+        { $$ = $1 + $3; }
+    ;
+
+font_feature_name_extended
+    : font_feature_name
+        { $$ = ' ' + $1; }
+    |
+        { $$ = ''; }
     ;
 
 font_feature_values_contents
-    : font_feature_values_contents font_feature_values_inner_block junk
-        { $$ = $1.concat([$2]); }
-    | font_feature_values_inner_block junk
-        { $$ = [$1]; }
+    : font_feature_values_inner_block junk font_feature_values_contents
+        { $$ = $3; $$.unshift($1); }
     |
         { $$ = []; }
     ;
@@ -429,10 +448,10 @@ keyframes_block
     ;
 
 keyframe_list
-    : keyframe_list keyframe
-        { $$ = $1; $$.push($2); }
-    | keyframe
-        { $$ = [$1]; }
+    : keyframe keyframe_list
+        { $$ = $2; $$.unshift($1); }
+    |
+        { $$ = []; }
     ;
 
 keyframe
@@ -441,24 +460,39 @@ keyframe
     ;
 
 keyframe_selector_list
-    : keyframe_selector_list ',' junk keyframe_selector
-        { $$ = $1; $$.push($4); }
-    | keyframe_selector
-        { $$ = [$1]; }
+    : keyframe_selector keyframe_selector_list_extended
+        { $$ = $2; $$.unshift($1); }
+    ;
+
+keyframe_selector_list_extended
+    : ',' junk keyframe_selector_list
+        { $$ = $3; }
+    |
+        { $$ = []; }
     ;
 
 keyframe_selector
-    : num '%' junk
-        { $$ = new yy.KeyframeSelector($1 + '%'); $$.range = @$; }
-    | num junk
+    : num optional_percent
         {
-            if ($1.asNumber() !== 0) throw new SyntaxError('Invalid keyframe selector: ' + $1.toString());
-            $$ = new yy.KeyframeSelector($1.toString());
+            if ($2) {
+                $$ = new yy.KeyframeSelector($1 + '%');
+            } else {
+                if ($1.asNumber() !== 0) throw new SyntaxError('Invalid keyframe selector: ' + $1.toString());
+                $$ = new yy.KeyframeSelector($1.toString());
+            }
+            $$.range = @$;
         }
     | FROM junk
         { $$ = new yy.KeyframeSelector('from'); $$.range = @$; }
     | TO junk
         { $$ = new yy.KeyframeSelector('to'); $$.range = @$; }
+    ;
+
+optional_percent
+    : '%' junk
+        { $$ = true; }
+    | junk
+        { $$ = false; }
     ;
 
 viewport_block
@@ -545,24 +579,24 @@ simple_selector
     ;
 
 simple_selector_part_list
-    : simple_selector_part_list ID_IDENT
-        { $$ = $1; $$.push(new yy.IDSelector($2.substr(1))); }
+    : ID_IDENT simple_selector_part_list
+        { $$ = $2; $$.unshift(new yy.IDSelector($1.substr(1))); }
     /* FIXME: These next four rules are an abomination. */
-    | simple_selector_part_list HEX_SHORT
-        { $$ = $1; $$.push(new yy.IDSelector($2.substr(1))); }
-    | simple_selector_part_list HEX_SHORT IDENT
-        { $$ = $1; $$.push(new yy.IDSelector($2.substr(1) + $3)); }
-    | simple_selector_part_list HEX_LONG
-        { $$ = $1; $$.push(new yy.IDSelector($2.substr(1))); }
-    | simple_selector_part_list HEX_LONG IDENT
-        { $$ = $1; $$.push(new yy.IDSelector($2.substr(1) + $3)); }
+    | HEX_SHORT simple_selector_part_list
+        { $$ = $2; $$.unshift(new yy.IDSelector($1.substr(1))); }
+    | HEX_SHORT IDENT simple_selector_part_list
+        { $$ = $3; $$.unshift(new yy.IDSelector($1.substr(1) + $2)); }
+    | HEX_LONG simple_selector_part_list
+        { $$ = $2; $$.unshift(new yy.IDSelector($1.substr(1))); }
+    | HEX_LONG IDENT simple_selector_part_list
+        { $$ = $3; $$.unshift(new yy.IDSelector($1.substr(1) + $2)); }
     /* </abomination> */
-    | simple_selector_part_list CLASS_IDENT
-        { $$ = $1; $$.push(new yy.ClassSelector($2.substr(1))); }
-    | simple_selector_part_list attribute_selector
-        { $$ = $1; $$.push($2); }
-    | simple_selector_part_list pseudo_selector
-        { $$ = $1; $$.push($2); }
+    | CLASS_IDENT simple_selector_part_list
+        { $$ = $2; $$.unshift(new yy.ClassSelector($1.substr(1))); }
+    | attribute_selector simple_selector_part_list
+        { $$ = $2; $$.unshift($1); }
+    | pseudo_selector simple_selector_part_list
+        { $$ = $2; $$.unshift($1); }
     |
         { $$ = []; }
     ;
@@ -751,14 +785,31 @@ unit_dim
 
 
 attr_expression
-    : ATTR '(' junk element_name junk IDENT junk ',' junk unit junk ')'
-        { $$ = new yy.Func('attr', new yy.Expression([[null, $4], [null, $6], [',', $10]])); $$.range = @$; }
-    | ATTR '(' junk element_name junk ',' junk unit junk ')'
-        { $$ = new yy.Func('attr', new yy.Expression([[null, $4], [',', $8]])); $$.range = @$; }
-    | ATTR '(' junk element_name junk IDENT junk  ')'
-        { $$ = new yy.Func('attr', new yy.Expression([[null, $4], [null, $6]])); $$.range = @$; }
-    | ATTR '(' junk element_name junk ')'
-        { $$ = new yy.Func('attr', $4); $$.range = @$; }
+    : ATTR '(' junk element_name junk attr_expression_unit ')'
+        {
+            $$ = new yy.Func(
+                'attr',
+                $6
+                    ? new yy.Expression([[null, $4]].concat($6))
+                    : $4
+            );
+        }
+    ;
+
+attr_expression_unit
+    : IDENT junk attr_expression_fallback junk
+        { $$ = [[null, $1]].concat($3); }
+    | ',' junk unit junk
+        { $$ = [[',', $3]]; }
+    |
+        { $$ = null; }
+    ;
+
+attr_expression_fallback
+    : ',' junk unit
+        { $$ = [[',', $3]]; }
+    |
+        { $$ = []; }
     ;
 
 math_expr

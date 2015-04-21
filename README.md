@@ -68,14 +68,7 @@ Reordering selectors and declarations significantly improves minified code sizes
 
 ### Benchmarks
 
-<table>
-<tr><th>CSS Source<th>Original<th>Original gzip<th>YUI<th>YUI gzip<th>clean-css<th>clean-css gzip<th>crass<th>crass gzip
-<tr><td>Firefox Marketplace<td>86983<td>19865<td>86911<td>19857<td>86983*<td>19865<td>82477<td>19395
-<tr><td>Github Homepage<td>252797<td>47173<td>251779<td>46768<td>248190<td>46455<td>241408<td>45374
-</table>
-
-\* The Firefox Marketplace uses clean-css for minification.
-
+Crass performs very well in many CSS minification benchmarks. See [goalsmashers' css minification benchmark](http://goalsmashers.github.io/css-minification-benchmark/) for more.
 
 
 ## FAQ

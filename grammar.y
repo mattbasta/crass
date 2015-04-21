@@ -49,7 +49,7 @@ ie_ident            [a-zA-Z0-9\.:]
 "@page"                             return 'BLOCK_PAGE'
 "@keyframes"                        return 'BLOCK_KEYFRAMES'
 "@-"[a-zA-Z]+"-keyframes"           return 'BLOCK_VENDOR_KEYFRAMES'
-"@-viewport"                        return 'BLOCK_VIEWPORT'
+"@viewport"                         return 'BLOCK_VIEWPORT'
 "@-"[a-zA-Z]+"-viewport"            return 'BLOCK_VENDOR_VIEWPORT'
 "@supports"                         return 'BLOCK_SUPPORTS'
 

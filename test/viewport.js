@@ -12,7 +12,7 @@ var parity = function(data) {
 
 describe('@-viewport', function() {
     it('should parse basic viewport block', function() {
-        parity('@-viewport{x:y}');
+        parity('@viewport{x:y}');
     });
     it('should parse basic vendor-prefixed viewport block', function() {
         parity('@-ms-viewport{x:y}');
@@ -21,8 +21,8 @@ describe('@-viewport', function() {
 
     it('should optimize contents', function() {
         assert.equal(
-            crass.parse('@-viewport{x:y;x:y}').optimize().toString(),
-            '@-viewport{x:y}'
+            crass.parse('@viewport{x:y;x:y}').optimize().toString(),
+            '@viewport{x:y}'
         );
     });
     it('should optimize away vendor prefixes', function() {

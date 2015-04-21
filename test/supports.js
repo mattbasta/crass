@@ -14,7 +14,7 @@ describe('@supports', function() {
     it('should parse basic supports block', function() {
         var parsed = crass.parse('@supports (foo: bar) {a{x:y}}');
         assert.equal(parsed.content.length, 1);
-        assert(parsed.content[0].condition_list);
+        assert(parsed.content[0].conditionList);
 
         assert.equal(parsed.toString(), '@supports (foo:bar){a{x:y}}')
     });

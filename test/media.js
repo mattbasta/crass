@@ -15,6 +15,10 @@ describe('@media', function() {
         parity('@media screen{$$}');
     });
 
+    it('should parse empty media queries', function() {
+        parity('@media only screen{}');
+    });
+
     it('should parse multiple media types', function() {
         parity('@media mobile,screen{$$}');
     });

@@ -16,6 +16,9 @@ describe('@page', function() {
         parity('@page :first{$$;}', '@page :first{x:y}');
         parity('@page :first{$$;a:b}');
     });
+    it('should parse empty pages', function() {
+        parity('@page :first{}');
+    });
 
     it('should parse pages with margins', function() {
         parity('@page :first{$$;@top-right{$$}}');

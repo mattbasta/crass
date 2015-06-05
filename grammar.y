@@ -113,6 +113,7 @@ ie_ident            [a-zA-Z0-9\.:]
 ":only-of-type"                     return 'PSEUDO_CLASS'
 "::"                                return '::'
 ":"                                 return ':'
+"\\0"                               return 'SLASH_ZERO'
 "\\9"                               return 'SLASH_NINE'
 <<EOF>>                             return 'EOF'
 
@@ -697,6 +698,8 @@ optional_important
 optional_slash_nine
     : SLASH_NINE junk
         { $$ = {slashNine: true}; }
+    | SLASH_ZERO junk
+        { $$ = {slashZero: true}; }
     |
         { $$ = {}; }
     ;

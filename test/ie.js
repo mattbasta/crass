@@ -86,6 +86,18 @@ describe('slash 9', function() {
 });
 
 
+describe('slash 0', function() {
+    it('is parsed', function() {
+        parity('a{foo:bar\\0}');
+        parity('a{foo:bar \\0}', 'a{foo:bar\\0}');
+    });
+    it('is ignored by default on optimizations', function() {
+        parityOpt('a{foo:bar\\0}', '');
+        paritySaveIE('a{foo:bar\\0}');
+    });
+});
+
+
 describe('star hack', function() {
     it('is ignored by default on optimizations', function() {
         parityOpt('a{*foo:bar}', '');

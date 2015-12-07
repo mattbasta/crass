@@ -17,6 +17,9 @@ describe('@media', function() {
 
     it('should parse empty media queries', function() {
         parity('@media only screen{}');
+        parity('@media only screen and (min-width:769px) and (max-width:1024px){}');
+        parity('@media only screen and (min-width:1025px){}');
+        parity('@media only screen and (min-width:321px) and (max-width:480px){}');
     });
 
     it('should parse multiple media types', function() {

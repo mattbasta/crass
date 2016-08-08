@@ -32,7 +32,7 @@ describe('Length', function() {
     });
     it('should convert mm', function() {
         // Only on O1
-        assert.equal(parseString('a{width:3.779px}', true), 'a{width:1mm}');
+        assert.equal(parseString('a{width:11.337px}', true), 'a{width:3mm}');
     });
     it('should convert cm', function() {
         // Only on O1
@@ -43,6 +43,11 @@ describe('Length', function() {
         // Only on O1
         assert.equal(parseString('a{width:1.0007mm}', true), 'a{width:.1cm}');
         assert.equal(parseString('a{width:1.0007mm}'), 'a{width:1.0007mm}');
+    });
+    it('should convert q', function() {
+        // Only on O1
+        assert.equal(parseString('a{width:1mm}', true), 'a{width:4q}');
+        assert.equal(parseString('a{width:1mm}'), 'a{width:1mm}');
     });
 });
 

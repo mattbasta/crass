@@ -1,6 +1,6 @@
 # crass
 
-A CSS3 utility library for JS.
+A CSS3 minification, pretty printing, and general utility library for JS.
 
 [![Build Status](https://travis-ci.org/mattbasta/crass.png?branch=master)](https://travis-ci.org/mattbasta/crass)
 
@@ -21,6 +21,9 @@ console.log(parsed.pretty());
 
 // Print a minified version of the stylesheet:
 console.log(parsed.toString());
+
+// The constructors for the AST nodes used to represent the
+// parsed CSS are available on `crass.objects`.
 
 ```
 

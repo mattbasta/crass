@@ -10,6 +10,7 @@ function help() {
         ' --O1              Runs optimizations with the O1 flag.',
         ' --pretty          Pretty prints the output.',
         ' --min xxx[[,xxx]] Sets browser minimum versions.',
+        ' --saveie          Enables support for IE6 and below.',
         '',
         'Browser versions:',
         ' - Must start with browser name',

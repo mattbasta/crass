@@ -282,6 +282,10 @@ describe('Replace', function() {
     it('*, .foo -> *', function() {
         parseCompare('*,.foo{$$}', '*{$$}', true);
     });
+
+    it('content:none to content: ""', function() {
+        parseCompare('foo{content:none}', 'foo{content:""}', true);
+    });
 });
 
 describe('Combine', function() {

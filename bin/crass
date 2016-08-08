@@ -51,7 +51,7 @@ fs.readFile(process.argv[2], function(err, data) {
     }
 
     if (opts.optimize) {
-        if (opts.o1 || opts.O1) kw.O1 = true;
+        if (opts.o1 || opts.O1) kw.o1 = true;
         if (opts.saveie) kw.saveie = true;
         parsed = parsed.optimize(kw);
     }

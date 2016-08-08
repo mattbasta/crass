@@ -94,25 +94,6 @@ describe('all', function() {
     });
 });
 
-describe('any', function() {
-    it('should return false when only falsey values are passed', function() {
-        assert.ok(
-            !utils.any(
-                [0, false, null],
-                utils.identity
-            )
-        );
-    });
-    it('should return false when one truthy value is passed', function() {
-        assert.ok(
-            utils.any(
-                [0, false, true, null],
-                utils.identity
-            )
-        );
-    });
-});
-
 describe('uniq', function() {
     it('should remove duplicate entries', function() {
         assert.deepEqual(

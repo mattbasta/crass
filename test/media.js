@@ -8,6 +8,14 @@ var parity = function(data) {
     assert.equal(crass.parse(data).toString(), data);
     assert.equal(crass.parse(crass.parse(data).pretty()).toString(), data);
 }
+function parityOpt(data, expected) {
+    assert.equal(crass.parse(data).optimize({}).toString(), expected);
+    assert.equal(crass.parse(crass.parse(data).optimize({}).pretty()).toString(), expected);
+}
+function paritySaveIE(data) {
+    assert.equal(crass.parse(data).optimize({saveie: true}).toString(), data);
+    assert.equal(crass.parse(crass.parse(data).optimize({saveie: true}).pretty()).toString(), data);
+}
 
 
 describe('@media', function() {
@@ -74,6 +82,21 @@ describe('@media', function() {
     describe('with @page', function() {
         it('should parse properly', function() {
             parity('@media screen{@page{margin:auto}}');
+        });
+    });
+
+    describe('slash 0', function() {
+        var example = '@media (min-width:0\\0){x{y:z}}';
+        it('is parsed', function() {
+            parity(example);
+        });
+        it('is removed when a min version of IE is set', function() {
+            var min = {ie: 10};
+            assert.equal(crass.parse(example).optimize({browser_min: min}).toString(), '');
+            assert.equal(
+                crass.parse(crass.parse(example).optimize({browser_min: min}).pretty()).toString(),
+                ''
+            );
         });
     });
 

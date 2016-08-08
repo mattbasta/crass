@@ -305,8 +305,8 @@ media_query_expr_and
     ;
 
 media_expr
-    : '(' junk IDENT junk media_expr_value ')' junk
-        { $$ = new yy.MediaExpression($3, $5); $$.range = @$; }
+    : '(' junk IDENT junk media_expr_value junk media_expr_slashzero ')' junk
+        { $$ = new yy.MediaExpression($3, $5, $7); $$.range = @$; }
     ;
 
 media_expr_value
@@ -314,6 +314,13 @@ media_expr_value
         { $$ = $3; }
     |
         { $$ = null; }
+    ;
+
+media_expr_slashzero
+    : SLASH_ZERO junk
+        { $$ = {slashZero: true}; }
+    |
+        { $$ = {}; }
     ;
 
 page_block

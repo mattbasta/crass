@@ -1,45 +1,110 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Crass - A CSS minification and optimization tool</title>
+    <title>Crass - A CSS utility library</title>
     <style>
-    body {
-      font-family: sans-serif;
-    }
-    textarea {
-      display: block;
-      height: 500px;
-      width: 500px;
-    }
+      @import url(https://fonts.googleapis.com/css?family=Roboto+Mono|Roboto);
+      *, *:before, *:after {
+        box-sizing: border-box;
+      }
+      
+      html, body {
+        font-family: Roboto, sans-serif;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .toolbar {
+        background: #CFD8DC;
+        height: 40px;
+        left: 0;
+        line-height: 40px;
+        padding: 0 5px;
+        position: fixed;
+        right: 0;
+        top: 0;
+      }
+      .stats {
+        opacity: 0.5;
+        padding: 0 15px;
+      }
+      
+      main {
+        display: flex;
+        height: 100%;
+        padding-top: 40px;
+      }
+      main > div {
+        flex: 1 1;
+        font-family: 'Roboto Mono';
+        font-size: 12px;
+        height: 100%;
+        padding: 10px;
+      }
+      button {
+        -moz-appearance: none;
+        -ms-appearance: none;
+        -webkit-appearance: none;
+        background: #03A9F4;
+        border: 0;
+        border-radius: 3px;
+        box-shadow: inset 0 -2px 0 0 rgba(0, 0, 0, 0.2);
+        color: #fff;
+        font-size: 1em;
+        line-height: 1em;
+        padding: 8px 15px;
+      }
     </style>
   </head>
   <body>
-    <textarea id="body">#my-id .class [attribute] {
-  color: #ff0000;
-  border-radius: 5px;
-  margin: 1in 0 96px 0;
-}
-.foo {
-  text-align: center;
-}
-.bar {
-  text-align: center;
-}
-    </textarea>
-    <button class="minify">Minify</button>
-    <button class="minify_o1">Minify + O1</button>
-    <button class="beautify">Beautify</button>
+    <div class="toolbar">
+      <button class="start">Minify</button>
+      <label>
+        <input type="checkbox" class="opt-optimize" checked>
+        <span>Optimize</span>
+      </label>
+      <label>
+        <input type="checkbox" class="opt-o1">
+        <span>O1 Optimizations</span>
+      </label>
+      <label>
+        <input type="checkbox" class="opt-pretty" checked>
+        <span>Pretty Print</span>
+      </label>
+      <span class="stats"></span>
+    </div>
+    <main>
+      <textarea id="body">#my-id .class [attribute] {
+    color: #ff0000;
+    border-radius: 5px;
+    margin: 1in 0 96px 0;
+  }
+  .foo {
+    text-align: center;
+  }
+  .bar {
+    text-align: center;
+  }
+      </textarea>
+    </main>
     <script src="https://wzrd.in/standalone/crass@latest"></script>
     <script>
       var text = document.querySelector('#body');
-      document.querySelector('.minify').addEventListener('click', function(e) {
-        body.value = crass.parse(body.value).optimize().toString();
-      });
-      document.querySelector('.minify_o1').addEventListener('click', function(e) {
-        body.value = crass.parse(body.value).optimize({O1: true}).toString();
-      });
-      document.querySelector('.beautify').addEventListener('click', function(e) {
-        body.value = crass.parse(body.value).pretty();
+      document.querySelector('.start').addEventListener('click', function(e) {
+        var parsed = crass.parse(body.value);
+        if (document.querySelector('.opt-optimize').checked) {
+          var options = {};
+          if (document.querySelector('.opt-o1').checked) {
+            options.o1 = true;
+          }
+          parsed = parsed.optimize(options);
+        }
+        if (document.querySelector('.opt-pretty').checked) {
+          body.value = parsed.pretty();
+        } else {
+          body.value = parsed.toString();
+        }
       });
     </script>
   </body>

@@ -113,7 +113,7 @@
         body.value = output;
         
         var statsData = raw.length + ' original (' + gzipSize.sync(raw) + ' gzip)';
-        var finalGZ = gzs.sync(output);
+        var finalGZ = gzipSize.sync(output);
         var finalPercent = Math.round(output.length / raw.length * 100).toString();
         var finalGZPercent = Math.round(finalGZ / raw.length * 100).toString();
         statsData += ', ' + output.length + ' min (' + finalPercent + '%)';

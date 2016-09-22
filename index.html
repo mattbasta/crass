@@ -89,10 +89,13 @@
       </textarea>
     </main>
     <script src="https://wzrd.in/standalone/crass@latest"></script>
+    <script src="https://wzrd.in/standalone/gzip-size@latest"></script>
     <script>
       var text = document.querySelector('#body');
+      var stats = document.querySelector('.stats');
       document.querySelector('.start').addEventListener('click', function(e) {
-        var parsed = crass.parse(body.value);
+        var raw = body.value;
+        var parsed = crass.parse(raw);
         if (document.querySelector('.opt-optimize').checked) {
           var options = {};
           if (document.querySelector('.opt-o1').checked) {
@@ -100,11 +103,22 @@
           }
           parsed = parsed.optimize(options);
         }
+        var output;
         if (document.querySelector('.opt-pretty').checked) {
-          body.value = parsed.pretty();
+          output = parsed.pretty();
         } else {
-          body.value = parsed.toString();
+          output = parsed.toString();
         }
+        
+        body.value = output;
+        
+        var statsData = raw.length + ' original (' + gzipSize.sync(raw) + ' gzip)';
+        var finalGZ = gzs.sync(output);
+        var finalPercent = Math.round(output.length / raw.length * 100).toString();
+        var finalGZPercent = Math.round(finalGZ / raw.length * 100).toString();
+        statsData += ', ' + output.length + ' min (' + finalPercent + '%)';
+        statsData += ', ' + finalGZ + ' min+gzip (' + finalGZPercent + '%)';
+        stats.innerHTML = statsData;
       });
     </script>
   </body>

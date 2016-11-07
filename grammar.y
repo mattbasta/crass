@@ -782,6 +782,8 @@ unit
 function
     : FUNCTION_IDENT junk expr ')'
         { $$ = new yy.Func($1.substr(0, $1.length - 1), $3); $$.range = @$; }
+    | FUNCTION_IDENT junk ')'
+        { $$ = new yy.Func($1.substr(0, $1.length - 1), null); $$.range = @$; }
     ;
 
 unit_dim

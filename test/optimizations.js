@@ -87,6 +87,10 @@ describe('Remove', function() {
     it('empty rulesets', function() {
         parseCompare('a{}', '');
     });
+    it('empty linear-gradients', function() {
+        parseCompare('a{background-image:linear-gradient()}', '');
+        parseCompare('a{background-image:-webkit-linear-gradient()}', '');
+    });
 
     describe('overridden declarations', function() {
         it('with a single overrider', function() {

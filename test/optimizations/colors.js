@@ -172,4 +172,26 @@ describe('colors', function() {
             {css4: true}
         );
     });
+    it('should generate alpha hex', function() {
+        parseCompare(
+            'b{color:rgba(255,0,0,0)}',
+            'b{color:#0000}',
+            {css4: true}
+        );
+        parseCompare(
+            'b{color:rgba(255,0,0,0.2)}',
+            'b{color:#f003}',
+            {css4: true}
+        );
+        parseCompare(
+            'b{color:#aabbccdd}',
+            'b{color:#abcd}',
+            {css4: true}
+        );
+        parseCompare(
+            'b{color:#abcdef11}',
+            'b{color:#abcdef11}',
+            {css4: true}
+        );
+    });
 });

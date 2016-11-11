@@ -14,7 +14,9 @@ ie_junk             [a-zA-Z0-9=#, \n\r\t'"]
 ie_ident            [a-zA-Z0-9\.:]
 
 %%
+"#"{hex}{hex}{hex}{hex}{hex}{hex}{hex}{hex}   return 'HEX_LONG_ALPHA'
 "#"{hex}{hex}{hex}{hex}{hex}{hex}   return 'HEX_LONG'
+"#"{hex}{hex}{hex}{hex}             return 'HEX_SHORT_ALPHA'
 "#"{hex}{hex}{hex}                  return 'HEX_SHORT'
 {int}"e"("+"|"-")?{int}             return 'SCINOT'
 {int}?"."[0-9]+                     return 'FLOAT'
@@ -589,7 +591,7 @@ simple_selector
 simple_selector_part_list
     : ID_IDENT simple_selector_part_list
         { $$ = $2; $$.unshift(new yy.IDSelector($1.substr(1))); }
-    /* FIXME: These next four rules are an abomination. */
+    /* FIXME: These next eight rules are an abomination. */
     | HEX_SHORT simple_selector_part_list
         { $$ = $2; $$.unshift(new yy.IDSelector($1.substr(1))); }
     | HEX_SHORT IDENT simple_selector_part_list
@@ -597,6 +599,14 @@ simple_selector_part_list
     | HEX_LONG simple_selector_part_list
         { $$ = $2; $$.unshift(new yy.IDSelector($1.substr(1))); }
     | HEX_LONG IDENT simple_selector_part_list
+        { $$ = $3; $$.unshift(new yy.IDSelector($1.substr(1) + $2)); }
+    | HEX_SHORT_ALPHA simple_selector_part_list
+        { $$ = $2; $$.unshift(new yy.IDSelector($1.substr(1))); }
+    | HEX_SHORT_ALPHA IDENT simple_selector_part_list
+        { $$ = $3; $$.unshift(new yy.IDSelector($1.substr(1) + $2)); }
+    | HEX_LONG_ALPHA simple_selector_part_list
+        { $$ = $2; $$.unshift(new yy.IDSelector($1.substr(1))); }
+    | HEX_LONG_ALPHA IDENT simple_selector_part_list
         { $$ = $3; $$.unshift(new yy.IDSelector($1.substr(1) + $2)); }
     /* </abomination> */
     | CLASS_IDENT simple_selector_part_list
@@ -847,6 +857,10 @@ hexcolor
     : HEX_SHORT
         { $$ = new yy.HexColor($1); $$.range = @$; }
     | HEX_LONG
+        { $$ = new yy.HexColor($1); $$.range = @$; }
+    | HEX_LONG_ALPHA
+        { $$ = new yy.HexColor($1); $$.range = @$; }
+    | HEX_SHORT_ALPHA
         { $$ = new yy.HexColor($1); $$.range = @$; }
     ;
 

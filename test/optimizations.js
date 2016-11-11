@@ -6,15 +6,15 @@ var filler = 'x:y';
 var parseString = function(data, kw) {
     return crass.parse(data).optimize(kw).toString();
 };
-var parseCompare = function(data, expected, o1) {
+var parseCompare = function(data, expected, kw) {
     data = data.replace(/\$\$/g, filler);
     expected = expected.replace(/\$\$/g, filler);
-    if (o1) {
-        if (data !== expected) {
+    if (kw) {
+        if (kw.o1 && data !== expected) {
             assert.notEqual(parseString(data), expected);
         }
-        assert.equal(parseString(data, {o1: true}), expected);
-        assert.equal(parseString(crass.parse(data).pretty(), {o1: true}), expected);
+        assert.equal(parseString(data, kw), expected);
+        assert.equal(parseString(crass.parse(data).pretty(), kw), expected);
     } else {
         assert.equal(parseString(data), expected);
     }
@@ -70,7 +70,7 @@ describe('Sort', function() {
 describe('Remove', function() {
     it('duplicate keyframes', function() {
         var kf = '@keyframes foo{from{x:y}to{x:a}}';
-        parseCompare(kf + kf, '@keyframes foo{0{x:y}to{x:a}}', true);
+        parseCompare(kf + kf, '@keyframes foo{0{x:y}to{x:a}}', {o1: true});
     });
     it('duplicate declarations', function() {
         parseCompare('a{a:1;a:1;a:lol;a:1;b:abc}', 'a{a:1;a:lol;b:abc}');
@@ -259,6 +259,65 @@ describe('Replace', function() {
                 'b{color:rgba(255,0,0)}'
             );
         });
+
+        it('should generate gray', function() {
+            parseCompare(
+                'b{color:rgb(255,255,255)}',
+                'b{color:#fff}',
+                {css4: true}
+            );
+            parseCompare(
+                'b{color:rgb(250,250,250)}',
+                'b{color:#fafafa}',
+                {css4: true}
+            );
+            parseCompare(
+                'b{color:rgba(255,255,255, 1)}',
+                'b{color:#fff}',
+                {css4: true}
+            );
+            parseCompare(
+                'b{color:rgba(255,255,255, 0.5)}',
+                'b{color:gray(100%/.5)}',
+                {css4: true}
+            );
+            parseCompare(
+                'b{color:hsla(0,0%,0%, 1)}',
+                'b{color:#000}',
+                {css4: true}
+            );
+            parseCompare(
+                'b{color:hsl(0,0%,100%)}',
+                'b{color:#fff}',
+                {css4: true}
+            );
+            parseCompare(
+                'b{color:hsl(0,0%,20%)}',
+                'b{color:#333}',
+                {css4: false}
+            );
+            parseCompare(
+                'b{color:hsl(0,0%,20%)}',
+                'b{color:#333}',
+                {css4: true}
+            );
+            parseCompare(
+                'b{color:hsl(0,0%,1%)}',
+                'b{color:#030303}',
+                {css4: true}
+            );
+            parseCompare(
+                'b{color:hsl(0,0%,50%)}',
+                'b{color:gray}',
+                {css4: true}
+            );
+            parseCompare(
+                'b{color:hsla(0,0%,50%, 0.5)}',
+                'b{color:gray(50.2%/.5)}',
+                {css4: true}
+            );
+        });
+
     });
 
     describe('font-weight and font', function() {
@@ -280,15 +339,15 @@ describe('Replace', function() {
     });
 
     it('*.foo -> .foo', function() {
-        parseCompare('*.foo{$$}', '.foo{$$}', true);
+        parseCompare('*.foo{$$}', '.foo{$$}', {o1: true});
     });
 
     it('*, .foo -> *', function() {
-        parseCompare('*,.foo{$$}', '*{$$}', true);
+        parseCompare('*,.foo{$$}', '*{$$}', {o1: true});
     });
 
     it('content:none to content: ""', function() {
-        parseCompare('foo{content:none}', 'foo{content:""}', true);
+        parseCompare('foo{content:none}', 'foo{content:""}', {o1: true});
     });
 });
 

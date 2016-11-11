@@ -11,6 +11,7 @@ function help() {
         ' --pretty          Pretty prints the output.',
         ' --min xxx[[,xxx]] Sets browser minimum versions.',
         ' --saveie          Enables support for IE6 and below.',
+        ' --css4            Allows optimizer to generate CSS 4 (may not be supported by all browsers).',
         '',
         'Browser versions:',
         ' - Must start with browser name',
@@ -49,6 +50,8 @@ fs.readFile(process.argv[2], function(err, data) {
             kw.browser_min[plat.browser] = plat.version;
         });
     }
+
+    kw.css4 = 'css4' in opts and opts.css4;
 
     if (opts.optimize) {
         if (opts.o1 || opts.O1) kw.o1 = true;

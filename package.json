@@ -22,7 +22,7 @@
   "author": "Matt Basta",
   "license": "MIT",
   "dependencies": {
-    "color-convert": "0.5.x"
+    "color-convert": "^1.7.0"
   },
   "devDependencies": {
     "mocha": "2.2.x",

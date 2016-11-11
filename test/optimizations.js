@@ -249,6 +249,17 @@ describe('Replace', function() {
             );
         });
 
+        it('should clamp opacity', function() {
+            parseCompare(
+                'b{color:rgba(255,0,0,1.1)}',
+                'b{color:red}'
+            );
+            parseCompare(
+                'b{color:rgba(255,0,0,-0.1)}',
+                'b{color:transparent}'
+            );
+        });
+
         it('should not mangle invalid colors', function() {
             parseCompare(
                 'b{color:rgb(255,0,0,5%)}',

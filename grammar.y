@@ -761,6 +761,8 @@ term
         { $$ = $1; }
     | hexcolor
         { $$ = $1; }
+    | custom_ident
+        { $$ = $1; }
     | IE_EXPRESSION
         { $$ = $1; }
     ;
@@ -863,6 +865,19 @@ hexcolor
     | HEX_SHORT_ALPHA
         { $$ = new yy.HexColor($1); $$.range = @$; }
     ;
+
+custom_ident
+    : '[' junk custom_ident_chain ']'
+        { $$ = new yy.CustomIdent($3); $$.range = @$; }
+    ;
+
+custom_ident_chain
+    : IDENT junk custom_ident_chain
+        { $$ = [$1].concat($3); }
+    | IDENT junk
+        { $$ = [$1]; }
+    ;
+
 
 signed_integer
     : '+' integer

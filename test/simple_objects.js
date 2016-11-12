@@ -120,3 +120,13 @@ describe('Attribute functions', function() {
         assert.equal(parseString('a{foo:attr(data-foo, 123px)}'), 'a{foo:attr(data-foo,123px)}');
     });
 });
+
+
+describe('Custom Identifiers', function() {
+    it('can be parsed alone', function() {
+        assert.equal(parseString('a{b:[foo]}'), 'a{b:[foo]}');
+    });
+    it('can be parsed in a group', function() {
+        assert.equal(parseString('a{b:[foo  bar]}'), 'a{b:[foo bar]}');
+    });
+});

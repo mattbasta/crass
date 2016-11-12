@@ -27,7 +27,7 @@ which makes it impossible to perform all types of optimizations.
 
 ## Installation
 
-Crass 1.8 is built with ES2015 and requires Node 4.6.2 or higher.
+Crass 0.8 is built with ES2015 and requires Node 4.6.2 or higher.
 
 ```sh
 npm install --save-dev crass

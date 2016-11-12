@@ -71,6 +71,24 @@ describe('colors', function() {
             'b{color:#fff}'
         );
     });
+    it('hsl with degrees', function() {
+        parseCompare(
+            'b{color:hsl(0deg,0%,100%)}',
+            'b{color:#fff}'
+        );
+        parseCompare(
+            'b{color:hsl(360deg,0%,100%)}',
+            'b{color:#fff}'
+        );
+        parseCompare(
+            'b{color:hsl(180deg,0%,100%)}',
+            'b{color:#fff}'
+        );
+        parseCompare(
+            'b{color:hsl(180deg,50%,50%)}',
+            'b{color:#40bf50}'
+        );
+    });
     it('hsl with long hex', function() {
         parseCompare(
             'b{color:hsl(1,100%,50%)}',

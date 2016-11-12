@@ -171,7 +171,7 @@ describe('colors', function() {
         );
         parseCompare(
             'b{color:hsla(0,0%,50%, 0.5)}',
-            'b{color:gray(50.2%/.5)}',
+            'b{color:lab(53 0 0/.5)}',
             {css4: true}
         );
     });

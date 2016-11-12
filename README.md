@@ -4,6 +4,16 @@ A CSS3 minification, pretty printing, and general utility library for JS.
 
 [![Build Status](https://travis-ci.org/mattbasta/crass.png?branch=master)](https://travis-ci.org/mattbasta/crass)
 
+
+## Installation
+
+Crass 1.8 requires Node 4 or higher.
+
+```sh
+npm install --save-dev crass
+```
+
+
 ## API
 
 ```js
@@ -94,6 +104,4 @@ All comments are ignored at the moment. Support for storing comment data may be 
 
 ### What about `@import` statements?
 
-Crass does not follow `@import` statements. Except when run from the command line, Crass has no concept of the file system. Consequently, mapping imports to other CSS files is a very difficult (or even impossible) task.
-
-It is trivial, however, for an implementor to add import following on top of crass if the file system structure is known. After parsing, simply iterate the imports on the `Stylesheet` object, recursively parse and process each in turn, and inject their contents into the head of the `Stylesheet`. Building this is left as an exercise to the user.
+Crass does not follow `@import` statements. You should use another CSS processing tool to resolve `@imports` and inline them appropriately, then use Crass to minify the result.

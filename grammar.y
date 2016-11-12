@@ -702,7 +702,7 @@ declaration_list
 
 declaration
     : declaration_inner optional_important optional_slash_nine
-        { $$ = $1; yy.extend($$, $2); yy.extend($$, $3); }
+        { $$ = $1; Object.assign($$, $2, $3); }
     ;
 
 optional_important

@@ -28,5 +28,6 @@
     "mocha": "2.2.x",
     "jison": "^0.4.15",
     "browserify": "^5.9.1"
-  }
+  },
+  "engines": {"node": ">=4.0.0"}
 }

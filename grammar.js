@@ -344,7 +344,7 @@ case 178:
  this.$ = [$$[$0]]; 
 break;
 case 180:
- this.$ = $$[$0-2]; yy.extend(this.$, $$[$0-1]); yy.extend(this.$, $$[$0]); 
+ this.$ = $$[$0-2]; Object.assign(this.$, $$[$0-1], $$[$0]); 
 break;
 case 181:
  this.$ = {important: true}; 

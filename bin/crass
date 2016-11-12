@@ -20,11 +20,6 @@ function help() {
     ].join('\n'));
 }
 
-if (process.argv.length < 3) {
-    help();
-    process.exit(1);
-}
-
 var fs = require('fs');
 
 var browser_support = require('../lib/browser_support');
@@ -32,6 +27,12 @@ var utils = require('../lib/utils');
 var opts = utils.opts(process.argv.slice(3));
 
 var crass = require('../crass');
+
+if (process.argv.length < 3) {
+    help();
+    process.exit(1);
+}
+
 fs.readFile(process.argv[2], function(err, data) {
     if (err) {
         console.error('Could not read file.');
@@ -51,7 +52,7 @@ fs.readFile(process.argv[2], function(err, data) {
         });
     }
 
-    kw.css4 = 'css4' in opts and opts.css4;
+    kw.css4 = 'css4' in opts && opts.css4;
 
     if (opts.optimize) {
         if (opts.o1 || opts.O1) kw.o1 = true;

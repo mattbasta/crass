@@ -4,30 +4,6 @@ var objects = require('../lib/objects');
 var utils = require('../lib/utils');
 
 
-describe('objects.extend', function() {
-    it('should should copy one object into another', function() {
-        var first = {x: 1, b: 2};
-        var second = {};
-        objects.extend(second, first);
-        assert.equal(second.x, 1);
-        assert.equal(second.b, 2);
-    });
-    it('should should copy one object into another', function() {
-        function F() {
-            this.x = 1;
-            this.b = 2;
-        }
-        F.prototype.foo = 'bar';
-        var first = new F();
-
-        var second = {};
-        objects.extend(second, first);
-        assert.equal(second.x, 1);
-        assert.equal(second.b, 2);
-        assert.ok(!('foo' in second));
-    });
-});
-
 describe('opts', function() {
     it('should default to process.argv', function() {
         assert.equal(

@@ -137,6 +137,22 @@ describe('Remove', function() {
                 'b{foo:0 0 0 0}'
             );
         });
+        it('except when slashes', function() {
+            parseCompare(
+                'b{border-radius:0 1/0 1}',
+                'b{border-radius:0 1/0 1}'
+            );
+        });
+        it('should collapse border radii', () => {
+            parseCompare(
+                'b{border-radius:0 0/0 0}',
+                'b{border-radius:0/0}'
+            );
+            parseCompare(
+                'b{border-radius:0 1 2 1/1 2 1}',
+                'b{border-radius:0 1 2/1 2}'
+            );
+        });
     });
 
     describe('mismatched browser prefixes', function() {

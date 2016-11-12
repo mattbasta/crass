@@ -1,6 +1,6 @@
 {
   "name": "crass",
-  "version": "0.7.12",
+  "version": "0.8.0",
   "description": "A CSS utility library for JS",
   "main": "crass.js",
   "scripts": {
@@ -29,5 +29,7 @@
     "jison": "^0.4.15",
     "browserify": "^5.9.1"
   },
-  "engines": {"node": ">=4.6.2"}
+  "engines": {
+    "node": ">=4.6.2"
+  }
 }

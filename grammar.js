@@ -439,18 +439,11 @@ case 236: case 241:
 break;
 case 237:
 
-            var parts = $$[$0].split('e');
-            var base = parseInt(parts[0], 10);
-            var exp = parts[1];
-            var sign = 1;
-            switch (exp[0]) {
-                case '-':
-                    sign = -1;
-                case '+':
-                    exp = exp.substr(1);
-            }
-            exp = parseInt(exp, 10);
-            this.$ = new yy.Number(base * Math.pow(10, sign * exp));
+            const parts = $$[$0].split('e');
+            const base = parseInt(parts[0], 10);
+            const exp = /[^\d]/.exec(parts[1][0]) ? parts[1].substr(1) : parts[1];
+            const sign = parts[1][0] === '-' ? -1 : 1;
+            this.$ = new yy.Number(base * Math.pow(10, sign * parseInt(exp, 10)));
             this.$.range = this._$;
         
 break;

@@ -7,7 +7,7 @@ A CSS3 minification, pretty printing, and general utility library for JS.
 
 ## Installation
 
-Crass 1.8 requires Node 4 or higher.
+Crass 1.8 is built with ES2015 and requires Node 4.6.2 or higher.
 
 ```sh
 npm install --save-dev crass

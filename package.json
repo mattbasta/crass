@@ -29,5 +29,5 @@
     "jison": "^0.4.15",
     "browserify": "^5.9.1"
   },
-  "engines": {"node": ">=4.0.0"}
+  "engines": {"node": ">=4.6.2"}
 }

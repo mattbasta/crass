@@ -1,8 +1,28 @@
 # crass
 
-A CSS3 minification, pretty printing, and general utility library for JS.
+A CSS minification, pretty printing, and general utility library written in JS.
 
 [![Build Status](https://travis-ci.org/mattbasta/crass.png?branch=master)](https://travis-ci.org/mattbasta/crass)
+
+## Why Crass?
+
+Crass is one of only a handful of CSS minifiers that creates a full parse tree
+of the CSS. Most other CSS minifiers operate on the string source instead,
+which makes it impossible to perform all types of optimizations.
+
+**Pros:**
+
+- Better minification, particularly after gzip
+- Support for consistent pretty printing
+- Support for settled CSS4 and all of CSS3
+- Ability to strip obsolete tags (removed prefixes, old standard specs, etc.) by browser version
+- Convert all colors to their smallest possible form
+- Unsafe optimizations are opt-in only
+
+**Cons:**
+- Slower minification times
+- Cannot minify CSS with syntax errors
+- Certain "CSS hacks" that use invalid syntax are unsupported
 
 
 ## Installation

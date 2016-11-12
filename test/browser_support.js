@@ -26,16 +26,28 @@ function getMins(str) {
 }
 
 describe('supportsDeclaration', function() {
+
+    beforeEach(function() {
+        browser_support.DECLARATIONS_REMOVED['-foo-bar'] = {ie: 6, firefox: 4};
+    });
+    afterEach(function() {
+        delete browser_support.DECLARATIONS_REMOVED['-foo-bar'];
+    });
+
     it('should return true when no mins have been provided', function() {
         assert(browser_support.supportsDeclaration('foo', {}));
     });
     it('should return true when the declaration is unrecognized', function() {
         assert(browser_support.supportsDeclaration('foo', getMins('ie1000,fx1000,chr1000')));
     });
-    it('should return true when the declaration is recognized but all browser support the decl', function() {
+    it('should return true when the declaration is recognized but all browsers support the decl', function() {
         var kw = getMins('ie1,fx1,chr1');
         assert(browser_support.supportsDeclaration('-moz-border-radius', kw));
         assert.equal(crass.parse('a{-moz-border-radius:0}').optimize(kw).toString(), 'a{-moz-border-radius:0}');
+    });
+    it('should return false when at least one supported browser uses the feature', function() {
+        var kw = getMins('ie5,fx10');
+        assert(browser_support.supportsDeclaration('-foo-bar', kw));
     });
     it('should return false when the declaration is unrecognized by the selected browsers', function() {
         var kw = getMins('ie1,fx5,chr1');

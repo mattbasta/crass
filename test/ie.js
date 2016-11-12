@@ -124,3 +124,19 @@ describe('* html hack', function() {
         paritySaveIE('* html foo,bar{foo:bar}');
     });
 });
+
+
+describe('flexbox display values', function() {
+    it('are ignored when no compat is specified', function() {
+        var output = crass.parse('a{display:-ms-flexbox}').optimize().toString();
+        assert.equal(output, 'a{display:-ms-flexbox}', 'should have been ignored');
+    });
+    it('are removed for ie10 and earlier', function() {
+        var output = crass.parse('a{display:-ms-flexbox}').optimize({browser_min: {ie: 10}}).toString();
+        assert.equal(output, 'a{display:-ms-flexbox}', 'should have been ignored');
+    });
+    it('are removed for ie11 and later', function() {
+        var output = crass.parse('a{display:-ms-flexbox;color:red}').optimize({browser_min: {ie: 11}}).toString();
+        assert.equal(output, 'a{color:red}', 'should have removed the value');
+    });
+});

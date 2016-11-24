@@ -1,4 +1,4 @@
-var assert = require("assert");
+var assert = require('assert');
 
 var crass = require('../crass');
 var parseString = function(data, o1) {

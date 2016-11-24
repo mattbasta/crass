@@ -1,4 +1,4 @@
-var assert = require("assert");
+var assert = require('assert');
 
 var objects = require('../lib/objects');
 var utils = require('../lib/utils');

@@ -1,4 +1,4 @@
-var assert = require("assert");
+var assert = require('assert');
 
 var browser_support = require('../lib/browser_support');
 var crass = require('../crass');

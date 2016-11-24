@@ -1,132 +1,137 @@
-var assert = require("assert");
+const assert = require('assert');
 
-var crass = require('../crass');
-var parseString = function(data) {
-    return crass.parse(data).toString();
-};
+const crass = require('../crass');
+const parseString = data => crass.parse(data).toString();
 
 
-describe('Strings', function() {
-    it('can be empty', function() {
+describe('Strings', () => {
+    it('can be empty', () => {
         assert.equal(parseString('a{content:""}'), 'a{content:""}');
     });
-    it('can contain a single char', function() {
+    it('can contain a single char', () => {
         assert.equal(parseString('a{content:"("}'), 'a{content:"("}');
     });
-    it('can contain another single char', function() {
+    it('can contain another single char', () => {
         assert.equal(parseString('a{content:"a"}'), 'a{content:"a"}');
     });
-    it('can contain escaped quotes', function() {
+    it('can contain escaped quotes', () => {
         assert.equal(parseString('a{content:\'\\\'\'}'), 'a{content:"\'"}');
         assert.equal(parseString('a{content:"\\""}'), 'a{content:\'"\'}');
     });
-    it('can contain escaped line breaks', function() {
+    it('can contain escaped line breaks', () => {
         assert.equal(parseString('a{content:"\\\n"}'), 'a{content:"\\\n"}');
     });
 });
 
 
-describe('URIs', function() {
-    it('can contain data uris', function() {
+describe('URIs', () => {
+    it('can contain data uris', () => {
         assert.equal(
             parseString('a{content:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeD0iMTJweCIgeT0iMHB4IiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIzcHgiIHZpZXdCb3g9Ij==)}'),
             'a{content:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeD0iMTJweCIgeT0iMHB4IiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIzcHgiIHZpZXdCb3g9Ij==)}'
         );
     });
-    it('can be double quote', function() {
+    it('can be double quote', () => {
         assert.equal(parseString('a{content:url("foo")}'), 'a{content:url(foo)}');
     });
-    it('can be single quote', function() {
+    it('can be single quote', () => {
         assert.equal(parseString('a{content:url(\'foo\')}'), 'a{content:url(foo)}');
     });
-    it('does not optimize', function() {
+    it('does not optimize', () => {
         assert.equal(crass.parse('a{content:url(\'foo\')}').optimize({o1: true}).toString(), 'a{content:url(foo)}');
     });
-    it('can retain quotes', function() {
+    it('can retain quotes', () => {
         assert.equal(parseString('a{content:url("foo)")}'), 'a{content:url("foo)")}');
         assert.equal(parseString('a{content:url(\'foo)\')}'), 'a{content:url("foo)")}');
     });
 });
 
 
-describe('Numbers', function() {
-    it('should omit a leading 0 in negative floating point numbers', function() {
+describe('Numbers', () => {
+    it('should omit a leading 0 in negative floating point numbers', () => {
         assert.equal(parseString('a{foo:-0.5}'), 'a{foo:-.5}');
     });
-    it('should support scientific notation', function() {
-        assert.equal(crass.parse('a{foo:3e1}').toString(), 'a{foo:30}');
-        assert.equal(crass.parse('a{foo:3e2}').toString(), 'a{foo:300}');
-        assert.equal(crass.parse('a{foo:3e+2}').toString(), 'a{foo:300}');
-        assert.equal(crass.parse('a{foo:3e-2}').toString(), 'a{foo:.03}');
+    it('should support scientific notation', () => {
+        assert.equal(parseString('a{foo:3e1}'), 'a{foo:30}');
+        assert.equal(parseString('a{foo:3e2}'), 'a{foo:300}');
+        assert.equal(parseString('a{foo:3e+2}'), 'a{foo:300}');
+        assert.equal(parseString('a{foo:3e-2}'), 'a{foo:.03}');
     });
-    it('should support unary plus', function() {
+    it('should support unary plus', () => {
         assert.equal(crass.parse('a{foo:+.5}').optimize().toString(), 'a{foo:.5}');
     });
-    it('should not optimize', function() {
+    it('should not optimize', () => {
         assert.equal(crass.parse('a{foo:-.5}').optimize().toString(), 'a{foo:-.5}');
     });
-    it('should strip units when the dimension is zero', function() {
-        assert.equal(crass.parse('a{foo:0px}').toString(), 'a{foo:0}');
+    it('should strip units when the dimension is zero', () => {
+        assert.equal(parseString('a{foo:0px}'), 'a{foo:0}');
     });
-    it('should not strip units when the dimension is zero percent', function() {
-        assert.equal(crass.parse('a{foo:0%}').toString(), 'a{foo:0%}');
+    it('should not strip units when the dimension is zero percent', () => {
+        assert.equal(parseString('a{foo:0%}'), 'a{foo:0%}');
     });
 });
 
 
-describe('Identifiers', function() {
-    it('can be normal identifiers', function() {
+describe('Identifiers', () => {
+    it('can be normal identifiers', () => {
         assert.equal(parseString('a{foo:bar}'), 'a{foo:bar}');
     });
-    it('can be n-resize', function() {
+    it('can be n-resize', () => {
         assert.equal(parseString('a{nearly-cursor:n-resize}'), 'a{nearly-cursor:n-resize}');
     });
-    it('can be not-allowed', function() {
+    it('can be not-allowed', () => {
         assert.equal(parseString('a{nearly-cursor:not-allowed}'), 'a{nearly-cursor:not-allowed}');
     });
-    it('can be use old hacks in declaration names', function() {
+    it('can be use old hacks in declaration names', () => {
         assert.equal(parseString('a{*foo: bar;}'), 'a{*foo:bar}');
     });
 });
 
 
-describe('Expressions', function() {
-    it('can be parsed with spaces', function() {
+describe('Expressions', () => {
+    it('can be parsed with spaces', () => {
         assert.equal(parseString('a{b:1 2 3}'), 'a{b:1 2 3}');
     });
-    it('can be parsed with slashes', function() {
+    it('can be parsed with slashes', () => {
         assert.equal(parseString('a{b:1 2 / 3}'), 'a{b:1 2/3}');
     });
-    it('can be parsed with commas', function() {
+    it('can be parsed with commas', () => {
         assert.equal(parseString('a{b:1 2 , 3}'), 'a{b:1 2,3}');
     });
-    it('can contain "to" inside functions', function() {
+    it('can contain "to" inside functions', () => {
         assert.equal(parseString('a{b:linear-gradient(to bottom,#65a4e1,#3085d6)}'), 'a{b:linear-gradient(to bottom,#65a4e1,#3085d6)}');
+    });
+
+    it('should reduce font names', () => {
+        assert.equal(
+            crass.parse('a{font-family:"Open Sans","Helvetica",sans-serif;}').optimize().toString(),
+            'a{font-family:Open Sans,Helvetica,sans-serif}'
+        );
     });
 });
 
 
-describe('Attribute functions', function() {
-    it('can contain an attribute name', function() {
+describe('Attribute functions', () => {
+    it('can contain an attribute name', () => {
         assert.equal(parseString('a{foo:attr(data-foo)}'), 'a{foo:attr(data-foo)}');
     });
-    it('can contain an element name with a unit', function() {
+    it('can contain an element name with a unit', () => {
         assert.equal(parseString('a{foo:attr(data-foo px)}'), 'a{foo:attr(data-foo px)}');
     });
-    it('can contain an element name with a unit with a fallback', function() {
+    it('can contain an element name with a unit with a fallback', () => {
         assert.equal(parseString('a{foo:attr(data-foo px, 123px)}'), 'a{foo:attr(data-foo px,123px)}');
     });
-    it('can contain an element name and a fallback without a dimension', function() {
+    it('can contain an element name and a fallback without a dimension', () => {
         assert.equal(parseString('a{foo:attr(data-foo, 123px)}'), 'a{foo:attr(data-foo,123px)}');
     });
 });
 
 
-describe('Custom Identifiers', function() {
-    it('can be parsed alone', function() {
+describe('Custom Identifiers', () => {
+    it('can be parsed alone', () => {
         assert.equal(parseString('a{b:[foo]}'), 'a{b:[foo]}');
     });
-    it('can be parsed in a group', function() {
+    it('can be parsed in a group', () => {
         assert.equal(parseString('a{b:[foo  bar]}'), 'a{b:[foo bar]}');
     });
 });

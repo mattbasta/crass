@@ -1,12 +1,12 @@
-var assert = require("assert");
+const assert = require('assert');
 
-var crass = require('../crass');
+const crass = require('../crass');
 
-var filler = 'x:y';
-var parseString = function(data) {
+const filler = 'x:y';
+const parseString = (data) => {
     return crass.parse(data).toString();
 };
-var parseCompare = function(data, expected) {
+const parseCompare = (data, expected) => {
     data = data.replace(/\$\$/g, filler);
     expected = expected.replace(/\$\$/g, filler);
     assert.equal(parseString(data), expected);
@@ -17,20 +17,20 @@ function parity(data, comp) {
 }
 
 
-describe('Element Selectors', function() {
-    it('should parse properly', function() {
+describe('Element Selectors', () => {
+    it('should parse properly', () => {
         parity('foo{$$}');
         parity('foo bar{$$}');
     });
-    it('should allow namespaces', function() {
+    it('should allow namespaces', () => {
         parity('foo|namespace{$$}');
         parity('|namespace{$$}');
         parity('foo|namespace bar{$$}');
     });
 });
 
-describe('ID Selectors', function() {
-    it('should work', function() {
+describe('ID Selectors', () => {
+    it('should work', () => {
         parity('#foo{$$}');
         parity('#f00{$$}'); // Short hex
         parity('#f00asdf{$$}'); // Short hex w/ident
@@ -42,16 +42,16 @@ describe('ID Selectors', function() {
     });
 });
 
-describe('Class Selectors', function() {
-    it('should work', function() {
+describe('Class Selectors', () => {
+    it('should work', () => {
         parity('.foo{$$}');
         parity('.foo .bar{$$}');
         parity('.foo.bar{$$}');
     });
 });
 
-describe('Attribute Selectors', function() {
-    it('should work', function() {
+describe('Attribute Selectors', () => {
+    it('should work', () => {
         parity('[foo]{$$}');
         parity('[foo=bar]{$$}');
         parity('[foo*=bar]{$$}');
@@ -60,7 +60,7 @@ describe('Attribute Selectors', function() {
         parity('[foo$=bar]{$$}');
         parity('[foo~=bar]{$$}');
     });
-    it('should strip quotes when possible', function() {
+    it('should strip quotes when possible', () => {
         parity('[foo=bar]{$$}');
         parity('[foo="ba\\\\r"]{$$}');
         assert.equal(
@@ -68,25 +68,25 @@ describe('Attribute Selectors', function() {
             '[foo=bar]{a:b}'
         )
     });
-    it('should allow namespaces', function() {
+    it('should allow namespaces', () => {
         parity('[foo|bar]{$$}');
         parity('[foo|bar=bar]{$$}');
     });
 });
 
-describe('Pseudo', function() {
-    it('elements', function() {
+describe('Pseudo', () => {
+    it('elements', () => {
         parity('::after{$$}');
         parity('::after:first-letter{$$}');
         parity('foo::after{$$}');
     });
-    it('classes', function() {
+    it('classes', () => {
         parity(':whatever{$$}');
         parity(':only-child{$$}');
         parity(':only-child:first-child{$$}');
         parity('foo:only-child{$$}');
     });
-    it('nth-func', function() {
+    it('nth-func', () => {
         parity('foo:nth-child(n){$$}');
         parity('foo:nth-last-child(n){$$}');
         parity('foo:nth-of-type(n){$$}');
@@ -97,7 +97,7 @@ describe('Pseudo', function() {
             'foo:nth-child(n){x:y}'
         );
     });
-    it('nth-func syntax', function() {
+    it('nth-func syntax', () => {
         parity(':nth-child(2n){$$}');
         parity(':nth-child(2n+1){$$}');
         parity(':nth-child(2n-1){$$}');
@@ -109,7 +109,7 @@ describe('Pseudo', function() {
         parity(':nth-child(even){$$}');
         parity(':nth-child(odd){$$}');
     });
-    it('not', function() {
+    it('not', () => {
         parity('foo:not(.foo){$$}');
         parity('foo:not(.foo .bar){$$}');
         parity(':not(:another){$$}');
@@ -119,31 +119,31 @@ describe('Pseudo', function() {
             'foo:not(bar){x:y}'
         );
     });
-    it('function', function() {
+    it('function', () => {
         parity(':whatever(1em #fff ident){$$}');
         parity(':with-hyphens(1em #fff ident){$$}');
     });
 });
 
-describe('Selector Lists', function() {
-    it('should output properly', function() {
+describe('Selector Lists', () => {
+    it('should output properly', () => {
         parity('a,b,c{$$}');
         parity('.a,#b,c{$$}');
         parity('.a #b,c{$$}');
     });
-    it('should pretty print', function() {
+    it('should pretty print', () => {
         assert.equal(
             crass.parse('a,b,c{foo:bar}').pretty(),
             'a, b, c {\n  foo: bar;\n}\n'
         );
     });
-    it('should pretty print with long lines', function() {
+    it('should pretty print with long lines', () => {
         assert.equal(
             crass.parse('thisisareallylongselector, thisisanotherreallylongselector, thisisathirdreallylongselector{foo:bar}').pretty(),
             'thisisareallylongselector,\nthisisanotherreallylongselector,\nthisisathirdreallylongselector {\n  foo: bar;\n}\n'
         );
     });
-    it('should pretty print with long lines when indented', function() {
+    it('should pretty print with long lines when indented', () => {
         assert.equal(
             crass.parse(
                 '@media (min-width:4){thisisareallylongselector, thisisanotherreallylongselector, thisisathirdreallylongselector{foo:bar}}'
@@ -153,17 +153,17 @@ describe('Selector Lists', function() {
     });
 });
 
-describe('Selector chains', function() {
-    it('can have descendants', function() {
+describe('Selector chains', () => {
+    it('can have descendants', () => {
         parity('x y z{$$}');
     });
-    it('can have adjacent siblings', function() {
+    it('can have adjacent siblings', () => {
         parseCompare('x + y+z {$$}', 'x+y+z{$$}');
     });
-    it('can have direct descendants', function() {
+    it('can have direct descendants', () => {
         parseCompare('x > y>z {$$}', 'x>y>z{$$}');
     });
-    it('can have siblings', function() {
+    it('can have siblings', () => {
         parseCompare('x ~ y~z {$$}', 'x~y~z{$$}');
     });
 });

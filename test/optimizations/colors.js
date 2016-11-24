@@ -1,11 +1,11 @@
-var assert = require('assert');
+const assert = require('assert');
 
-var crass = require('../../crass');
+const crass = require('../../crass');
 
-var parseString = function(data, kw) {
+const parseString = (data, kw) => {
     return crass.parse(data).optimize(kw || {}).toString();
 };
-var parseCompare = function(data, expected, kw) {
+const parseCompare = (data, expected, kw) => {
     if (kw) {
         if (kw.o1 && data !== expected) {
             assert.notEqual(parseString(data), expected);

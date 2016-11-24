@@ -44,6 +44,14 @@ describe('URIs', () => {
         assert.equal(parseString('a{content:url("foo)")}'), 'a{content:url("foo)")}');
         assert.equal(parseString('a{content:url(\'foo)\')}'), 'a{content:url("foo)")}');
     });
+
+    it('should normalize URIs on O1', () => {
+        const unnormalized = 'a{foo:url(../foo/../bar/./zap)}';
+        assert.equal(parseString(unnormalized), unnormalized);
+        assert.equal(crass.parse(unnormalized).optimize().toString(), unnormalized);
+        assert.equal(crass.parse(unnormalized).optimize({o1: true}).toString(), 'a{foo:url(../bar/zap)}');
+    });
+
 });
 
 

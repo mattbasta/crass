@@ -1,6 +1,6 @@
 var assert = require('assert');
 
-var crass = require('../crass');
+var crass = require('../src');
 var parseString = function(data, o1) {
     var params = {};
     if (o1) params.o1 = true;

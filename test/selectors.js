@@ -1,6 +1,6 @@
 const assert = require('assert');
 
-const crass = require('../crass');
+const crass = require('../src');
 
 const filler = 'x:y';
 const parseString = (data) => {

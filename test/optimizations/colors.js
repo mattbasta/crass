@@ -1,6 +1,6 @@
 const assert = require('assert');
 
-const crass = require('../../crass');
+const crass = require('../../src');
 
 const parseString = (data, kw) => {
     return crass.parse(data).optimize(kw || {}).toString();

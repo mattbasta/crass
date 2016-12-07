@@ -1,5 +1,5 @@
 var grammar = require('./grammar');
-var objects = require('./lib/objects');
+var objects = require('./objects');
 
 exports.parse = function parse(data) {
     var parser = new grammar.Parser();

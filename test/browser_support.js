@@ -1,7 +1,7 @@
 var assert = require('assert');
 
-var browser_support = require('../lib/browser_support');
-var crass = require('../crass');
+var browser_support = require('../src/browser_support');
+var crass = require('../src');
 
 
 describe('parseBrowser', function() {

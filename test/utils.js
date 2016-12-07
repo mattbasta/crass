@@ -1,7 +1,7 @@
 var assert = require('assert');
 
-var objects = require('../lib/objects');
-var utils = require('../lib/utils');
+var objects = require('../src/objects');
+var utils = require('../src/utils');
 
 
 describe('opts', function() {

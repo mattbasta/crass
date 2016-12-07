@@ -22,11 +22,11 @@ function help() {
 
 var fs = require('fs');
 
-var browser_support = require('../lib/browser_support');
-var utils = require('../lib/utils');
+var browser_support = require('../src/browser_support');
+var utils = require('../src/utils');
 var opts = utils.opts(process.argv.slice(3));
 
-var crass = require('../crass');
+var crass = require('../src');
 
 if (process.argv.length < 3) {
     help();

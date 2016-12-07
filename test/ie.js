@@ -1,6 +1,6 @@
 var assert = require('assert');
 
-var crass = require('../crass');
+var crass = require('../src');
 
 function parseString(data) {
     return crass.parse(data).toString();

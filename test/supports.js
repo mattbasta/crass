@@ -1,6 +1,6 @@
 var assert = require('assert');
 
-var crass = require('../crass');
+var crass = require('../src');
 
 var filler = '.foo{x:y}';
 var parity = function(data) {

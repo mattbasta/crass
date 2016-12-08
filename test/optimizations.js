@@ -101,6 +101,10 @@ describe('Remove', function() {
     describe('unnecessary quadList items', function() {
         it('for groups of four identical items', function() {
             parseCompare(
+                'b{margin:0 0}',
+                'b{margin:0}'
+            );
+            parseCompare(
                 'b{margin:0 0 0 0}',
                 'b{margin:0}'
             );
@@ -119,6 +123,12 @@ describe('Remove', function() {
             parseCompare(
                 'b{padding:#fff #000 #123 #000}',
                 'b{padding:#fff #000 #123}'
+            );
+        });
+        it('for identical first and second items', function() {
+            parseCompare(
+                'b{padding:#fff #fff}',
+                'b{padding:#fff}'
             );
         });
         it('for identical first and third items', function() {

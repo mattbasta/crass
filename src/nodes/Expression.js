@@ -66,8 +66,8 @@ Expression.prototype.optimize = function optimize(kw) {
     // e.g.: `margin:0 0 0 0` -> `margin:0`
     if (
         kw.declarationName in optimization.quadLists &&
-        this.chain.length > 2 &&
-        this.chain.length <= 4 &&
+        this.chain.length > 1 &&
+        this.chain.length < 5 &&
         this.chain.every(c => c[0] !== '/')
     ) {
         this.chain = this.processQuadList(this.chain);

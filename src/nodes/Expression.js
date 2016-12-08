@@ -107,6 +107,60 @@ Expression.prototype.optimize = function optimize(kw) {
     ) {
         // OPT: `content:none` -> `content:""`
         this.chain[0][1] = new objects.String('');
+
+    } else if (kw.declarationName === 'display' && this.chain.length > 1) {
+        const sec = this.chain[1][1];
+        switch (this.chain[0][1]) {
+            case 'block':
+                if (sec === 'flow') {
+                    this.chain.splice(1, 1);
+                } else if (sec === 'flow-root') {
+                    this.chain = [[null, 'flow-root']];
+                } else if (sec === 'flex') {
+                    this.chain = [[null, 'flex']];
+                } else if (sec === 'grid') {
+                    this.chain = [[null, 'grid']];
+                } else if (sec === 'table') {
+                    this.chain = [[null, 'table']];
+                }
+                break;
+            case 'inline':
+                if (sec === 'flow') {
+                    this.chain.splice(1, 1);
+                } else if (sec === 'flow-root') {
+                    this.chain = [[null, 'inline-block']];
+                } else if (sec === 'flex') {
+                    this.chain = [[null, 'inline-flex']];
+                } else if (sec === 'grid') {
+                    this.chain = [[null, 'inline-grid']];
+                } else if (sec === 'ruby') {
+                    this.chain = [[null, 'ruby']];
+                } else if (sec === 'table') {
+                    this.chain = [[null, 'inline-table']];
+                }
+                break;
+            case 'run-in':
+                if (sec === 'flow') {
+                    this.chain.splice(1, 1);
+                }
+                break;
+            case 'list-item':
+                if (this.chain.length === 3 && this.chain[2][1] === 'flow') {
+                    if (sec === 'block') {
+                        this.chain = [[null, 'list-item']];
+                    } else if (sec === 'inline') {
+                        this.chain = [[null, 'inline-list-item']];
+                    }
+                }
+                break;
+            case 'table-cell':
+            case 'table-caption':
+            case 'ruby-base':
+            case 'ruby-text':
+                if (sec === 'flow') {
+                    this.chain.splice(1, 1);
+                }
+        }
     }
 
     if (

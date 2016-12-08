@@ -1,7 +1,7 @@
-var browserSupport = require('../browser_support');
-var objects = require('../objects');
-var optimization = require('../optimization');
-var utils = require('../utils');
+const browserSupport = require('../browser_support');
+const objects = require('../objects');
+const optimization = require('../optimization');
+const utils = require('../utils');
 
 
 /**
@@ -27,7 +27,7 @@ Keyframes.prototype.getBlockHeader = function getBlockHeader() {
  * @return {string}
  */
 Keyframes.prototype.toString = function toString() {
-    var output = this.getBlockHeader();
+    let output = this.getBlockHeader();
     output += this.name;
     output += '{';
     output += utils.joinAll(this.content);
@@ -40,14 +40,14 @@ Keyframes.prototype.toString = function toString() {
  * @return {string}
  */
 Keyframes.prototype.pretty = function pretty(indent) {
-    var output = '';
+    let output = '';
     output += utils.indent(this.getBlockHeader() + this.name + ' {') + '\n';
-    output += this.content.map(function(line) {
-        return utils.indent(line.pretty(indent + 1), indent);
-    }).join('\n') + '\n';
+    output += this.content
+        .map(line => utils.indent(line.pretty(indent + 1), indent))
+        .join('\n') + '\n';
     output += utils.indent('}', indent) + '\n';
     return output;
-};
+};``
 
 /**
  * @param {object} kw
@@ -65,10 +65,8 @@ Keyframes.prototype.optimize = function optimize(kw) {
 
     // OPT: Combine keyframes with identical stops.
     this.content = optimization.combineList(
-        function(item) {return item.stop.toString();},
-        function(a, b) {
-            return new objects.Keyframe(a.stop, a.content.concat(b.content));
-        },
+        item => item.stop.toString(),
+        (a, b) => new objects.Keyframe(a.stop, a.content.concat(b.content)),
         this.content
     );
     // OPT: Sort keyframes.
@@ -79,9 +77,9 @@ Keyframes.prototype.optimize = function optimize(kw) {
     this.content = optimization.optimizeList(this.content, kw);
 
     // OPT: Combine duplicate keyframes
-    var cache = {};
+    const cache = {};
     this.content = this.content.reduce(function(a, b) {
-        var content = b.content.toString();
+        const content = b.content.toString();
         if (content in cache) {
             cache[content].stop = cache[content].stop.concat(b.stop);
             return a;

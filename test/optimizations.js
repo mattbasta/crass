@@ -68,10 +68,6 @@ describe('Sort', function() {
 });
 
 describe('Remove', function() {
-    it('duplicate keyframes', function() {
-        var kf = '@keyframes foo{from{x:y}to{x:a}}';
-        parseCompare(kf + kf, '@keyframes foo{0{x:y}to{x:a}}', {o1: true});
-    });
     it('duplicate declarations', function() {
         parseCompare('a{a:1;a:1;a:lol;a:1;b:abc}', 'a{a:1;a:lol;b:abc}');
         parseCompare('a{color:#ffffff;color:white}', 'a{color:#fff}');

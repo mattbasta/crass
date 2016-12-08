@@ -1,11 +1,11 @@
 const assert = require('assert');
 
-var crass = require('../../src');
+const crass = require('../../src');
 
-var parseString = function(data, kw) {
+const parseString = function(data, kw) {
     return crass.parse(data).optimize(kw || {}).toString();
 };
-var parseCompare = function(dataRaw, expectedRaw, kw) {
+const parseCompare = function(dataRaw, expectedRaw, kw) {
     const data = `a{b:${dataRaw}}`;
     const expected = expectedRaw ? `a{b:${expectedRaw}}` : '';
     if (kw) {

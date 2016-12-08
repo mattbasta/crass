@@ -1,5 +1,6 @@
-var optimization = require('../optimization');
-var utils = require('../utils');
+const objects = require('../objects');
+const optimization = require('../optimization');
+const utils = require('../utils');
 
 
 /**
@@ -20,7 +21,7 @@ function Stylesheet(charset, imports, namespaces, content) {
  * @return {string}
  */
 Stylesheet.prototype.toString = function toString() {
-    var output = '';
+    let output = '';
     if (this.charset) {
         output += this.charset.toString();
     }
@@ -41,7 +42,7 @@ Stylesheet.prototype.toString = function toString() {
  */
 Stylesheet.prototype.pretty = function pretty(indent) {
     indent = indent || 0;
-    var output = '';
+    let output = '';
     if (this.charset) {
         output += this.charset.pretty(indent);
     }
@@ -73,6 +74,30 @@ Stylesheet.prototype.optimize = function optimize(kw) {
         this.namespaces = optimization.optimizeList(this.namespaces, kw);
     }
     this.content = optimization.optimizeBlocks(this.content, kw);
+
+    // OPT: Remove overridden keyframe blocks
+    const keyframeMap = {};
+    const toRemove = new Set();
+    this.content.forEach((x, i) => {
+        if (!(x instanceof objects.Keyframes)) {
+            return;
+        }
+        const prefix = x.vendorPrefix || '--';
+        if (!(prefix in keyframeMap)) {
+            keyframeMap[prefix] = {};
+        }
+        if (x.name in keyframeMap[prefix]) {
+            toRemove.add(keyframeMap[prefix][x.name]);
+        }
+        keyframeMap[prefix][x.name] = i;
+    });
+    if (toRemove.size) {
+        const ordered = Array.from(toRemove.values()).sort((a, b) => b - a);
+        for (let i of ordered) {
+            this.content.splice(i, 1);
+        }
+    }
+
     return this;
 };
 

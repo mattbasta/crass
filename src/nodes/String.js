@@ -26,8 +26,8 @@ String.prototype.toString = function toString() {
     if (this._noQuotes) {
         return this.value;
     }
-    var single_ = "'" + this.value.replace(/'/g, "\\'") + "'";
-    var double_ = '"' + this.value.replace(/"/g, '\\"') + '"';
+    const single_ = "'" + this.value.replace(/'/g, "\\'") + "'";
+    const double_ = '"' + this.value.replace(/"/g, '\\"') + '"';
     // OPT: Choose the shortest string variation
     return (single_.length < double_.length) ? single_ : double_;
 };

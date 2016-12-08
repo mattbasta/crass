@@ -2,6 +2,9 @@
 
 const path = require('path');
 
+const sdu = require('strong-data-uri');
+const svgo = require('svgo');
+
 const objects = require('../objects');
 
 /**
@@ -29,6 +32,16 @@ URI.prototype.asString = function asString() {
 /**
  * @return {string}
  */
+URI.prototype.asRawString = function asRawString() {
+    if (this.uri instanceof objects.String) {
+        return this.uri.value;
+    }
+    return this.uri;
+};
+
+/**
+ * @return {string}
+ */
 URI.prototype.toString = function toString() {
     let uri = this.uri;
     if (typeof uri === 'string' && uri.indexOf(')') !== -1) {
@@ -50,23 +63,85 @@ URI.prototype.pretty = function pretty() {
  * @return {URI}
  */
 URI.prototype.optimize = function optimize(kw) {
+    let self = this;
+    const isURL = this.isURL();
+
     // OPT: Normalize URIs
-    if (kw.o1) {
+    if (kw.o1 && isURL) {
         if (this.uri instanceof objects.String) {
             this.uri = new objects.String(
-                path.normalize(this.uri.asString(true))
+                path.normalize(this.uri.value)
             );
         } else {
             this.uri = path.normalize(this.uri);
         }
+    } else if (kw.o1 && !isURL) {
+        const content = this.asRawString();
+        if (content.slice(0, 5) === 'data:') {
+            try {
+                const out = sdu.decode(content);
+                self = this.optimizeDataURI(out);
+                if (!self) {
+                    return null;
+                }
+            } catch (e) {
+                return null;
+            }
+        }
     }
-    if (this.uri instanceof objects.String) {
-        this.uri = this.uri.optimize(kw);
-        if (!this.uri) {
+
+    if (self.uri instanceof objects.String) {
+        self.uri = self.uri.optimize(kw);
+        if (!self.uri) {
             return null;
         }
     }
-    return this;
+    return self;
+};
+
+/**
+ * Optimizes data URIs
+ * @param  {Buffer} data The output of strong-data-uri
+ * @return {URI}      The optimized URI
+ */
+URI.prototype.optimizeDataURI = function optimizeDataURI(data) {
+    let newContent;
+    if (data.mimetype === 'image/svg+xml') {
+        const s = new svgo({});
+        try {
+            s.optimize(data.toString('utf-8'), data => {
+                newContent = data.data;
+            });
+        } catch (e) {
+            return this;
+        }
+
+    } else {
+        return this;
+    }
+
+    if (!newContent) {
+        return null;
+    }
+
+    return new URI(sdu.encode(newContent, data.mimetype));
+};
+
+/**
+ * Returns whether the URI is a URL
+ * @return {Boolean}
+ */
+URI.prototype.isURL = function isURL() {
+    const content = this.asRawString();
+    if (content.slice(0, 5) === 'data:') {
+        return false;
+    }
+
+    if (content.slice(0, 5) === 'file:') {
+        return false;
+    }
+
+    return true;
 };
 
 module.exports = URI;

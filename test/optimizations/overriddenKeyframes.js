@@ -1,6 +1,6 @@
 const assert = require('assert');
 
-var crass = require('../../src');
+const crass = require('../../src');
 
 
 function optimize(x) {

@@ -24,7 +24,9 @@
   "author": "Matt Basta",
   "license": "MIT",
   "dependencies": {
-    "color-convert": "^1.7.0"
+    "color-convert": "^1.7.0",
+    "strong-data-uri": "^1.0.4",
+    "svgo": "^0.7.1"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",

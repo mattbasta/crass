@@ -1,3 +1,5 @@
+'use strict';
+
 const objects = require('../objects');
 const optimization = require('../optimization');
 const utils = require('../utils');

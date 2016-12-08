@@ -1,17 +1,17 @@
-var assert = require('assert');
+const assert = require('assert');
 
-var crass = require('../../src');
+const crass = require('../../src');
 
 
 function doesNotChange(data) {
-    var pretty = crass.parse(data).optimize().pretty();
-    var optPretty = crass.parse(data).optimize({o1: true}).pretty();
+    const pretty = crass.parse(data).optimize().pretty();
+    const optPretty = crass.parse(data).optimize({o1: true}).pretty();
     assert.equal(optPretty, pretty);
 }
 
 function changes(data, expected) {
-    var expectedPretty = crass.parse(expected).optimize().pretty();
-    var optPretty = crass.parse(data).optimize({o1: true}).pretty();
+    const expectedPretty = crass.parse(expected).optimize().pretty();
+    const optPretty = crass.parse(data).optimize({o1: true}).pretty();
     assert.equal(optPretty, expectedPretty);
 }
 

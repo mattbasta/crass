@@ -1,3 +1,5 @@
+'use strict';
+
 const browserSupport = require('../browser_support');
 const objects = require('../objects');
 const optimization = require('../optimization');

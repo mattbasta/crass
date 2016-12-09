@@ -44,6 +44,11 @@ AttributeSelector.prototype.optimize = function optimize(kw) {
     // OPT: Lowercase attribute names.
     this.ident = optimization.try_(this.ident, kw);
     this.value = optimization.try_(this.value, kw);
+
+    if (!this.ident) {
+        return null;
+    }
+
     return this;
 };
 

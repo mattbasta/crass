@@ -56,6 +56,11 @@ SelectorList.prototype.optimize = function(kw) {
     // OPT: Remove duplicate selectors in a selector list.
     this.selectors = utils.uniq(null, this.selectors);
 
+    this.selectors = this.selectors.filter(x => x);
+    if (!this.selectors.length) {
+        return null;
+    }
+
     // TODO(opt): Merge selectors.
     return this;
 

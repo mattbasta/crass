@@ -21,9 +21,13 @@ IDSelector.prototype.pretty = function pretty() {
 };
 
 /**
+ * @param {object} kw
  * @return {IDSelector}
  */
-IDSelector.prototype.optimize = function optimize() {
+IDSelector.prototype.optimize = function optimize(kw) {
+    if (!kw.saveid && this.ident.indexOf('#')) {
+        return null;
+    }
     return this;
 };
 

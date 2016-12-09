@@ -96,6 +96,9 @@ Ruleset.prototype.optimize = function optimize(kw) {
     }
 
     this.selector = optimization.try_(this.selector, kw);
+    if (!this.selector) {
+        return null;
+    }
 
     this.optimizeContent(kw);
 

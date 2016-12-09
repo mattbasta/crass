@@ -33,6 +33,11 @@ module.exports = function chainedSelectorFactory(name, operator) {
         optimize(kw) {
             this.ancestor = optimization.try_(this.ancestor, kw);
             this.descendant = optimization.try_(this.descendant, kw);
+
+            if (!this.ancestor || !this.descendant) {
+                return null;
+            }
+
             return this;
         }
     };

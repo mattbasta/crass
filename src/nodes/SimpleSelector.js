@@ -31,14 +31,17 @@ SimpleSelector.prototype.pretty = function pretty(indent) {
  */
 SimpleSelector.prototype.optimize = function optimize(kw) {
     this.conditions = optimization.optimizeList(this.conditions, kw);
+
+    if (!this.conditions.length || this.conditions.some(x => x === null)) {
+        return null;
+    }
+
     // OPT: Remove duplicate conditions from a simple selector.
     this.conditions = utils.uniq(null, this.conditions);
 
     // OPT(O1): Remove unnecessary wildcard selectors
     if (kw.o1 && this.conditions.length > 1) {
-        this.conditions = this.conditions.filter(function(item) {
-            return item.toString() !== '*';
-        });
+        this.conditions = this.conditions.filter(i => i.toString() !== '*');
     }
     return this;
 };

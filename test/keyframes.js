@@ -56,4 +56,11 @@ describe('@keyframes', function() {
         );
     });
 
+    it('should remove unprefixed transforms from prefixed keyframes', function() {
+        assert.equal(
+            crass.parse('@-webkit-keyframes foo{0{-webkit-transform:x;transform:x}to{-webkit-transform:y;transform:y}}').optimize({o1: true}).toString(),
+            '@-webkit-keyframes foo{0{-webkit-transform:x}to{-webkit-transform:y}}'
+        );
+    });
+
 });

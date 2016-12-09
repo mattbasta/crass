@@ -49,6 +49,11 @@ Declaration.prototype.optimize = function optimize(kw) {
         return null;
     }
 
+    // OPT: Remove `transform` inside prefixed `@keyframes`
+    if (kw.o1 && kw.vendorPrefix && this.ident === 'transform') {
+        return null;
+    }
+
     // OPT: Ignore slash nine from old IE
     if (!kw.saveie && this.slashNine) {
         return null;

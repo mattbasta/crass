@@ -24,7 +24,7 @@ var fs = require('fs');
 
 function tryRequire(module) {
     try {
-        return require('../lib/' + module);
+        return require('../dist/' + module);
     } catch (e) {
         return require('../src/' + module);
     }

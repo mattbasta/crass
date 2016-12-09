@@ -56,17 +56,6 @@ SelectorList.prototype.optimize = function(kw) {
     // OPT: Remove duplicate selectors in a selector list.
     this.selectors = utils.uniq(null, this.selectors);
 
-    // OPT(O1): `.foo, *` -> `*`
-    if (
-        kw.o1 &&
-        this.selectors.length > 1 &&
-        this.selectors.some(i => i.toString() === '*')
-    ) {
-        this.selectors = [
-            new objects.SimpleSelector([new (objects.ElementSelector)('*')]),
-        ];
-    }
-
     // TODO(opt): Merge selectors.
     return this;
 

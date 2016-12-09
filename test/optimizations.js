@@ -212,10 +212,6 @@ describe('Replace', function() {
         parseCompare('*.foo{$$}', '.foo{$$}', {o1: true});
     });
 
-    it('*, .foo -> *', function() {
-        parseCompare('*,.foo{$$}', '*{$$}', {o1: true});
-    });
-
     it('content:none to content: ""', function() {
         parseCompare('foo{content:none}', 'foo{content:""}', {o1: true});
     });

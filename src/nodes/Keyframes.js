@@ -61,6 +61,8 @@ Keyframes.prototype.optimize = function optimize(kw) {
         return null;
     }
 
+    kw.insideKeyframes = this.name;
+
     if (this.vendorPrefix) {
         kw.vendorPrefix = this.vendorPrefix;
     }
@@ -92,6 +94,7 @@ Keyframes.prototype.optimize = function optimize(kw) {
     }, []);
 
     delete kw.vendorPrefix;
+    delete kw.insideKeyframes;
 
     return this;
 };

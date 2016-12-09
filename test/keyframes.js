@@ -63,4 +63,15 @@ describe('@keyframes', function() {
         );
     });
 
+    it('should remove prefixed transforms from unprefixed keyframes only when the prefixed keyframes block exists', function() {
+        assert.equal(
+            crass.parse('@-webkit-keyframes foo{0{a:b}}@keyframes foo{0{-webkit-transform:a;transform:b}}').optimize({o1: true}).toString(),
+            '@-webkit-keyframes foo{0{a:b}}@keyframes foo{0{transform:b}}'
+        );
+        assert.equal(
+            crass.parse('@-webkit-keyframes bar{0{a:b}}@keyframes foo{0{-webkit-transform:a;transform:b}}').optimize({o1: true}).toString(),
+            '@-webkit-keyframes bar{0{a:b}}@keyframes foo{0{-webkit-transform:a;transform:b}}'
+        );
+    });
+
 });

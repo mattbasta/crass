@@ -113,7 +113,7 @@ const overrideList = module.exports.overrideList = {
     '-webkit-transition-delay': ['-webkit-transition'],
     '-webkit-transition-duration': ['-webkit-transition'],
     '-webkit-transition-property': ['-webkit-transition'],
-    '-webkit-transition-timing-function': ['-webkit-transition']
+    '-webkit-transition-timing-function': ['-webkit-transition'],
 };
 
 

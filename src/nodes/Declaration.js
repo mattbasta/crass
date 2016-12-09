@@ -50,8 +50,21 @@ Declaration.prototype.optimize = function optimize(kw) {
     }
 
     // OPT: Remove `transform` inside prefixed `@keyframes`
-    if (kw.o1 && kw.vendorPrefix && this.ident === 'transform') {
+    if (kw.o1 && kw.insideKeyframes && kw.vendorPrefix && this.ident === 'transform') {
         return null;
+    }
+
+    // OPT: Remove `-webkit-transform` inside unprefixed `@keyframes` when a prefixed version exists
+    if (
+        kw.o1 &&
+        kw.insideKeyframes &&
+        !kw.vendorPrefix &&
+        this.isPrefixed()
+    ) {
+        const prefix = this.getPrefix();
+        if (prefix in kw.keyframeMap && kw.keyframeMap[prefix][kw.insideKeyframes]) {
+            return null;
+        }
     }
 
     // OPT: Ignore slash nine from old IE
@@ -87,13 +100,27 @@ Declaration.prototype.optimize = function optimize(kw) {
     delete kw.declarationName;
 
     // OPT: Remove mismatched vendor prefixes in declarations.
-    if (kw.vendorPrefix && this.ident.match(/\-[a-z]+\-.+/)) {
+    if (kw.vendorPrefix && this.isPrefixed()) {
         if (this.ident.substr(0, kw.vendorPrefix.length) !== kw.vendorPrefix) {
             return null;
         }
     }
 
     return this;
+};
+
+/**
+ * @return {bool} Whether the declaration is prefixed
+ */
+Declaration.prototype.isPrefixed = function isPrefixed() {
+    return this.ident.match(/\-[a-z]+\-.+/);
+};
+
+/**
+ * @return {string} The declaration's prefix
+ */
+Declaration.prototype.getPrefix = function getPrefix() {
+    return /(\-[a-z]+\-).+/.exec(this.ident)[1];
 };
 
 module.exports = Declaration;

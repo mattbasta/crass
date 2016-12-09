@@ -75,7 +75,6 @@ Stylesheet.prototype.optimize = function optimize(kw) {
     if (this.namespaces.length) {
         this.namespaces = optimization.optimizeList(this.namespaces, kw);
     }
-    this.content = optimization.optimizeBlocks(this.content, kw);
 
     // OPT: Remove overridden keyframe blocks
     const keyframeMap = {};
@@ -99,6 +98,18 @@ Stylesheet.prototype.optimize = function optimize(kw) {
             this.content.splice(i, 1);
         }
     }
+
+    const kwKFM = {};
+    Object.keys(keyframeMap).forEach(prefix => {
+        const m = {};
+        Object.keys(keyframeMap[prefix]).forEach(name => {
+            m[name] = this.content[keyframeMap[prefix][name]];
+        });
+        kwKFM[prefix] = m;
+    });
+    kw.keyframeMap = kwKFM;
+
+    this.content = optimization.optimizeBlocks(this.content, kw);
 
     return this;
 };

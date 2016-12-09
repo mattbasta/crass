@@ -26,7 +26,7 @@ describe('@keyframes', function() {
     });
 
     it('should parse keyframe selectors', function() {
-        parity('@-webkit-keyframes foo{0{a:b}to{c:d}}');
+        parity('@-webkit-keyframes foo{0%{a:b}to{c:d}}');
     });
 
     it('should parse multiple keyframe selectors', function() {
@@ -38,39 +38,39 @@ describe('@keyframes', function() {
             crass.parse(
                 '@-webkit-keyframes foo{to{bbb:foo;aaa:bar;}from{ccc:zip;ddd:zap}}'
             ).optimize().toString(),
-            '@-webkit-keyframes foo{0{ccc:zip;ddd:zap}to{aaa:bar;bbb:foo}}'
+            '@-webkit-keyframes foo{0%{ccc:zip;ddd:zap}to{aaa:bar;bbb:foo}}'
         );
     });
 
     it('should optimize keyframe selectors', function() {
         assert.equal(
             crass.parse('@-webkit-keyframes foo{0%{a:b}100%{c:d}}').optimize().toString(),
-            '@-webkit-keyframes foo{0{a:b}to{c:d}}'
+            '@-webkit-keyframes foo{0%{a:b}to{c:d}}'
         );
     });
 
     it('should dedupe selectors', function() {
         assert.equal(
-            crass.parse('@-webkit-keyframes foo{0{a:b}50%{a:b}100%{c:d}}').optimize({o1: true}).toString(),
-            '@-webkit-keyframes foo{0,50%{a:b}to{c:d}}'
+            crass.parse('@-webkit-keyframes foo{0%{a:b}50%{a:b}100%{c:d}}').optimize({o1: true}).toString(),
+            '@-webkit-keyframes foo{0%,50%{a:b}to{c:d}}'
         );
     });
 
     it('should remove unprefixed transforms from prefixed keyframes', function() {
         assert.equal(
-            crass.parse('@-webkit-keyframes foo{0{-webkit-transform:x;transform:x}to{-webkit-transform:y;transform:y}}').optimize({o1: true}).toString(),
-            '@-webkit-keyframes foo{0{-webkit-transform:x}to{-webkit-transform:y}}'
+            crass.parse('@-webkit-keyframes foo{0%{-webkit-transform:x;transform:x}to{-webkit-transform:y;transform:y}}').optimize({o1: true}).toString(),
+            '@-webkit-keyframes foo{0%{-webkit-transform:x}to{-webkit-transform:y}}'
         );
     });
 
     it('should remove prefixed transforms from unprefixed keyframes only when the prefixed keyframes block exists', function() {
         assert.equal(
-            crass.parse('@-webkit-keyframes foo{0{a:b}}@keyframes foo{0{-webkit-transform:a;transform:b}}').optimize({o1: true}).toString(),
-            '@-webkit-keyframes foo{0{a:b}}@keyframes foo{0{transform:b}}'
+            crass.parse('@-webkit-keyframes foo{0%{a:b}}@keyframes foo{0%{-webkit-transform:a;transform:b}}').optimize({o1: true}).toString(),
+            '@-webkit-keyframes foo{0%{a:b}}@keyframes foo{0%{transform:b}}'
         );
         assert.equal(
-            crass.parse('@-webkit-keyframes bar{0{a:b}}@keyframes foo{0{-webkit-transform:a;transform:b}}').optimize({o1: true}).toString(),
-            '@-webkit-keyframes bar{0{a:b}}@keyframes foo{0{-webkit-transform:a;transform:b}}'
+            crass.parse('@-webkit-keyframes bar{0%{a:b}}@keyframes foo{0%{-webkit-transform:a;transform:b}}').optimize({o1: true}).toString(),
+            '@-webkit-keyframes bar{0%{a:b}}@keyframes foo{0%{-webkit-transform:a;transform:b}}'
         );
     });
 

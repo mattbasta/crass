@@ -44,9 +44,7 @@ SelectorList.prototype.optimize = function(kw) {
 
     // OPT: Ignore `* html` hacks from IE6
     if (!kw.saveie) {
-        this.selectors = this.selectors.filter(function(selector) {
-            return !/\* html($| .+)/.exec(selector.toString());
-        });
+        this.selectors = this.selectors.filter(s => !/\* html($| .+)/.exec(s.toString()));
     }
 
     // OPT: Sort selector lists.
@@ -59,12 +57,11 @@ SelectorList.prototype.optimize = function(kw) {
     this.selectors = utils.uniq(null, this.selectors);
 
     // OPT(O1): `.foo, *` -> `*`
-    if (kw.o1 &&
+    if (
+        kw.o1 &&
         this.selectors.length > 1 &&
-        this.selectors.some(function(i) {
-            return i.toString() === '*';
-        })) {
-
+        this.selectors.some(i => i.toString() === '*')
+    ) {
         this.selectors = [
             new objects.SimpleSelector([new (objects.ElementSelector)('*')]),
         ];

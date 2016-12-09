@@ -24,9 +24,9 @@ KeyframeSelector.prototype.pretty = function pretty() {
  * @return {KeyframeSelector}
  */
 KeyframeSelector.prototype.optimize = function optimize() {
-    // OPT: Convert 0% and 'from' to 0
-    if (this.stop === '0%' || this.stop === 'from') {
-        this.stop = '0';
+    // OPT: Convert 'from' to 0%
+    if (this.stop === 'from') {
+        this.stop = '0%';
     } else if (this.stop === '100%') {
         this.stop = 'to';
     }

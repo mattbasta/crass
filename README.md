@@ -67,6 +67,8 @@ If you `npm install -g crass`, you'll get `crass` on your PATH.
 crass input.css [--optimize [--O1]] [--min x,y,z] [--pretty] [--saveie] [--css4]
 ```
 
+If you don't specify `--min`, crass will automatically default to the latest browser version from two years ago. At the time of writing, this is Chrome 39, Firefox 31, IE 11, and Opera 26.
+
 - **`--optimize`**: Flag to enable basic optimization
 - **`--O1`**: Only applies when `--optimize` is active. Flag to enable more advanced optimizations, though these are not guaranteed to work for all CSS.
 - **`--min`**: Setting this flag followed by a comma-separated list of browser versions will instruct Crass to strip CSS that would otherwise only apply to browsers older than the versions listed. For example, `--min ie9,fx30` would strip CSS that applies only to Firefox 29 and below and Internet Explorer 8 and below. The following prefixes are supported: `ie`, `op`, `fx`, `chr`

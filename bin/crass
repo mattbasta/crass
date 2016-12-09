@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
+var version = require('../package.json').version;
+
 function help() {
     console.log([
+        'crass ' + version,
         'Usage:',
         '  crass <input file> [options]',
         '',
@@ -24,9 +27,9 @@ var fs = require('fs');
 
 function tryRequire(module) {
     try {
-        return require('../dist/' + module);
-    } catch (e) {
         return require('../src/' + module);
+    } catch (e) {
+        return require('../dist/' + module);
     }
 }
 
@@ -53,11 +56,21 @@ fs.readFile(process.argv[2], function(err, data) {
 
     var kw = {};
     if ('min' in opts) {
-        var min_plats = opts.min.split(',').map(browser_support.parseBrowser);
-        kw.browser_min = {};
-        min_plats.forEach(function(plat) {
-            kw.browser_min[plat.browser] = plat.version;
-        });
+        var minPlatsUnparsed = opts.min.split(',');
+        if (minPlatsUnparsed.length) {
+            var minPlats = minPlatsUnparsed.map(browser_support.parseBrowser);
+            kw.browser_min = {};
+            minPlats.forEach(function(plat) {
+                kw.browser_min[plat.browser] = plat.version;
+            });
+        }
+    } else {
+        kw.browser_min = {
+            chrome: 39,
+            firefox: 31,
+            ie: 11,
+            opera: 26,
+        };
     }
 
     kw.css4 = 'css4' in opts && opts.css4;

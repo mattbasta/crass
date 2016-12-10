@@ -46,7 +46,11 @@ Dimension.prototype.optimize = function optimize(kw) {
     if (!this.unit) {
         return this.number;
     }
-    if (kw.func !== 'hsl' && kw.func !== 'hsla' && Math.abs(this.number.value) === 0) {
+    if (
+        kw.func !== 'hsl' &&
+        kw.func !== 'hsla' &&
+        Math.abs(this.number.value) === 0
+    ) {
         return this.number;
     }
     return optimization.unit(this, kw);

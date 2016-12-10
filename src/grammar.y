@@ -8,7 +8,7 @@ unary_operator      [\-\+]
 ws                  [ \n\r\t\f]
 comment             "/*"(.|\n|\r)*?"*/"
 hex                 [a-fA-F0-9]
-ident               ([a-zA-Z_]|"-"[a-zA-Z\-]+)[a-zA-Z0-9_\-]*
+ident               ([a-zA-Z_]|"-"[a-zA-Z\-]+)([a-zA-Z0-9_\-]|\\\D)*
 int                 ([1-9][0-9]*|"0")
 ie_junk             [a-zA-Z0-9=#, \n\r\t'"]
 ie_ident            [a-zA-Z0-9\.:]

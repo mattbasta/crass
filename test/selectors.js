@@ -47,6 +47,7 @@ describe('Class Selectors', () => {
         parity('.foo{$$}');
         parity('.foo .bar{$$}');
         parity('.foo.bar{$$}');
+        parity('.foo\\@foo{$$}');
     });
 });
 

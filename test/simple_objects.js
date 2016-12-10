@@ -59,6 +59,12 @@ describe('Numbers', () => {
     it('should omit a leading 0 in negative floating point numbers', () => {
         assert.equal(parseString('a{foo:-0.5}'), 'a{foo:-.5}');
     });
+    it('should omit a leading zero in floating point numbers', () => {
+        assert.equal(parseString('a{foo:.5}'), 'a{foo:.5}');
+    });
+    it('should omit a trailing dot in floating point numbers', () => {
+        assert.equal(parseString('a{foo:1.}'), 'a{foo:1}');
+    });
     it('should support scientific notation', () => {
         assert.equal(parseString('a{foo:3e1}'), 'a{foo:30}');
         assert.equal(parseString('a{foo:3e2}'), 'a{foo:300}');

@@ -20,6 +20,7 @@ ie_ident            [a-zA-Z0-9\.:]
 "#"{hex}{hex}{hex}                  return 'HEX_SHORT'
 {int}"e"("+"|"-")?{int}             return 'SCINOT'
 {int}?"."[0-9]+                     return 'FLOAT'
+{int}"."[0-9]*                      return 'FLOAT'
 {int}                               return 'INTEGER'
 ({ws}|{comment})+                   return 'S'
 ","                                 return ','

@@ -64,6 +64,17 @@ describe('Merge longhand declarations into shorthand', () => {
             `,
             'a{border:same dashed red}'
         );
+        parseCompare(
+            `
+            a {
+                border-left: 2px solid red;
+                border-right: 2px solid red;
+                border-top: 2px solid red;
+                border-bottom: 2px solid red;
+            }
+            `,
+            'a{border:2px solid red}'
+        );
     });
     it('should handle border-radius simple shorthand', () => {
         parseCompare(

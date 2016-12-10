@@ -103,6 +103,8 @@ const overrideList = module.exports.overrideList = {
     'text-decoration-color': ['text-decoration'],
     'text-decoration-line': ['text-decoration'],
     'text-decoration-style': ['text-decoration'],
+    'text-emphasis-color': ['text-emphasis'],
+    'text-emphasis-style': ['text-emphasis'],
     'transition-delay': ['transition'],
     'transition-duration': ['transition'],
     'transition-property': ['transition'],
@@ -161,10 +163,31 @@ const shorthandMapping = [
         expressionBuilder: defaultShorthandExpressionBuilder,
     },
     {
+        name: 'border',
+        decls: ['border-top', 'border-right', 'border-bottom', 'border-left'],
+        declQualifies: () => true,
+        allDeclsQualify: decls => {
+            const first = decls[0];
+            const rest = decls.slice(1);
+            return rest.every(
+                x =>
+                    x.expr.chain.length === first.expr.chain.length &&
+                    first.expr.chain.every((item, i) => x.expr.chain[i][1].toString() === item[1].toString())
+            );
+        },
+        expressionBuilder: rules => rules[0].expr.chain,
+    },
+    {
         name: 'text-decoration',
         decls: ['text-decoration-line', 'text-decoration-style', 'text-decoration-color'],
         declQualifies: decl => decl.expr.chain.length >= 1,
         expressionBuilder: rules => rules.reduce((a, b) => a.concat(b.expr.chain), []),
+    },
+    {
+        name: 'text-emphasis',
+        decls: ['text-emphasis-style', 'text-emphasis-color'],
+        declQualifies: defaultShorthandExpressionQualifier,
+        expressionBuilder: defaultShorthandExpressionBuilder,
     },
 
     {
@@ -181,7 +204,11 @@ const shorthandMapping = [
             suffix[0][0] = '/';
             return prefix.concat(suffix);
         },
-    }
+    },
+
+    // TODO: transition
+    // TODO: animation
+
 ];
 
 
@@ -396,6 +423,10 @@ module.exports.optimizeDeclarations = (content, kw) => {
             }
 
             subRules.push(seen);
+        }
+        if (shMap.allDeclsQualify && !shMap.allDeclsQualify(subRules)) {
+            console.log('nad')
+            return;
         }
 
         // Remove the declarations that will be merged

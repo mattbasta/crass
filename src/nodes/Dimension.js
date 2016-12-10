@@ -49,7 +49,8 @@ Dimension.prototype.optimize = function optimize(kw) {
     if (
         kw.func !== 'hsl' &&
         kw.func !== 'hsla' &&
-        Math.abs(this.number.value) === 0
+        Math.abs(this.number.value) === 0 &&
+        kw.declarationName !== 'height'
     ) {
         return this.number;
     }

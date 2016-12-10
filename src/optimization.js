@@ -116,6 +116,14 @@ const overrideList = module.exports.overrideList = {
     '-webkit-transition-timing-function': ['-webkit-transition'],
 };
 
+const shorthandMapping = {
+    'border-color': ['border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color'],
+    'border-style': ['border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style'],
+    'border-width': ['border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width'],
+    margin: ['margin-top', 'margin-right', 'margin-bottom', 'margin-left'],
+    padding: ['padding-top', 'padding-right', 'padding-bottom', 'padding-left'],
+};
+
 
 const optimizeList = module.exports.optimizeList = (list, kw) => {
     const output = [];
@@ -296,11 +304,14 @@ module.exports.optimizeDeclarations = (content, kw) => {
     content = optimizeList(content, kw);
     if (!content.length) return [];
 
-    // OPT: Remove overridden CSS properties
+    // OPT: Remove longhand declarations that are overridden by shorthand declarations
     const seenDeclarations = {};
     for (let i = content.length - 1; i >= 0; i--) {
         const decl = content[i];
-        if (decl.ident in seenDeclarations) continue;
+        if (decl.ident in seenDeclarations) {
+            content.splice(i, 1);
+            continue;
+        }
 
         // If we match an overridable declaration and we've seen one of the
         // things that overrides it, remove it from the ruleset.
@@ -312,25 +323,29 @@ module.exports.optimizeDeclarations = (content, kw) => {
             continue;
         }
 
-        seenDeclarations[decl.ident] = true;
+        seenDeclarations[decl.ident] = decl;
     }
+    // OPT: Merge together 'piecemeal' declarations when all pieces are specified
+    // Ex. padding-left, padding-right, padding-top, padding-bottom -> padding
+    Object.keys(shorthandMapping).forEach(key => {
+        const subRules = shorthandMapping[key].map(rule => seenDeclarations[rule]);
+        if (!subRules.every(rule => rule)) {
+            return;
+        }
 
+        // Remove the declarations that will be merged
+        content = content.filter(declaration => subRules.indexOf(declaration) === -1);
+        const mergedRule = new objects.Declaration(key, new objects.Expression(subRules.map(rule => rule.expr.chain[0])));
+        content.push(mergedRule.optimize(kw));
+    });
 
     // OPT: Sort declarations.
-    content = content.sort((a, b) => {
+    return content.sort((a, b) => {
         if (a.ident === b.ident) {
             return a.toString().localeCompare(b.toString());
         }
         return a.ident.localeCompare(b.ident);
     });
-
-    // OPT: Remove duplicate declarations.
-    if (kw.o1) {
-        return utils.uniq(decl => decl.ident, content);
-    } else {
-        // We want to remove identical duplicate declarations normally.
-        return utils.uniq(null, content);
-    }
 };
 
 module.exports.try_ = (obj, kw) => {

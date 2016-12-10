@@ -15,6 +15,10 @@ function Declaration(ident, expr) {
     this.slashZero = false;
 }
 
+Declaration.prototype.canOptimize = function canOptimize() {
+    return !(this.important && this.slashNine && this.slashZero);
+};
+
 /**
  * @return {string}
  */

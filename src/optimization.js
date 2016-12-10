@@ -68,6 +68,8 @@ const overrideList = module.exports.overrideList = {
     'border-width': ['border'],
     'border-bottom': ['border'],
     'border-bottom-color': ['border-bottom', 'border-color', 'border'],
+    'border-bottom-left-radius': ['border-radius'],
+    'border-bottom-right-radius': ['border-radius'],
     'border-bottom-style': ['border-bottom', 'border-style', 'border'],
     'border-bottom-width': ['border-bottom', 'border-width', 'border'],
     'border-left': ['border'],
@@ -80,6 +82,8 @@ const overrideList = module.exports.overrideList = {
     'border-right-width': ['border-right', 'border-width', 'border'],
     'border-top': ['border'],
     'border-top-color': ['border-top', 'border-color', 'border'],
+    'border-top-left-radius': ['border-radius'],
+    'border-top-right-radius': ['border-radius'],
     'border-top-style': ['border-top', 'border-style', 'border'],
     'border-top-width': ['border-top', 'border-width', 'border'],
     'font-family': ['font'],
@@ -87,6 +91,7 @@ const overrideList = module.exports.overrideList = {
     'font-style': ['font'],
     'font-variant': ['font'],
     'font-weight': ['font'],
+    'line-height': ['font'],
     'margin-bottom': ['margin'],
     'margin-left': ['margin'],
     'margin-right': ['margin'],
@@ -154,6 +159,12 @@ const shorthandMapping = [
         decls: ['border-width', 'border-style', 'border-color'],
         declQualifies: defaultShorthandExpressionQualifier,
         expressionBuilder: defaultShorthandExpressionBuilder,
+    },
+    {
+        name: 'text-decoration',
+        decls: ['text-decoration-line', 'text-decoration-style', 'text-decoration-color'],
+        declQualifies: decl => decl.expr.chain.length >= 1,
+        expressionBuilder: rules => rules.reduce((a, b) => a.concat(b.expr.chain), []),
     },
 
     {

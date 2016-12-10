@@ -37,6 +37,18 @@ describe('Merge longhand declarations into shorthand', () => {
             'b{padding-bottom:bottom;padding-right:right;padding-top:top}'
         );
     });
+    it('should handle text-decoration', () => {
+        parseCompare(
+            `
+            b {
+                text-decoration-line: underline overline;
+                text-decoration-style: dashed;
+                text-decoration-color: red;
+            }
+            `,
+            'b{text-decoration:underline overline dashed red}'
+        );
+    });
 
     it('should handle border shorthand', () => {
         parseCompare(

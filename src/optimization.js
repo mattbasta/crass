@@ -116,13 +116,62 @@ const overrideList = module.exports.overrideList = {
     '-webkit-transition-timing-function': ['-webkit-transition'],
 };
 
-const shorthandMapping = {
-    'border-color': ['border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color'],
-    'border-style': ['border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style'],
-    'border-width': ['border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width'],
-    margin: ['margin-top', 'margin-right', 'margin-bottom', 'margin-left'],
-    padding: ['padding-top', 'padding-right', 'padding-bottom', 'padding-left'],
-};
+const defaultShorthandExpressionQualifier = decl => decl.expr.chain.length === 1;
+const defaultShorthandExpressionBuilder = rules => rules.map(rule => rule.expr.chain[0]);
+const shorthandMapping = [
+    {
+        name: 'border-color',
+        decls: ['border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color'],
+        declQualifies: defaultShorthandExpressionQualifier,
+        expressionBuilder: defaultShorthandExpressionBuilder,
+    },
+    {
+        name: 'border-style',
+        decls: ['border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style'],
+        declQualifies: defaultShorthandExpressionQualifier,
+        expressionBuilder: defaultShorthandExpressionBuilder,
+    },
+    {
+        name: 'border-width',
+        decls: ['border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width'],
+        declQualifies: defaultShorthandExpressionQualifier,
+        expressionBuilder: defaultShorthandExpressionBuilder,
+    },
+    {
+        name: 'margin',
+        decls: ['margin-top', 'margin-right', 'margin-bottom', 'margin-left'],
+        declQualifies: defaultShorthandExpressionQualifier,
+        expressionBuilder: defaultShorthandExpressionBuilder,
+    },
+    {
+        name: 'padding',
+        decls: ['padding-top', 'padding-right', 'padding-bottom', 'padding-left'],
+        declQualifies: defaultShorthandExpressionQualifier,
+        expressionBuilder: defaultShorthandExpressionBuilder,
+    },
+    {
+        name: 'border',
+        decls: ['border-width', 'border-style', 'border-color'],
+        declQualifies: defaultShorthandExpressionQualifier,
+        expressionBuilder: defaultShorthandExpressionBuilder,
+    },
+
+    {
+        name: 'border-radius',
+        decls: ['border-top-left-radius', 'border-top-right-radius', 'border-bottom-right-radius', 'border-bottom-left-radius'],
+        declQualifies: decl =>
+            decl.expr.chain.length === 1 || decl.expr.chain.length === 2,
+        expressionBuilder: rules => {
+            const prefix = rules.map(rule => rule.expr.chain[0]);
+            if (rules.every(rule => rule.expr.chain.length === 1)) {
+                return prefix;
+            }
+            const suffix = rules.map(rule => rule.expr.chain[1] || rule.expr.chain[0]);
+            suffix[0][0] = '/';
+            return prefix.concat(suffix);
+        },
+    }
+];
 
 
 const optimizeList = module.exports.optimizeList = (list, kw) => {
@@ -327,17 +376,46 @@ module.exports.optimizeDeclarations = (content, kw) => {
     }
     // OPT: Merge together 'piecemeal' declarations when all pieces are specified
     // Ex. padding-left, padding-right, padding-top, padding-bottom -> padding
-    Object.keys(shorthandMapping).forEach(key => {
-        const subRules = shorthandMapping[key].map(rule => seenDeclarations[rule]);
-        if (!subRules.every(rule => rule)) {
-            return;
+    shorthandMapping.forEach(shMap => {
+        const subRules = [];
+        for (let rule of shMap.decls) {
+            const seen = seenDeclarations[rule];
+            if (!seen || !shMap.declQualifies(seen)) {
+                return;
+            }
+
+            subRules.push(seen);
         }
 
         // Remove the declarations that will be merged
-        content = content.filter(declaration => subRules.indexOf(declaration) === -1);
-        const mergedRule = new objects.Declaration(key, new objects.Expression(subRules.map(rule => rule.expr.chain[0])));
-        content.push(mergedRule.optimize(kw));
+        for (let decl of subRules) {
+            content.splice(content.indexOf(decl), 1);
+            delete seenDeclarations[decl.ident];
+        }
+
+        const mergedRule = new objects.Declaration(
+            shMap.name,
+            new objects.Expression(
+                shMap.expressionBuilder(subRules)
+            )
+        );
+        const optimized = mergedRule.optimize(kw);
+        content.push(optimized);
+        seenDeclarations[shMap.name] = optimized;
     });
+
+    // TODO: Under O1, do these sorts of reductions:
+    /*
+        border-color: red;
+        border-style: solid;
+        border-width: 0 0 4px;
+    into
+        border: 0 solid red;
+        border-bottom-width: 4px;
+    or
+        border: 0 solid red;
+        border-width: 0 0 4px;
+    */
 
     // OPT: Sort declarations.
     return content.sort((a, b) => {

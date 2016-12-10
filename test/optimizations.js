@@ -69,7 +69,7 @@ describe('Sort', function() {
 
 describe('Remove', function() {
     it('duplicate declarations', function() {
-        parseCompare('a{a:1;a:1;a:lol;a:1;b:abc}', 'a{a:1;a:lol;b:abc}');
+        parseCompare('a{a:1;a:1;a:lol;a:1;b:abc}', 'a{a:1;b:abc}');
         parseCompare('a{color:#ffffff;color:white}', 'a{color:#fff}');
     });
     it('duplicate selectors in a selector list', function() {
@@ -228,7 +228,7 @@ describe('Combine', function() {
                      '@keyframes foo{0%{a:b;c:d}}');
         // Test that declaration optimization happens after merging.
         parseCompare('@keyframes foo{0%{a:b;}0%{a:c;}}',
-                     '@keyframes foo{0%{a:b;a:c}}');
+                     '@keyframes foo{0%{a:c}}');
     });
     it('adjacent blocks with similar bodies', function() {
         parseCompare('a{x:y}b{x:y}', 'a,b{x:y}');
@@ -240,7 +240,7 @@ describe('Combine', function() {
     });
     it('adjacent blocks with similar selectors', function() {
         parseCompare('a{foo:bar}a{def:ghi}', 'a{def:ghi;foo:bar}');
-        parseCompare('a{foo:bar}a{foo:baz}', 'a{foo:bar;foo:baz}');
+        parseCompare('a{foo:bar}a{foo:baz}', 'a{foo:bar}');
     });
 
     it('nearby blocks with identical selectors and intersection', function() {

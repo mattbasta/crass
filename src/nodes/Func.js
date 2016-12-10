@@ -1,11 +1,13 @@
-var colorConvert = require('color-convert');
+'use strict';
 
-var colorOptimizer = require('../optimizations/color');
-var Dimension = require('./Dimension');
-var Expression = require('./Expression');
-var objects = require('../objects');
-var optimization = require('../optimization');
-var utils = require('../utils');
+const colorConvert = require('color-convert');
+
+const colorOptimizer = require('../optimizations/color');
+const Dimension = require('./Dimension');
+const Expression = require('./Expression');
+const objects = require('../objects');
+const optimization = require('../optimization');
+const utils = require('../utils');
 
 
 /**
@@ -49,7 +51,7 @@ Func.prototype.pretty = function pretty(indent) {
 Func.prototype.optimize = function optimize(kw) {
     // OPT: Lowercase function names.
     this.name = this.name.toLowerCase();
-    var oldkwf = kw.func;
+    const oldkwf = kw.func;
     kw.func = this.name;
     if (this.content) {
         this.content = optimization.try_(this.content, kw);
@@ -67,7 +69,7 @@ Func.prototype.optimize = function optimize(kw) {
         return this.content;
     }
 
-    var self = this.optimizeColor(kw);
+    let self = this.optimizeColor(kw);
     if (!self || !(self instanceof Func)) {
         kw.func = oldkwf;
         return self;
@@ -95,11 +97,23 @@ Func.prototype.optimize = function optimize(kw) {
     return self;
 };
 
-var ALPHA_INDEX = {
+const recognizedColorFuncs = {
+    'rgb': {minArgs: 3, maxArgs: 3},
+    'hsl': {minArgs: 3, maxArgs: 3},
+    'rgba': {minArgs: 4, maxArgs: 4},
+    'hsla': {minArgs: 4, maxArgs: 4},
+    'gray': {minArgs: 1, maxArgs: 2},
+    'hwb': {minArgs: 3, maxArgs: 4},
+    'lab': {minArgs: 3, maxArgs: 4},
+    'lch': {minArgs: 3, maxArgs: 4},
+};
+const ALPHA_INDEX = {
     'gray': 1,
     'rgba': 3,
     'hsla': 3,
     'hwb': 3,
+    'lab': 3,
+    'lch': 3,
 };
 
 /**
@@ -107,6 +121,15 @@ var ALPHA_INDEX = {
  * @return {Func}
  */
 Func.prototype.optimizeColor = function optimizeColor(kw) {
+    if (!(this.name in recognizedColorFuncs)) {
+        return this;
+    }
+
+    const spec = recognizedColorFuncs[this.name];
+    if (this.content.chain.length < spec.minArgs || this.content.chain.length > spec.maxArgs) {
+        return null;
+    }
+
     if (
         !this.content ||
         !this.content.chain ||
@@ -117,16 +140,22 @@ Func.prototype.optimizeColor = function optimizeColor(kw) {
             if (
                 (
                     i === 0 && (this.name === 'hsl' || this.name === 'hsla' || this.name === 'hwb') ||
-                    i === 2 && this.name === 'hwb'
+                    i === 2 && (this.name === 'lch')
                 ) &&
                 x[1] instanceof Dimension
             ) {
                 return true;
             }
-            return utils.isPositiveNum(x[1]) || (x[1].unit && x[1].unit === '%' && utils.isPositiveNum(x[1].number));
+            if (
+                i === 1 && this.name === 'hwb' ||
+                i === 2 && this.name === 'hwb'
+            ) {
+                return x[1] instanceof Dimension;
+            }
+            return utils.isNum(x[1]);
         }, this)
     ) {
-        return this;
+        return null;
     }
 
     // OPT: Convert color functions to shortest variants
@@ -152,39 +181,37 @@ Func.prototype.optimizeColor = function optimizeColor(kw) {
             return this;
     }
 
-    var applier;
-    var alpha = 1;
+    let applier;
+    let alpha = 1;
 
-    var components = this.content.chain.map(function(v) {
-        return asRealNum(v[1]);
-    });
+    const components = this.content.chain.map(v => asRealNum(v[1])).map(v => Math.max(v, 0));
 
     switch (this.name) {
         case 'rgba':
         case 'hsla':
             alpha = components[3];
-            applier = function(funcName) {
-                var name = this.name.substr(0, 3);
+            applier = funcName => {
+                const name = this.name.substr(0, 3);
                 if (funcName === name) {
                     return components.slice(0, 3);
                 }
                 return colorConvert[name][funcName](components[0], components[1], components[2]);
-            }.bind(this);
+            };
             break;
         case 'rgb':
         case 'hsl':
-            applier = function(funcName) {
+            applier = funcName => {
                 if (funcName === this.name) {
                     return components.slice(0, 3);
                 }
                 return colorConvert[this.name][funcName](components[0], components[1], components[2]);
-            }.bind(this);
+            };
             break;
         case 'gray':
             if (components.length > 1) {
                 alpha = components[1];
             }
-            applier = function(funcName) {
+            applier = funcName => {
                 return colorConvert.gray[funcName](components[0]);
             };
             break;
@@ -194,12 +221,12 @@ Func.prototype.optimizeColor = function optimizeColor(kw) {
             if (components.length > 3) {
                 alpha = components[3];
             }
-            applier = function(funcName) {
+            applier = funcName => {
                 if (funcName === this.name) {
                     return components.slice(0, 3);
                 }
                 return colorConvert[this.name][funcName](components[0], components[1], components[2]);
-            }.bind(this);
+            };
             break;
         default:
             return this;
@@ -211,27 +238,10 @@ Func.prototype.optimizeColor = function optimizeColor(kw) {
 
 
 var GRADIENT_ANGLES = {
-    top: function() {
-        return new objects.Number(0);
-    },
-    right: function() {
-        return new Dimension(
-            new objects.Number(90),
-            'deg'
-        );
-    },
-    bottom: function() {
-        return new Dimension(
-            new objects.Number(180),
-            'deg'
-        );
-    },
-    left: function() {
-        return new Dimension(
-            new objects.Number(270),
-            'deg'
-        );
-    },
+    top: () => new objects.Number(0),
+    right: () => new Dimension(new objects.Number(90), 'deg'),
+    bottom: () => new Dimension(new objects.Number(180), 'deg'),
+    left: () => new Dimension(new objects.Number(270), 'deg'),
 };
 
 /**
@@ -252,8 +262,7 @@ Func.prototype.optimizeLinearGradient = function optimizeLinearGradient(kw) {
         return this;
     }
 
-    var chain = this.content.chain;
-    var numSeparators = chain.reduce((acc, x) => acc + (x[0] !== null ? 1 : 0), 0);
+    let chain = this.content.chain;
 
     if (
         chain.length > 2 &&
@@ -266,19 +275,19 @@ Func.prototype.optimizeLinearGradient = function optimizeLinearGradient(kw) {
         chain[0] = [null, GRADIENT_ANGLES[val]()];
     }
 
-    var segments = chain.reduce((acc, cur) => {
+    const segments = chain.reduce((acc, cur) => {
         if (cur[0] !== null) {
             acc.push([]);
         }
         acc[acc.length - 1].push(cur);
         return acc;
     }, [[]]);
-    var lastStop = null;
+    let lastStop = null;
     segments.forEach((group, idx) => {
         if (group.length !== 2 || !(group[1][1] instanceof Dimension || group[1][1] instanceof objects.Number)) {
             return;
         }
-        var isFinal = idx === segments.length - 1;
+        const isFinal = idx === segments.length - 1;
         if (!lastStop) {
             lastStop = group[1][1];
             if (isFinal) {

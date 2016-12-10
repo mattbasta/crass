@@ -19,6 +19,24 @@ const parseCompare = (data, expected, kw) => {
 
 
 describe('colors', function() {
+    it('should drop invalid colors', function() {
+        const isDropped = css => assert.equal(crass.parse(css).optimize().toString(), '', `${css} should have been dropped`);
+
+        isDropped('a{color:rgb(1,2)}');
+        isDropped('a{color:rgb(1,2,3,4)}');
+        isDropped('a{color:rgb(1,2,foo)}');
+        isDropped('a{color:gray(1/2 3)}');
+        isDropped('a{color:hwb(4% 0 5%)}'); // arg 1 should be dimension
+        isDropped('a{color:hwb(4% 5% 6)}'); // arg 2 should be dimension
+        isDropped('a{color:lch(foo 1 1)}'); // arg 0 should be dimension or num
+    });
+    it('clamp colors to zero', function() {
+        assert.equal(
+            crass.parse('b{color:rgba(-100,0,-100,.5)}').optimize().toString(),
+            'b{color:rgba(0,0,0,.5)}'
+        );
+    });
+
     it('long hex to short hex', function() {
         parseCompare(
             'b{color:#ffffff}',
@@ -125,17 +143,6 @@ describe('colors', function() {
         parseCompare(
             'b{color:rgba(255,0,0,-0.1)}',
             'b{color:transparent}'
-        );
-    });
-
-    it('should not mangle invalid colors', function() {
-        parseCompare(
-            'b{color:rgb(255,0,0,5%)}',
-            'b{color:rgb(255,0,0,5%)}'
-        );
-        parseCompare(
-            'b{color:rgba(255,0,0)}',
-            'b{color:rgba(255,0,0)}'
         );
     });
 

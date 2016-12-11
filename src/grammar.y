@@ -214,6 +214,8 @@ namespace_block
 blocks
     : block blocks
         { $$ = $2; $2.unshift($1); }
+    | charset_block blocks
+        { $$ = $2; }
     |
         { $$ = []; }
     ;

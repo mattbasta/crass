@@ -494,7 +494,8 @@ module.exports.optimizeDeclarations = (content, kw) => {
         // things that overrides it, remove it from the ruleset.
         if (
             decl.ident in overrideList &&
-            overrideList[decl.ident].some(overrider => overrider in seenDeclarations)
+            overrideList[decl.ident].some(overrider => overrider in seenDeclarations) &&
+            !decl.important
         ) {
             content.splice(i, 1);
             continue;

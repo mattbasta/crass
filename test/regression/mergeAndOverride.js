@@ -5,6 +5,18 @@ const crass = require('../../src');
 
 describe('merge and override', () => {
 
+    it('should not override with !important', () => {
+        assert.equal(
+            crass.parse(`
+            a {
+                padding-bottom: bottom !important;
+                padding: 0 1 2 3;
+            }
+            `).optimize({o1: true}).toString(),
+            'a{padding:0 1 2 3;padding-bottom:bottom!important}'
+        );
+    });
+
     it('should override correctly', () => {
         assert.equal(
             crass.parse(`

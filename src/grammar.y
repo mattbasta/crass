@@ -637,20 +637,35 @@ element_type
     ;
 
 attribute_selector
-    : '[' junk element_name junk ']'
-        { $$ = new yy.AttributeSelector($3, null, null); $$.range = @$; }
-    | '[' junk element_name junk '=' junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5, $7); $$.range = @$; }
-    | '[' junk element_name junk '*' '=' junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); $$.range = @$; }
-    | '[' junk element_name junk '|=' junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5, $7); $$.range = @$; }
-    | '[' junk element_name junk '^' '=' junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); $$.range = @$; }
-    | '[' junk element_name junk '$' '=' junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); $$.range = @$; }
-    | '[' junk element_name junk SEL_SIBLING '=' junk string_or_ident junk ']'
-        { $$ = new yy.AttributeSelector($3, $5 + $6, $8); $$.range = @$; }
+    : '[' junk attribute_selector_body ']'
+        { $$ = $3; $$.range = @$; }
+    ;
+
+attribute_selector_body
+    : attribute_selector_body_name
+        { $$ = new yy.AttributeSelector($1, null, null); }
+    | attribute_selector_body_name attribute_selector_body_operator junk string_or_ident junk
+        { $$ = new yy.AttributeSelector($1, $2, $4); }
+    ;
+
+attribute_selector_body_name
+    : element_name junk
+        { $$ = $1; }
+    ;
+
+attribute_selector_body_operator
+    : '='
+        { $$ = $1; }
+    | '*' '='
+        { $$ = '*='; }
+    | '|='
+        { $$ = $1; }
+    | '^' '='
+        { $$ = '^='; }
+    | '$' '='
+        { $$ = '$='; }
+    | SEL_SIBLING '='
+        { $$ = '~='; }
     ;
 
 pseudo_selector
@@ -693,21 +708,38 @@ n_val
 declaration_list
     : declaration_list ';' junk declaration
         { $$ = $1; $$.push($4); }
-    | declaration_list ';' junk empty_declaration
-        { $$ = $1; $$.push($4); }
     | declaration_list ';' junk
         { $$ = $1; }
     | declaration
-        { $$ = [$1]; }
-    | empty_declaration
         { $$ = [$1]; }
     |
         { $$ = []; }
     ;
 
 declaration
-    : declaration_inner optional_important optional_slash_nine
+    : declaration_body optional_important optional_slash_nine
         { $$ = $1; Object.assign($$, $2, $3); }
+    ;
+
+declaration_body
+    : IE_FILTER junk
+        { $$ = new yy.IEFilter($1); $$.range = @$; }
+    | declaration_head expr
+        { $$ = new yy.Declaration($1, $2); $$.range = @$; }
+    | declaration_head
+        { $$ = new yy.Declaration($1, null); $$.range = @$; }
+    ;
+
+declaration_head
+    : declaration_name junk ':' junk
+        { $$ = $1; }
+    ;
+
+declaration_name
+    : '*' IDENT
+        { $$ = $1 + $2; }
+    | IDENT
+        { $$ = $1; }
     ;
 
 optional_important
@@ -726,21 +758,6 @@ optional_slash_nine
         { $$ = {}; }
     ;
 
-declaration_inner
-    : IE_FILTER junk
-        { $$ = new yy.IEFilter($1); $$.range = @$; }
-    | '*' IDENT junk ':' junk expr
-        { $$ = new yy.Declaration('*' + $2, $6); $$.range = @$; }
-    | IDENT junk ':' junk expr
-        { $$ = new yy.Declaration($1, $5); $$.range = @$; }
-    ;
-
-empty_declaration
-    : IDENT junk ':' junk ';' junk
-        { $$ = new yy.Declaration($1, null); $$.range = @$; }
-    | IDENT junk ':' junk optional_important optional_slash_nine ';' junk
-        { $$ = new yy.Declaration($1, null); Object.assign($$, $5, $6); $$.range = @$; }
-    ;
 
 expr
     : term junk expr_chain

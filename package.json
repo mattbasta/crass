@@ -6,7 +6,8 @@
   "scripts": {
     "build": "babel src -d dist",
     "prepublish": "npm run build",
-    "test": "mocha --recursive --reporter=dot"
+    "test": "mocha --recursive --reporter=dot",
+    "grammar": "jison src/grammar.y --outfile=src/grammar.js"
   },
   "repository": {
     "type": "git",

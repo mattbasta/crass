@@ -145,14 +145,22 @@ describe('Remove', function() {
         });
         it('except when slashes', function() {
             parseCompare(
+                'b{border-radius:1 0/0 1}',
+                'b{border-radius:1 0/0 1}'
+            );
+            parseCompare(
                 'b{border-radius:0 1/0 1}',
-                'b{border-radius:0 1/0 1}'
+                'b{border-radius:0 1}'
             );
         });
         it('should collapse border radii', () => {
             parseCompare(
                 'b{border-radius:0 0/0 0}',
-                'b{border-radius:0/0}'
+                'b{border-radius:0}'
+            );
+            parseCompare(
+                'b{border-radius:0 1/0 0}',
+                'b{border-radius:0 1/0}'
             );
             parseCompare(
                 'b{border-radius:0 1 2 1/1 2 1}',
@@ -240,7 +248,7 @@ describe('Combine', function() {
     });
     it('adjacent blocks with similar selectors', function() {
         parseCompare('a{foo:bar}a{def:ghi}', 'a{def:ghi;foo:bar}');
-        parseCompare('a{foo:bar}a{foo:baz}', 'a{foo:bar}');
+        parseCompare('a{foo:bar}a{foo:baz}', 'a{foo:baz}');
     });
 
     it('nearby blocks with identical selectors and intersection', function() {

@@ -77,14 +77,18 @@ Expression.prototype.optimize = function optimize(kw) {
         this.chain.some(x => x[0] === '/')
     ) {
         const slashIdx = this.findSlash();
-        const leftChain = this.chain.slice(0, slashIdx);
-        const rightChain = this.chain.slice(slashIdx).map(x => [null, x[1]]);
+        const leftChain = optimization.expandQuadList(this.chain.slice(0, slashIdx));
+        const rightChain = optimization.expandQuadList(this.chain.slice(slashIdx).map(x => [null, x[1]]));
 
-        const pLeftChain = this.processQuadList(leftChain);
-        const pRightChain = this.processQuadList(rightChain);
+        if (leftChain.every((x, i) => x[1].toString() === rightChain[i][1].toString())) {
+            this.chain = this.processQuadList(leftChain);
+        } else {
+            const pLeftChain = this.processQuadList(leftChain);
+            const pRightChain = this.processQuadList(rightChain);
 
-        pRightChain[0][0] = '/';
-        this.chain = pLeftChain.concat(pRightChain);
+            pRightChain[0][0] = '/';
+            this.chain = pLeftChain.concat(pRightChain);
+        }
 
     } else if (
         kw.declarationName === 'font-weight' ||

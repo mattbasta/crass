@@ -122,45 +122,79 @@ const overrideList = module.exports.overrideList = {
     '-webkit-transition-property': ['-webkit-transition'],
     '-webkit-transition-timing-function': ['-webkit-transition'],
 };
+// TODO: This will be useful eventually.
+// const invertedOverrideList = Object.keys(overrideList).reduce((acc, cur) => {
+//     const overriders = overrideList[cur];
+//     overriders.forEach(orr => {
+//         if (!(orr in acc)) {
+//             acc[orr] = [cur];
+//         } else {
+//             acc[orr].push(cur);
+//         }
+//     });
+//     return acc;
+// }, {});
 
 const defaultShorthandExpressionQualifier = decl => decl.expr.chain.length === 1;
 const defaultShorthandExpressionBuilder = rules => rules.map(rule => rule.expr.chain[0]);
+const defaultShorthandMerger = (shChain, lhChain, idx) => expandQuadList(shChain).map((x, i) => i === idx ? lhChain[0] : x);
+const expandQuadList = module.exports.expandQuadList = chain => {
+    if (chain.length === 4) {
+        return chain;
+    } else if (chain.length === 3) {
+        return chain.concat([chain[1]]);
+    } else if (chain.length === 2) {
+        return chain.concat(chain);
+    } else if (chain.length === 1) {
+        return chain.concat(chain).concat(chain).concat(chain);
+    }
+};
 const shorthandMapping = [
     {
         name: 'border-color',
         decls: ['border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color'],
         declQualifies: defaultShorthandExpressionQualifier,
         expressionBuilder: defaultShorthandExpressionBuilder,
+        shorthandMerger: defaultShorthandMerger,
     },
     {
         name: 'border-style',
         decls: ['border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style'],
         declQualifies: defaultShorthandExpressionQualifier,
         expressionBuilder: defaultShorthandExpressionBuilder,
+        shorthandMerger: defaultShorthandMerger,
     },
     {
         name: 'border-width',
         decls: ['border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width'],
         declQualifies: defaultShorthandExpressionQualifier,
         expressionBuilder: defaultShorthandExpressionBuilder,
+        shorthandMerger: defaultShorthandMerger,
     },
     {
         name: 'margin',
         decls: ['margin-top', 'margin-right', 'margin-bottom', 'margin-left'],
         declQualifies: defaultShorthandExpressionQualifier,
         expressionBuilder: defaultShorthandExpressionBuilder,
+        shorthandMerger: defaultShorthandMerger,
     },
     {
         name: 'padding',
         decls: ['padding-top', 'padding-right', 'padding-bottom', 'padding-left'],
         declQualifies: defaultShorthandExpressionQualifier,
         expressionBuilder: defaultShorthandExpressionBuilder,
+        shorthandMerger: defaultShorthandMerger,
     },
     {
         name: 'border',
         decls: ['border-width', 'border-style', 'border-color'],
         declQualifies: defaultShorthandExpressionQualifier,
         expressionBuilder: defaultShorthandExpressionBuilder,
+        canMerge: (shChain, lhChain, idx) => {
+            // TODO: maybe there's a way to do more?
+            return shChain.length === 3 && lhChain.length === 1;
+        },
+        shorthandMerger: (shChain, lhChain, idx) => shChain.map((x, i) => i === idx ? lhChain[0] : x),
     },
     {
         name: 'border',
@@ -175,19 +209,23 @@ const shorthandMapping = [
                     first.expr.chain.every((item, i) => x.expr.chain[i][1].toString() === item[1].toString())
             );
         },
+        canMerge: (shChain, lhChain) => shChain.every((x, i) => x[1].toString() === lhChain[i][1].toString()),
         expressionBuilder: rules => rules[0].expr.chain,
+        shorthandMerger: shChain => shChain,
     },
     {
         name: 'text-decoration',
         decls: ['text-decoration-line', 'text-decoration-style', 'text-decoration-color'],
         declQualifies: decl => decl.expr.chain.length >= 1,
         expressionBuilder: rules => rules.reduce((a, b) => a.concat(b.expr.chain), []),
+        canMerge: false, // TODO: maybe there's a way?
     },
     {
         name: 'text-emphasis',
         decls: ['text-emphasis-style', 'text-emphasis-color'],
         declQualifies: defaultShorthandExpressionQualifier,
         expressionBuilder: defaultShorthandExpressionBuilder,
+        canMerge: false, // TODO: maybe there's a way?
     },
 
     {
@@ -204,12 +242,47 @@ const shorthandMapping = [
             suffix[0][0] = '/';
             return prefix.concat(suffix);
         },
+        shorthandMerger: (shChain, lhChain, i) => {
+            const hasSlash = shChain.some(x => x[0] === '/');
+            // Check for the easy path
+            if (!hasSlash && lhChain.length === 1) {
+                shChain = expandQuadList(shChain);
+                shChain[i] = [null, lhChain[0][1]];
+                return shChain;
+            }
+
+            let slashIdx = 0;
+            for (let i = 1; i < shChain.length; i++) {
+                if (shChain[i][0] === '/') {
+                    slashIdx = i;
+                    break;
+                }
+            }
+
+            const preSlash = expandQuadList(shChain.slice(0, slashIdx)).map(x => [null, x[1]]);
+            const postSlash = expandQuadList(shChain.slice(slashIdx)).map(x => [null, x[1]]);
+
+            preSlash[i][1] = lhChain[0][1];
+            postSlash[i][1] = lhChain[1] ? lhChain[1][1] : lhChain[0][1];
+
+            postSlash[0][0] = '/';
+
+            return preSlash.concat(postSlash);
+        },
     },
 
     // TODO: transition
     // TODO: animation
 
 ];
+const shorthandMappingMapped = shorthandMapping.reduce((acc, cur) => {
+    if (cur.name in acc) {
+        acc[cur.name].push(cur);
+    } else {
+        acc[cur.name] = [cur];
+    }
+    return acc;
+}, {});
 
 
 const optimizeList = module.exports.optimizeList = (list, kw) => {
@@ -297,7 +370,7 @@ function _combineAdjacentRulesets(content, kw) {
                    lastPushed.selector.toString() === content[i].selector.toString()) {
 
             // Step 1: Combine the content of the adjacent rulesets.
-            lastPushed.content = content[i].content.concat(lastPushed.content);
+            lastPushed.content = lastPushed.content.concat(content[i].content);
 
             // Step 2: Re-optimize the ruleset body.
             lastPushed.optimizeContent(kw);
@@ -387,6 +460,23 @@ module.exports.optimizeBlocks = (content, kw) => {
     return _combineAdjacentRulesets(content, kw);
 };
 
+function mergeDeclarations(rule, shorthand, longhand) {
+    if (!rule.declQualifies(longhand)) {
+        return null;
+    }
+    if (rule.canMerge && !rule.canMerge(shorthand.expr.chain, longhand.expr.chain)) {
+        return null;
+    }
+
+    const declIdx = rule.decls.indexOf(longhand.ident);
+    const newChain = rule.shorthandMerger(shorthand.expr.chain, longhand.expr.chain, declIdx);
+
+    return new objects.Declaration(
+        shorthand.ident,
+        new objects.Expression(newChain)
+    );
+}
+
 module.exports.optimizeDeclarations = (content, kw) => {
     content = optimizeList(content, kw);
     if (!content.length) return [];
@@ -394,7 +484,7 @@ module.exports.optimizeDeclarations = (content, kw) => {
     // OPT: Remove longhand declarations that are overridden by shorthand declarations
     const seenDeclarations = {};
     for (let i = content.length - 1; i >= 0; i--) {
-        const decl = content[i];
+        let decl = content[i];
         if (decl.ident in seenDeclarations) {
             content.splice(i, 1);
             continue;
@@ -408,6 +498,47 @@ module.exports.optimizeDeclarations = (content, kw) => {
         ) {
             content.splice(i, 1);
             continue;
+        }
+
+        if (decl.ident in shorthandMappingMapped) {
+            shorthandMappingMapped[decl.ident].forEach(shorthand => {
+                // Short circuit if we eliminate this declaration below.
+                if (!decl || !shorthand.decls.some(lhDecl => lhDecl in seenDeclarations)) {
+                    return;
+                }
+                shorthand.decls.forEach(lhDeclName => {
+                    // Short circuit if we eliminate this declaration below.
+                    if (!decl) {
+                        return;
+                    }
+
+                    const lhDecl = seenDeclarations[lhDeclName];
+                    if (!lhDecl) {
+                        return;
+                    }
+
+                    const output = mergeDeclarations(shorthand, decl, lhDecl);
+                    // A null result means they could not be merged.
+                    if (!output) {
+                        return;
+                    }
+
+                    content.splice(content.indexOf(lhDecl), 1);
+                    delete seenDeclarations[lhDecl.ident];
+
+                    const optimized = output.optimize(kw);
+                    if (!optimized) {
+                        content.splice(i, 1);
+                        decl = null;
+                        return;
+                    }
+                    decl = optimized;
+                    content[i] = decl;
+                });
+            });
+            if (!decl) {
+                continue;
+            }
         }
 
         seenDeclarations[decl.ident] = decl;
@@ -425,7 +556,6 @@ module.exports.optimizeDeclarations = (content, kw) => {
             subRules.push(seen);
         }
         if (shMap.allDeclsQualify && !shMap.allDeclsQualify(subRules)) {
-            console.log('nad')
             return;
         }
 

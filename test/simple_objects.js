@@ -83,6 +83,9 @@ describe('Numbers', () => {
     it('should not strip units when the dimension is zero percent', () => {
         assert.equal(parseString('a{foo:0%}'), 'a{foo:0%}');
         assert.equal(crass.parse('a{height:0%}').optimize().toString(), 'a{height:0%}');
+        assert.equal(crass.parse('a{width:0%}').optimize().toString(), 'a{width:0%}');
+        assert.equal(crass.parse('a{flex:0%}').optimize().toString(), 'a{flex:0%}');
+        assert.equal(crass.parse('a{flex-basis:0%}').optimize().toString(), 'a{flex-basis:0%}');
     });
 });
 

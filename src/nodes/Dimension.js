@@ -38,6 +38,14 @@ Dimension.prototype.pretty = function pretty(indent) {
     return this.number.pretty(indent) + this.unit;
 };
 
+
+const declsToNotOptimizePercents = {
+    'height': true,
+    'width': true,
+    'flex': true,
+    'flex-basis': true,
+};
+
 /**
  * @param {object} kw
  * @return {Dimension}
@@ -50,7 +58,7 @@ Dimension.prototype.optimize = function optimize(kw) {
         kw.func !== 'hsl' &&
         kw.func !== 'hsla' &&
         Math.abs(this.number.value) === 0 &&
-        kw.declarationName !== 'height'
+        !(kw.declarationName in declsToNotOptimizePercents)
     ) {
         return this.number;
     }

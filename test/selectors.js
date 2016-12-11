@@ -77,9 +77,9 @@ describe('Attribute Selectors', () => {
 
 describe('Pseudo', () => {
     it('elements', () => {
-        parity('::after{$$}');
-        parity('::after:first-letter{$$}');
-        parity('foo::after{$$}');
+        parseCompare('::after{$$}', ':after{$$}');
+        parseCompare('::after:first-letter{$$}', ':after:first-letter{$$}');
+        parseCompare('foo::after{$$}', 'foo:after{$$}');
     });
     it('classes', () => {
         parity(':whatever{$$}');

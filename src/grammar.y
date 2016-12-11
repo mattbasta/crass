@@ -693,9 +693,13 @@ n_val
 declaration_list
     : declaration_list ';' junk declaration
         { $$ = $1; $$.push($4); }
+    | declaration_list ';' junk empty_declaration
+        { $$ = $1; $$.push($4); }
     | declaration_list ';' junk
         { $$ = $1; }
     | declaration
+        { $$ = [$1]; }
+    | empty_declaration
         { $$ = [$1]; }
     |
         { $$ = []; }
@@ -729,6 +733,13 @@ declaration_inner
         { $$ = new yy.Declaration('*' + $2, $6); $$.range = @$; }
     | IDENT junk ':' junk expr
         { $$ = new yy.Declaration($1, $5); $$.range = @$; }
+    ;
+
+empty_declaration
+    : IDENT junk ':' junk ';'
+        { $$ = new yy.Declaration($1, null); $$.range = @$; }
+    | IDENT junk ':' junk optional_important optional_slash_nine ';'
+        { $$ = new yy.Declaration($1, null); Object.assign($$, $5, $6); $$.range = @$; }
     ;
 
 expr

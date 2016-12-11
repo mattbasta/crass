@@ -10,6 +10,9 @@ function PseudoElementSelector(ident) {
  * @return {string}
  */
 PseudoElementSelector.prototype.toString = function toString() {
+    if (this.ident === 'before' || this.ident === 'after') {
+        return ':' + this.ident;
+    }
     return '::' + this.ident;
 };
 
@@ -17,7 +20,7 @@ PseudoElementSelector.prototype.toString = function toString() {
  * @return {string}
  */
 PseudoElementSelector.prototype.pretty = function pretty() {
-    return this.toString();
+    return '::' + this.ident;
 };
 
 /**

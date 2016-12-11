@@ -23,7 +23,8 @@ Declaration.prototype.canOptimize = function canOptimize() {
  * @return {string}
  */
 Declaration.prototype.toString = function toString() {
-    return this.ident + ':' + this.expr.toString() +
+    return this.ident + ':' +
+        (this.expr === null ? '' : this.expr.toString()) +
         (this.important ? '!important' : '') +
         (this.slashZero ? '\\0' : '') +
         (this.slashNine ? '\\9' : '');
@@ -34,7 +35,8 @@ Declaration.prototype.toString = function toString() {
  * @return {string}
  */
 Declaration.prototype.pretty = function pretty(indent) {
-    return this.ident + ': ' + this.expr.pretty(indent) +
+    return this.ident + ': ' +
+        (this.expr === null ? '' : this.expr.pretty(indent)) +
         (this.important ? ' !important' : '') +
         (this.slashZero ? ' \\0' : '') +
         (this.slashNine ? ' \\9' : '');
@@ -45,6 +47,9 @@ Declaration.prototype.pretty = function pretty(indent) {
  * @return {Declaration}
  */
 Declaration.prototype.optimize = function optimize(kw) {
+    if (!this.expr) {
+        return null;
+    }
     // OPT: Lowercase descriptor names.
     this.ident = this.ident.toLowerCase();
 

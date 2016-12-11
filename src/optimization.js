@@ -504,7 +504,12 @@ module.exports.optimizeDeclarations = (content, kw) => {
         if (decl.ident in shorthandMappingMapped) {
             shorthandMappingMapped[decl.ident].forEach(shorthand => {
                 // Short circuit if we eliminate this declaration below.
-                if (!decl || !shorthand.decls.some(lhDecl => lhDecl in seenDeclarations)) {
+                if (
+                    !decl ||
+                    !shorthand.decls.some(
+                        lhDecl => lhDecl in seenDeclarations && !seenDeclarations[lhDecl].important
+                    )
+                ) {
                     return;
                 }
                 shorthand.decls.forEach(lhDeclName => {

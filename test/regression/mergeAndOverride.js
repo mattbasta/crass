@@ -15,6 +15,26 @@ describe('merge and override', () => {
             `).optimize({o1: true}).toString(),
             'a{padding:0 1 2 3;padding-bottom:bottom!important}'
         );
+        assert.equal(
+            crass.parse(`
+            a {
+                padding: 0 1 2 3;
+                padding-bottom: bottom !important;
+            }
+            `).optimize({o1: true}).toString(),
+            'a{padding:0 1 2 3;padding-bottom:bottom!important}'
+        );
+        assert.equal(
+            crass.parse(`
+            a {
+                padding: 0 1 2 3;
+            }
+            a {
+                padding-bottom: bottom !important;
+            }
+            `).optimize({o1: true}).toString(),
+            'a{padding:0 1 2 3;padding-bottom:bottom!important}'
+        );
     });
 
     it('should override correctly', () => {

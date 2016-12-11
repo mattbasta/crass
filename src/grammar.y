@@ -736,9 +736,9 @@ declaration_inner
     ;
 
 empty_declaration
-    : IDENT junk ':' junk ';'
+    : IDENT junk ':' junk ';' junk
         { $$ = new yy.Declaration($1, null); $$.range = @$; }
-    | IDENT junk ':' junk optional_important optional_slash_nine ';'
+    | IDENT junk ':' junk optional_important optional_slash_nine ';' junk
         { $$ = new yy.Declaration($1, null); Object.assign($$, $5, $6); $$.range = @$; }
     ;
 

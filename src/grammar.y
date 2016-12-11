@@ -205,9 +205,9 @@ namespace_list
     ;
 
 namespace_block
-    : BLOCK_NAMESPACE junk string junk
+    : BLOCK_NAMESPACE junk string_or_uri junk
         { $$ = new yy.Namespace($3, null); $$.range = @$; }
-    | BLOCK_NAMESPACE junk IDENT junk string junk
+    | BLOCK_NAMESPACE junk IDENT junk string_or_uri junk
         { $$ = new yy.Namespace($5, $3); $$.range = @$; }
     ;
 

@@ -13,8 +13,8 @@ function String(value) {
  * @return {string}
  */
 String.prototype.asString = function asString(raw) {
-    if (raw && this.value.indexOf('\\') === -1) {
-        return this.value;
+    if (raw || this._noQuotes) {
+        return this.value.replace(/(\s)/g, '\\$1');
     }
     return this.toString();
 };

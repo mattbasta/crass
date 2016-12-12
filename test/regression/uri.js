@@ -12,4 +12,11 @@ describe('URIs', () => {
         );
     });
 
+    it('should escape spaces', () => {
+        assert.equal(
+            crass.parse('a{foo:url("http://mysite.com/images/foo bar.jpg")}').optimize({o1: true}).toString(),
+            'a{foo:url(http://mysite.com/images/foo\\ bar.jpg)}'
+        );
+    });
+
 });

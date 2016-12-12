@@ -67,11 +67,22 @@ describe('Attribute Selectors', () => {
     });
     it('should strip quotes when possible', () => {
         parity('[foo=bar]{$$}');
-        parity('[foo="ba\\\\r"]{$$}');
+        assert.equal(
+            crass.parse('[foo="ba\\\\r"]{a:b}').toString(),
+            '[foo=ba\\\\r]{a:b}'
+        );
+        assert.equal(
+            crass.parse('[foo="ba r"]{a:b}').toString(),
+            '[foo=ba\\ r]{a:b}'
+        );
+        assert.equal(
+            crass.parse('[foo="ba   r"]{a:b}').toString(),
+            '[foo="ba   r"]{a:b}'
+        );
         assert.equal(
             crass.parse('[foo="bar"]{a:b}').toString(),
             '[foo=bar]{a:b}'
-        )
+        );
     });
     it('should allow namespaces', () => {
         parity('[foo|bar]{$$}');

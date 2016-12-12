@@ -47,9 +47,10 @@ URI.prototype.toString = function toString() {
     if (typeof uri === 'string' && uri.indexOf(')') !== -1) {
         uri = new objects.String(uri);
     } else if (typeof uri === 'string') {
-        return `url(${uri})`;
+        return `url(${uri.replace(/\s/g, '\\ ')})`;
     }
-    return 'url(' + uri.asString(uri.asString(true).indexOf(')') === -1) + ')';
+    const rawStr = uri.asString(true);
+    return 'url(' + uri.asString(rawStr.indexOf(')') === -1) + ')';
 };
 
 /**

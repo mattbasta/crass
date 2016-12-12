@@ -19,9 +19,12 @@ function AttributeSelector(ident, comparison, value) {
 AttributeSelector.prototype.toString = function toString() {
     // TODO: Handle quoting/unquoting
     if (this.value) {
-        var value = this.value;
-        if (value.asString) {
-            value = value.asString(true);
+        let value = this.value.toString();
+        if (this.value.asString) {
+            const newValue = this.value.asString(true);
+            if (newValue.length <= value.length) {
+                value = newValue;
+            }
         }
         return '[' + this.ident + this.comparison + value + ']';
     } else {

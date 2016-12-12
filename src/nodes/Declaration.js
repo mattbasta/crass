@@ -102,6 +102,7 @@ Declaration.prototype.optimize = function optimize(kw) {
     }
 
     kw.declarationName = this.ident.toLowerCase();
+
     this.expr = optimization.try_(this.expr, kw);
     if (!this.expr) {
         return null;

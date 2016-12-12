@@ -81,14 +81,24 @@ URI.prototype.optimize = function optimize(kw) {
     } else if (kw.o1 && !isURL) {
         const content = this.asRawString();
         if (content.slice(0, 5) === 'data:') {
+            let out;
             try {
-                const out = sdu.decode(content);
+                out = sdu.decode(content);
+            } catch (e) {}
+            if (!out) {
+                const split = content.split(',');
+                if (split.length === 1) {
+                    return self;
+                }
+                out = split[1];
+            }
+            try {
                 self = this.optimizeDataURI(out);
                 if (!self) {
                     return null;
                 }
             } catch (e) {
-                return null;
+                return self;
             }
         }
     }

@@ -59,6 +59,9 @@ Expression.prototype.pretty = function pretty(indent) {
  */
 Expression.prototype.optimize = function optimize(kw) {
     this.chain = this.chain.map(v => [v[0], optimization.try_(v[1], kw)]).filter(v => !!v[1]);
+    if (!this.chain.length) {
+        return null;
+    }
 
     if (!kw.declarationName) return this;
 

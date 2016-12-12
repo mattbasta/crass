@@ -1,14 +1,13 @@
-// CSS grammar based on CSS3 specification
+// CSS grammar based on CSS3+ specification(s)
 // Written by Matt Basta
-// Copyright 2014
+// Copyright 2016
 
 %lex
-esc                 "\\"
-unary_operator      [\-\+]
 ws                  [ \n\r\t\f]
 comment             "/*"(.|\n|\r)*?"*/"
 hex                 [a-fA-F0-9]
-ident               ([a-zA-Z_]|"-"[a-zA-Z\-]+)([a-zA-Z0-9_\-]|\\\D)*
+escape_seq          \\([\da-fA-F]+\s|[^\n])
+ident               "-"?([a-zA-Z_]|\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*
 int                 ([1-9][0-9]*|"0")
 ie_junk             [a-zA-Z0-9=#, \n\r\t'"]
 ie_ident            [a-zA-Z0-9\.:]

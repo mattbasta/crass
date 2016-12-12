@@ -7,7 +7,7 @@ ws                  [ \n\r\t\f]
 comment             "/*"(.|\n|\r)*?"*/"
 hex                 [a-fA-F0-9]
 escape_seq          \\([\da-fA-F]+\s|[^\n])
-ident               "-"?([a-zA-Z_]|\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*
+ident               ([a-zA-Z_]|\-[a-zA-Z_\-]|\-?\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*
 int                 ([1-9][0-9]*|"0")
 ie_junk             [a-zA-Z0-9=#, \n\r\t'"]
 ie_ident            [a-zA-Z0-9\.:]
@@ -98,6 +98,7 @@ ie_ident            [a-zA-Z0-9\.:]
 "url("(\"(?:\\(?:.|{ws})|[^"\\])*\"|\'(?:\\(?:.|{ws})|[^'\\])*\'|[^)]*)")"                      return 'URL_FULL'
 "calc"                              return 'CALC'
 "attr"                              return 'ATTR'
+"#"{ident}"#"{ident}                return 'ID_IDENT'  // for ie :(
 "#"{ident}                          return 'ID_IDENT'
 "."{ident}                          return 'CLASS_IDENT'
 {ident}"("                          return 'FUNCTION_IDENT'

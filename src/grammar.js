@@ -1112,50 +1112,52 @@ case 79:return 180
 break;
 case 80:return 183
 break;
-case 81:return 128
+case 81:return 128  // for ie :(
 break;
-case 82:return 133
+case 82:return 128
 break;
-case 83:return 151
+case 83:return 133
 break;
-case 84:return 108
+case 84:return 151
 break;
-case 85:return 109
+case 85:return 108
 break;
-case 86:return 10
+case 86:return 109
 break;
-case 87:return 147
+case 87:return 10
 break;
-case 88:return 146
+case 88:return 147
 break;
-case 89:return 155
+case 89:return 146
 break;
-case 90:return 122
+case 90:return 155
 break;
-case 91:return 124
+case 91:return 122
 break;
-case 92:return 125
+case 92:return 124
 break;
-case 93:return 149
+case 93:return 125
 break;
-case 94:return 152
+case 94:return 149
 break;
 case 95:return 152
 break;
-case 96:return 148
+case 96:return 152
 break;
-case 97:return 58
+case 97:return 148
 break;
-case 98:return 60
+case 98:return 58
 break;
-case 99:return 168
+case 99:return 60
 break;
-case 100:return 6
+case 100:return 168
+break;
+case 101:return 6
 break;
 }
 },
-rules: [/^(?:#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9]))/,/^(?:#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9]))/,/^(?:#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9]))/,/^(?:#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9]))/,/^(?:(([1-9][0-9]*|0))e(\+|-)?(([1-9][0-9]*|0)))/,/^(?:(([1-9][0-9]*|0))?\.[0-9]+)/,/^(?:(([1-9][0-9]*|0))\.[0-9]*)/,/^(?:(([1-9][0-9]*|0)))/,/^(?:(([ \n\r\t\f])|(\/\*(.|\n|\r)*?\*\/))+)/,/^(?:,)/,/^(?:;)/,/^(?:,)/,/^(?:\{)/,/^(?:\})/,/^(?:\[)/,/^(?:\])/,/^(?:\()/,/^(?:\))/,/^(?:%)/,/^(?:\*)/,/^(?:\|=)/,/^(?:\|)/,/^(?:\/)/,/^(?:\*)/,/^(?:=)/,/^(?:n-resize\b)/,/^(?:not-allowed\b)/,/^(?:n\b)/,/^(?:@charset\b)/,/^(?:@counter-style\b)/,/^(?:@import\b)/,/^(?:@namespace\b)/,/^(?:@media\b)/,/^(?:@font-face\b)/,/^(?:@font-feature-values\b)/,/^(?:@page\b)/,/^(?:@keyframes\b)/,/^(?:@-[a-zA-Z]+-keyframes\b)/,/^(?:@viewport\b)/,/^(?:@-[a-zA-Z]+-viewport\b)/,/^(?:@supports\b)/,/^(?:@top-left-corner\b)/,/^(?:@top-left\b)/,/^(?:@top-center\b)/,/^(?:@top-right\b)/,/^(?:@top-right-corner\b)/,/^(?:@bottom-left-corner\b)/,/^(?:@bottom-left\b)/,/^(?:@bottom-center\b)/,/^(?:@bottom-right\b)/,/^(?:@bottom-right-corner\b)/,/^(?:@left-top\b)/,/^(?:@left-middle\b)/,/^(?:@left-bottom\b)/,/^(?:@right-top\b)/,/^(?:@right-middle\b)/,/^(?:@right-bottom\b)/,/^(?:@swash\b)/,/^(?:@annotation\b)/,/^(?:@ornaments\b)/,/^(?:@stylistic\b)/,/^(?:@styleset\b)/,/^(?:@character-variant\b)/,/^(?:U\+([a-fA-F0-9])+-([a-fA-F0-9])+)/,/^(?:U\+([a-fA-F0-9])+\?*)/,/^(?:"(?:\\(?:.|([ \n\r\t\f]))|[^"\\])*")/,/^(?:'(?:\\(?:.|([ \n\r\t\f]))|[^'\\])*')/,/^(?:only\b)/,/^(?:not\b)/,/^(?:and\b)/,/^(?:or\b)/,/^(?:odd\b)/,/^(?:even\b)/,/^(?:!)/,/^(?:important\b)/,/^(?:expression\(.*?\))/,/^(?:filter([ \n\r\t\f])*:([ \n\r\t\f])*(([a-zA-Z0-9\.:])+\(([a-zA-Z0-9=#, \n\r\t'"])*\)([ \n\r\t\f])*)+)/,/^(?:-ms-filter([ \n\r\t\f])*:([ \n\r\t\f])*(([a-zA-Z0-9\.:])+\(([a-zA-Z0-9=#, \n\r\t'"])*\)([ \n\r\t\f])*)+)/,/^(?:url\(("(?:\\(?:.|([ \n\r\t\f]))|[^"\\])*"|'(?:\\(?:.|([ \n\r\t\f]))|[^'\\])*'|[^)]*)\))/,/^(?:calc\b)/,/^(?:attr\b)/,/^(?:#(-?([a-zA-Z_]|\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*))/,/^(?:\.(-?([a-zA-Z_]|\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*))/,/^(?:(-?([a-zA-Z_]|\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*)\()/,/^(?:from\b)/,/^(?:to\b)/,/^(?:(-?([a-zA-Z_]|\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*))/,/^(?:\$)/,/^(?:\^)/,/^(?:-)/,/^(?:\+)/,/^(?:>)/,/^(?:~)/,/^(?::nth-(last-)?(child|of-type))/,/^(?::only-child\b)/,/^(?::only-of-type\b)/,/^(?:::)/,/^(?::)/,/^(?:\\0)/,/^(?:\\9\b)/,/^(?:$)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100],"inclusive":true}}
+rules: [/^(?:#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9]))/,/^(?:#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9]))/,/^(?:#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9]))/,/^(?:#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9]))/,/^(?:(([1-9][0-9]*|0))e(\+|-)?(([1-9][0-9]*|0)))/,/^(?:(([1-9][0-9]*|0))?\.[0-9]+)/,/^(?:(([1-9][0-9]*|0))\.[0-9]*)/,/^(?:(([1-9][0-9]*|0)))/,/^(?:(([ \n\r\t\f])|(\/\*(.|\n|\r)*?\*\/))+)/,/^(?:,)/,/^(?:;)/,/^(?:,)/,/^(?:\{)/,/^(?:\})/,/^(?:\[)/,/^(?:\])/,/^(?:\()/,/^(?:\))/,/^(?:%)/,/^(?:\*)/,/^(?:\|=)/,/^(?:\|)/,/^(?:\/)/,/^(?:\*)/,/^(?:=)/,/^(?:n-resize\b)/,/^(?:not-allowed\b)/,/^(?:n\b)/,/^(?:@charset\b)/,/^(?:@counter-style\b)/,/^(?:@import\b)/,/^(?:@namespace\b)/,/^(?:@media\b)/,/^(?:@font-face\b)/,/^(?:@font-feature-values\b)/,/^(?:@page\b)/,/^(?:@keyframes\b)/,/^(?:@-[a-zA-Z]+-keyframes\b)/,/^(?:@viewport\b)/,/^(?:@-[a-zA-Z]+-viewport\b)/,/^(?:@supports\b)/,/^(?:@top-left-corner\b)/,/^(?:@top-left\b)/,/^(?:@top-center\b)/,/^(?:@top-right\b)/,/^(?:@top-right-corner\b)/,/^(?:@bottom-left-corner\b)/,/^(?:@bottom-left\b)/,/^(?:@bottom-center\b)/,/^(?:@bottom-right\b)/,/^(?:@bottom-right-corner\b)/,/^(?:@left-top\b)/,/^(?:@left-middle\b)/,/^(?:@left-bottom\b)/,/^(?:@right-top\b)/,/^(?:@right-middle\b)/,/^(?:@right-bottom\b)/,/^(?:@swash\b)/,/^(?:@annotation\b)/,/^(?:@ornaments\b)/,/^(?:@stylistic\b)/,/^(?:@styleset\b)/,/^(?:@character-variant\b)/,/^(?:U\+([a-fA-F0-9])+-([a-fA-F0-9])+)/,/^(?:U\+([a-fA-F0-9])+\?*)/,/^(?:"(?:\\(?:.|([ \n\r\t\f]))|[^"\\])*")/,/^(?:'(?:\\(?:.|([ \n\r\t\f]))|[^'\\])*')/,/^(?:only\b)/,/^(?:not\b)/,/^(?:and\b)/,/^(?:or\b)/,/^(?:odd\b)/,/^(?:even\b)/,/^(?:!)/,/^(?:important\b)/,/^(?:expression\(.*?\))/,/^(?:filter([ \n\r\t\f])*:([ \n\r\t\f])*(([a-zA-Z0-9\.:])+\(([a-zA-Z0-9=#, \n\r\t'"])*\)([ \n\r\t\f])*)+)/,/^(?:-ms-filter([ \n\r\t\f])*:([ \n\r\t\f])*(([a-zA-Z0-9\.:])+\(([a-zA-Z0-9=#, \n\r\t'"])*\)([ \n\r\t\f])*)+)/,/^(?:url\(("(?:\\(?:.|([ \n\r\t\f]))|[^"\\])*"|'(?:\\(?:.|([ \n\r\t\f]))|[^'\\])*'|[^)]*)\))/,/^(?:calc\b)/,/^(?:attr\b)/,/^(?:#(([a-zA-Z_]|-[a-zA-Z_\-]|-?\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*)#(([a-zA-Z_]|-[a-zA-Z_\-]|-?\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*))/,/^(?:#(([a-zA-Z_]|-[a-zA-Z_\-]|-?\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*))/,/^(?:\.(([a-zA-Z_]|-[a-zA-Z_\-]|-?\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*))/,/^(?:(([a-zA-Z_]|-[a-zA-Z_\-]|-?\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*)\()/,/^(?:from\b)/,/^(?:to\b)/,/^(?:(([a-zA-Z_]|-[a-zA-Z_\-]|-?\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*))/,/^(?:\$)/,/^(?:\^)/,/^(?:-)/,/^(?:\+)/,/^(?:>)/,/^(?:~)/,/^(?::nth-(last-)?(child|of-type))/,/^(?::only-child\b)/,/^(?::only-of-type\b)/,/^(?:::)/,/^(?::)/,/^(?:\\0)/,/^(?:\\9\b)/,/^(?:$)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101],"inclusive":true}}
 });
 return lexer;
 })();

@@ -39,6 +39,10 @@ describe('ID Selectors', () => {
         parity('#foo #bar{$$}');
         // Technically won't match anything, but not invalid.
         parity('#foo#bar{$$}');
+        assert.equal(
+            crass.parse('#foo{a:b}').optimize({o1: true}).toString(),
+            '#foo{a:b}'
+        );
     });
 });
 

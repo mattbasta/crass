@@ -156,4 +156,14 @@ describe('#ie8#hack', () => {
             ''
         );
     });
+    it('should be preserved when saveie is present', () => {
+        assert.equal(
+            crass.parse('#ie8#hack,a{b:c}').optimize({saveie: true}).toString(),
+            '#ie8#hack,a{b:c}'
+        );
+        assert.equal(
+            crass.parse('#ie8#hack{b:c}').optimize({saveie: true}).toString(),
+            '#ie8#hack{b:c}'
+        );
+    });
 });

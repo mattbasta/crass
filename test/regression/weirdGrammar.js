@@ -11,4 +11,5 @@ describe('weird grammar regressions', () => {
             '.\\31 0\\+{x:y}'
         );
     });
+
 });

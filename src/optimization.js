@@ -486,7 +486,13 @@ module.exports.optimizeDeclarations = (content, kw) => {
     for (let i = content.length - 1; i >= 0; i--) {
         let decl = content[i];
         if (decl.ident in seenDeclarations) {
-            content.splice(i, 1);
+            const seen = seenDeclarations[decl.ident];
+            if (decl.important && !seen.important) {
+                content.splice(content.indexOf(seen), 1);
+                seenDeclarations[decl.ident] = decl;
+            } else {
+                content.splice(i, 1);
+            }
             continue;
         }
 

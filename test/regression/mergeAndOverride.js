@@ -63,4 +63,18 @@ describe('merge and override', () => {
         );
     });
 
+    it('should not merge into an important shorthand', () => {
+        assert.equal(
+            crass.parse(`
+            .box {
+                margin:0!important
+            }
+            .box {
+                margin:1px
+            }
+            `).optimize({o1: true}).toString(),
+            '.box{margin:0!important}'
+        );
+    });
+
 });

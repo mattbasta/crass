@@ -55,6 +55,10 @@ describe('filter', () => {
         var ie10_min = {browser_min: {ie: 10}};
         assert.equal(crass.parse('a{-ms-filter:foo;zip:zap}').optimize(ie10_min).toString(), 'a{zip:zap}');
     });
+
+    it('is has whitespace stripped during optimization', () => {
+        assert.equal(crass.parse('a{filter : foo;}').optimize({o1: true}).toString(), 'a{filter:foo}');
+    });
 });
 
 

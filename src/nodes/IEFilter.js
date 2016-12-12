@@ -30,6 +30,8 @@ IEFilter.prototype.optimize = function optimize(kw) {
         return null;
     }
 
+    this.blob = 'filter:' + /filter\s*:\s*(.+)/.exec(this.blob)[1];
+
     return this;
 };
 

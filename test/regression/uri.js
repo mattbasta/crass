@@ -19,4 +19,15 @@ describe('URIs', () => {
         );
     });
 
+    it('should trim URLs', () => {
+        assert.equal(
+            crass.parse('a{foo:url("    foo.jpg")}').optimize({o1: true}).toString(),
+            'a{foo:url(foo.jpg)}'
+        );
+        assert.equal(
+            crass.parse('a{foo:url("    fo o.jpg")}').optimize({o1: true}).toString(),
+            'a{foo:url(fo\\ o.jpg)}'
+        );
+    });
+
 });

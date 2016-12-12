@@ -55,7 +55,7 @@ String.prototype.optimize = function optimize(kw) {
         kw.declarationName === 'font-family' && /[\w ]/.exec(this.value) &&
         keywords.every(keyword => this.value.toLowerCase().indexOf(keyword) === -1)
     ) {
-        const newValue = this.value.replace(/ (?=\d+\b)/g, '\\ ');
+        const newValue = this.value.trim().replace(/ (?=\d+\b)/g, '\\ ');
         if (newValue.length <= this.value.length + 2) {
             this._noQuotes = true;
             this.value = newValue;

@@ -34,9 +34,9 @@ URI.prototype.asString = function asString() {
  */
 URI.prototype.asRawString = function asRawString() {
     if (this.uri instanceof objects.String) {
-        return this.uri.value;
+        return this.uri.value.trim();
     }
-    return this.uri;
+    return this.uri.trim();
 };
 
 /**
@@ -45,9 +45,9 @@ URI.prototype.asRawString = function asRawString() {
 URI.prototype.toString = function toString() {
     let uri = this.uri;
     if (typeof uri === 'string' && uri.indexOf(')') !== -1) {
-        uri = new objects.String(uri);
+        uri = new objects.String(uri.trim());
     } else if (typeof uri === 'string') {
-        return `url(${uri.replace(/\s/g, '\\ ')})`;
+        return `url(${uri.trim().replace(/\s/g, '\\ ')})`;
     }
     const rawStr = uri.asString(true);
     return 'url(' + uri.asString(rawStr.indexOf(')') === -1) + ')';

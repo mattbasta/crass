@@ -1,4 +1,6 @@
-var optimization = require('../optimization');
+'use strict';
+
+const optimization = require('../optimization');
 
 
 /**

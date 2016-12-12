@@ -13,7 +13,7 @@ function String(value) {
  * @return {string}
  */
 String.prototype.asString = function asString(raw) {
-    if (raw || this._noQuotes) {
+    if (raw) {
         return this.value.replace(/(\s)/g, '\\$1');
     }
     return this.toString();
@@ -41,10 +41,10 @@ String.prototype.pretty = function pretty() {
 
 const keywords = [
     'cursive',
+    'fantasy',
+    'monospace',
     'sans-serif',
     'serif',
-    'fantasy',
-    // no monospace because quoted monospace renders differently in Chrome ¯\_(ツ)_/¯
 ];
 
 /**
@@ -55,7 +55,11 @@ String.prototype.optimize = function optimize(kw) {
         kw.declarationName === 'font-family' && /[\w ]/.exec(this.value) &&
         keywords.every(keyword => this.value.toLowerCase().indexOf(keyword) === -1)
     ) {
-        this._noQuotes = true;
+        const newValue = this.value.replace(/ (?=\d+\b)/g, '\\ ');
+        if (newValue.length <= this.value.length + 2) {
+            this._noQuotes = true;
+            this.value = newValue;
+        }
     }
     return this;
 };

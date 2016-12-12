@@ -60,7 +60,7 @@ Func.prototype.optimize = function optimize(kw) {
     }
 
     if (
-        this.name === 'calc' &&
+        this.isCalc() &&
         !(
             this.content instanceof objects.MathSum ||
             this.content instanceof objects.MathProduct
@@ -87,7 +87,7 @@ Func.prototype.optimize = function optimize(kw) {
         return null;
     }
 
-    if (this.name === 'calc') {
+    if (this.isCalc()) {
         self = self.optimizeCalc(kw);
     }
 
@@ -95,6 +95,13 @@ Func.prototype.optimize = function optimize(kw) {
     kw.func = oldkwf;
 
     return self;
+};
+
+/**
+ * @return {bool} Whether the function is calc or not.
+ */
+Func.prototype.isCalc = function isCalc() {
+    return Boolean(/^(\-[a-zA-Z]+\-)?calc$/i.exec(this.name));
 };
 
 const recognizedColorFuncs = {

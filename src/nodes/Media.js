@@ -47,6 +47,9 @@ Media.prototype.optimize = function optimize(kw) {
     }
 
     this.content = optimization.optimizeBlocks(this.content, kw);
+    if (!this.content.length) {
+        return null;
+    }
 
     return this;
 };

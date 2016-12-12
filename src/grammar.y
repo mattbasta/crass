@@ -7,10 +7,11 @@ ws                  [ \n\r\t\f]
 comment             "/*"(.|\n|\r)*?"*/"
 hex                 [a-fA-F0-9]
 escape_seq          \\([\da-fA-F]+\s|[^\n])
-ident               ([a-zA-Z_]|\-[a-zA-Z_\-]|\-?\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*
+ident               ([a-zA-Z_]|[^\x00-\x7F]|\-([a-zA-Z_\-]|[^\x00-\x7F])|\-?\\([\da-fA-F]{1,6}\s|[^\n\da-fA-F]))([\w_\-]|[^\x00-\x7F]|\\([\da-fA-F]+\s|[^\n\da-fA-F]))*
 int                 ([1-9][0-9]*|"0")
 ie_junk             [a-zA-Z0-9=#, \n\r\t'"]
 ie_ident            [a-zA-Z0-9\.:]
+vendor_prefix       ((\-[a-zA-Z]+\-)?)
 
 %%
 "#"{hex}{hex}{hex}{hex}{hex}{hex}{hex}{hex}   return 'HEX_LONG_ALPHA'
@@ -96,7 +97,7 @@ ie_ident            [a-zA-Z0-9\.:]
 "filter"{ws}*":"{ws}*({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
 "-ms-filter"{ws}*":"{ws}*({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
 "url("(\"(?:\\(?:.|{ws})|[^"\\])*\"|\'(?:\\(?:.|{ws})|[^'\\])*\'|[^)]*)")"                      return 'URL_FULL'
-"calc"                              return 'CALC'
+{vendor_prefix}"calc"               return 'CALC'
 "attr"                              return 'ATTR'
 "#"{ident}"#"{ident}                return 'ID_IDENT'  // for ie :(
 "#"{ident}                          return 'ID_IDENT'
@@ -172,14 +173,14 @@ stylesheet
     ;
 
 charset_block
-    : BLOCK_CHARSET junk string junk ';' scc
+    : BLOCK_CHARSET junk string junk ';' junk
         { $$ = new yy.Charset($3); $$.range = @$; }
     |
         { $$ = null; }
     ;
 
 import_list
-    : BLOCK_IMPORT junk import_block ';' scc import_list
+    : BLOCK_IMPORT junk import_block ';' junk import_list
         { $$ = $6; $$.unshift($3); }
     |
         { $$ = []; }
@@ -198,7 +199,7 @@ optional_medium_list
     ;
 
 namespace_list
-    : namespace_block ';' scc namespace_list
+    : namespace_block ';' junk namespace_list
         { $$ = $4; $$.unshift($1); }
     |
         { $$ = []; }
@@ -221,25 +222,31 @@ blocks
     ;
 
 block
-    : ruleset scc
+    : ruleset junk
         { $$ = $1; }
-    | media_block scc
+    | media_block junk
         { $$ = $1; }
-    | page_block scc
+    | page_block junk
         { $$ = $1; }
-    | font_face_block scc
+    | font_face_block junk
         { $$ = $1; }
-    | font_feature_values_block scc
+    | font_feature_values_block junk
         { $$ = $1; }
-    | keyframes_block scc
+    | keyframes_block junk
         { $$ = $1; }
-    | viewport_block scc
+    | viewport_block junk
         { $$ = $1; }
-    | supports_block scc
+    | supports_block junk
         { $$ = $1; }
-    | counter_styles_block scc
+    | counter_styles_block junk
         { $$ = $1; }
     ;
+
+block_of_declarations
+    : '{' junk declaration_list '}'
+        { $$ = $3; }
+    ;
+
 
 media_block
     : BLOCK_MEDIA junk medium_list junk '{' junk media_inner_list '}'
@@ -254,11 +261,11 @@ media_inner_list
     ;
 
 media_inner
-    : media_block scc
+    : media_block junk
         { $$ = $1; }
-    | page_block scc
+    | page_block junk
         { $$ = $1; }
-    | ruleset scc
+    | ruleset junk
         { $$ = $1; }
     ;
 
@@ -365,8 +372,8 @@ page_declaration
 
 
 page_margin_declaration
-    : page_margin junk '{' junk declaration_list '}' junk
-        { $$ = new yy.PageMargin($1.substr(1), $5); }
+    : page_margin junk block_of_declarations junk
+        { $$ = new yy.PageMargin($1.substr(1), $3); }
     ;
 
 page_margin
@@ -405,8 +412,8 @@ page_margin
     ;
 
 font_face_block
-    : BLOCK_FONT_FACE junk '{' junk declaration_list '}'
-        { $$ = new yy.FontFace($5); $$.range = @$; }
+    : BLOCK_FONT_FACE junk block_of_declarations
+        { $$ = new yy.FontFace($3); $$.range = @$; }
     ;
 
 font_feature_values_block
@@ -427,15 +434,15 @@ font_feature_name_extended
     ;
 
 font_feature_values_contents
-    : font_feature_values_inner_block junk font_feature_values_contents
-        { $$ = $3; $$.unshift($1); }
+    : font_feature_values_inner_block font_feature_values_contents
+        { $$ = $2; $$.unshift($1); }
     |
         { $$ = []; }
     ;
 
 font_feature_values_inner_block
-    : font_feature_values_content_block junk '{' junk declaration_list '}'
-        { $$ = new yy.FontFeatureValuesBlock($1, $5); $$.range = @$; }
+    : font_feature_values_content_block junk block_of_declarations junk
+        { $$ = new yy.FontFeatureValuesBlock($1, $3); $$.range = @$; }
     ;
 
 font_feature_values_content_block
@@ -468,13 +475,13 @@ keyframe_list
     ;
 
 keyframe
-    : keyframe_selector_list '{' junk declaration_list '}' junk
-        { $$ = new yy.Keyframe($1, $4); $$.range = @$; }
+    : keyframe_selector_list block_of_declarations junk
+        { $$ = new yy.Keyframe($1, $2); $$.range = @$; }
     ;
 
 keyframe_selector_list
-    : keyframe_selector keyframe_selector_list_extended
-        { $$ = $2; $$.unshift($1); }
+    : keyframe_selector junk keyframe_selector_list_extended
+        { $$ = $3; $$.unshift($1); }
     ;
 
 keyframe_selector_list_extended
@@ -495,24 +502,24 @@ keyframe_selector
             }
             $$.range = @$;
         }
-    | FROM junk
+    | FROM
         { $$ = new yy.KeyframeSelector('from'); $$.range = @$; }
-    | TO junk
+    | TO
         { $$ = new yy.KeyframeSelector('to'); $$.range = @$; }
     ;
 
 optional_percent
-    : '%' junk
+    : '%'
         { $$ = true; }
-    | junk
+    |
         { $$ = false; }
     ;
 
 viewport_block
-    : BLOCK_VIEWPORT junk '{' junk declaration_list '}'
-        { $$ = new yy.Viewport($5); $$.range = @$; }
-    | BLOCK_VENDOR_VIEWPORT junk '{' junk declaration_list '}'
-        { $$ = new yy.Viewport($5, $1.substring(1, $1.length - 8)); $$.range = @$; }
+    : BLOCK_VIEWPORT junk block_of_declarations
+        { $$ = new yy.Viewport($3); $$.range = @$; }
+    | BLOCK_VENDOR_VIEWPORT junk block_of_declarations
+        { $$ = new yy.Viewport($3, $1.substring(1, $1.length - 8)); $$.range = @$; }
     ;
 
 
@@ -554,14 +561,14 @@ supports_negation_base
     ;
 
 counter_styles_block
-    : BLOCK_COUNTERSTYLE junk IDENT junk '{' junk declaration_list '}'
-        { $$ = new yy.CounterStyle($3, $7); $$.range = @$; }
+    : BLOCK_COUNTERSTYLE junk IDENT junk block_of_declarations
+        { $$ = new yy.CounterStyle($3, $5); $$.range = @$; }
     ;
 
 
 ruleset
-    : selector_list '{' junk declaration_list '}'
-        { $$ = new yy.Ruleset($1, $4); $$.range = @$; }
+    : selector_list block_of_declarations
+        { $$ = new yy.Ruleset($1, $2); $$.range = @$; }
     ;
 
 selector_list
@@ -773,7 +780,7 @@ expr_chain
         { $$ = $1; $$.push([$2, $4]); }
     | expr_chain term junk
         { $$ = $1; $$.push([null, $2]); }
-    | junk
+    |
         { $$ = []; }
     ;
 
@@ -815,7 +822,7 @@ unit
     | '(' junk math_expr ')'
         { $$ = $3; }
     | CALC '(' junk math_expr ')'
-        { $$ = new yy.Func('calc', $4, null); $$.range = @$; }
+        { $$ = new yy.Func($1, $4, null); $$.range = @$; }
     | attr_expression
         { $$ = $1; }
     | function

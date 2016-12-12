@@ -53,6 +53,7 @@ describe('calc()', () => {
         parseCompare('calc(2em + 4kHz)', '');
         parseCompare('calc(2rem * (2 * (2 + 3)) + 4 + (5/2))', '');
         parseCompare('calc((4 * 2) + 4.2 + 1 + (2rem * .4) + (2px * .4))', '');
+        parseCompare('calc(50% / 0)', '');
     });
 
     it('should ignore unrecognized units', () => {
@@ -68,6 +69,17 @@ describe('calc()', () => {
         parseCompare('calc((2 * 100) / 12)', '16.6666');
         parseCompare('calc((100 / 12) * 2)', '16.6666');
         parseCompare('calc(50% - 50vw + (100vw - 100vw) / 2 + 1em)', 'calc(50% - 50vw + 0 + 1em)');
+
+        parseCompare('calc(50% + 0px)', '50%');
+        parseCompare('calc(50% - 0px)', '50%');
+        parseCompare('calc(50% + 0)', '50%');
+        parseCompare('calc(50% - 0)', '50%');
+        parseCompare('calc(0px + 50%)', '50%');
+        parseCompare('calc(0 + 50%)', '50%');
+        parseCompare('calc(0 - 50%)', '-50%');
+
+        parseCompare('calc(0 / 1)', '0');
+        parseCompare('calc(0px / 1)', '0');
     });
 
 });

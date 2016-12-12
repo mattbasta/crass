@@ -65,10 +65,14 @@ MathProduct.prototype.optimize = function optimize(kw) {
     ) {
         return null;
     }
-    if (this.operator === '/' && !(this.term instanceof objects.Number)) {
-        return null;
+    if (this.operator === '/') {
+        if (!(this.term instanceof objects.Number)) {
+            return null;
+        }
+        if (this.term.asNumber() === 0) {
+            return null;
+        }
     }
-
 
     if (
         this.base instanceof objects.Dimension &&
@@ -91,7 +95,9 @@ MathProduct.prototype.optimize = function optimize(kw) {
                 '%'
             );
         }
-    } else if (
+    }
+
+    if (
         this.base instanceof objects.Number &&
         this.term instanceof objects.Dimension &&
         this.operator === '*'

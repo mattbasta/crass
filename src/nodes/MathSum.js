@@ -58,6 +58,29 @@ MathSum.prototype.optimize = function optimize(kw) {
         return null;
     }
 
+    // OPT: Handle zero gracefully
+    if (
+        this.base instanceof objects.Dimension &&
+        (this.term instanceof objects.Dimension || this.term instanceof objects.Number) &&
+        this.term.asNumber() === 0
+    ) {
+        return this.base;
+
+    } else if (
+        this.term instanceof objects.Dimension &&
+        (this.base instanceof objects.Dimension || this.base instanceof objects.Number) &&
+        this.base.asNumber() === 0
+    ) {
+        if (this.operator === '+') {
+            return this.term;
+        }
+
+        return new objects.Dimension(
+            new objects.Number(this.term.asNumber() * -1),
+            this.term.unit
+        );
+    }
+
     // OPT: drop invalid calculations
     if (
         this.base instanceof objects.Dimension &&
@@ -95,6 +118,7 @@ MathSum.prototype.optimize = function optimize(kw) {
             return this;
         }
         return new objects.Dimension(new objects.Number(val), this.base.unit);
+
     } else if (
         this.base instanceof objects.Number &&
         this.term instanceof objects.Number
@@ -104,6 +128,7 @@ MathSum.prototype.optimize = function optimize(kw) {
         } else if (this.operator === '-') {
             return new objects.Number(this.base.value - this.term.value);
         }
+
     }
 
     return this;

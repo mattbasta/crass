@@ -68,12 +68,14 @@ URI.prototype.optimize = function optimize(kw) {
 
     // OPT: Normalize URIs
     if (kw.o1 && isURL) {
-        if (this.uri instanceof objects.String) {
-            this.uri = new objects.String(
-                path.normalize(this.uri.value)
-            );
+        const rawURI = this.asRawString();
+        const urlCut = /https?:\/\/.+?(\/.*)/.exec(rawURI);
+        if (urlCut) {
+            const urlPath = urlCut[1];
+            const optimizedPath = path.normalize(urlPath);
+            this.uri = rawURI.slice(0, rawURI.length - urlCut[1].length) + optimizedPath;
         } else {
-            this.uri = path.normalize(this.uri);
+            this.uri = path.normalize(rawURI);
         }
     } else if (kw.o1 && !isURL) {
         const content = this.asRawString();

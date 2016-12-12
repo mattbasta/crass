@@ -67,13 +67,75 @@ describe('merge and override', () => {
         assert.equal(
             crass.parse(`
             .box {
-                margin:0!important
+                margin: 0 !important;
             }
             .box {
-                margin:1px
+                margin: 1px;
             }
             `).optimize({o1: true}).toString(),
             '.box{margin:0!important}'
+        );
+        assert.equal(
+            crass.parse(`
+            .box {
+                margin: 0 !important;
+                margin-top: 1px;
+            }
+            `).optimize({o1: true}).toString(),
+            '.box{margin:0!important}'
+        );
+        assert.equal(
+            crass.parse(`
+            .box {
+                margin-top: 1px;
+                margin: 0 !important;
+            }
+            `).optimize({o1: true}).toString(),
+            '.box{margin:0!important}'
+        );
+    });
+
+    it('should not merge important longhand into unimportant shorthand', () => {
+        assert.equal(
+            crass.parse(`
+            .box {
+                margin: 0;
+                margin-top: 1px !important;
+            }
+            `).optimize({o1: true}).toString(),
+            '.box{margin:0;margin-top:1px!important}'
+        );
+        assert.equal(
+            crass.parse(`
+            .box {
+                margin-top: 1px !important;
+                margin: 0;
+            }
+            `).optimize({o1: true}).toString(),
+            '.box{margin:0;margin-top:1px!important}'
+        );
+    });
+
+    it('should perform partial merges into an important shorthand', () => {
+        assert.equal(
+            crass.parse(`
+            .box {
+                margin: 0 !important;
+                margin-left: 2px !important;
+                margin-top: 1px;
+            }
+            `).optimize({o1: true}).toString(),
+            '.box{margin:0 0 0 2px!important}'
+        );
+        assert.equal(
+            crass.parse(`
+            .box {
+                margin-top: 1px;
+                margin-left: 2px !important;
+                margin: 0 !important;
+            }
+            `).optimize({o1: true}).toString(),
+            '.box{margin:0!important}' // margin-left is overriden by the shorthand "naturally"
         );
     });
 

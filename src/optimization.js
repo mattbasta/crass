@@ -471,10 +471,16 @@ function mergeDeclarations(rule, shorthand, longhand) {
     const declIdx = rule.decls.indexOf(longhand.ident);
     const newChain = rule.shorthandMerger(shorthand.expr.chain, longhand.expr.chain, declIdx);
 
-    return new objects.Declaration(
+    const output = new objects.Declaration(
         shorthand.ident,
         new objects.Expression(newChain)
     );
+
+    if (shorthand.important) {
+        output.important = true;
+    }
+
+    return output;
 }
 
 module.exports.optimizeDeclarations = (content, kw) => {
@@ -500,8 +506,9 @@ module.exports.optimizeDeclarations = (content, kw) => {
         // things that overrides it, remove it from the ruleset.
         if (
             decl.ident in overrideList &&
-            overrideList[decl.ident].some(overrider => overrider in seenDeclarations) &&
-            !decl.important
+            overrideList[decl.ident].some(
+                ident => ident in seenDeclarations && seenDeclarations[ident].important >= decl.important
+            )
         ) {
             content.splice(i, 1);
             continue;
@@ -510,14 +517,31 @@ module.exports.optimizeDeclarations = (content, kw) => {
         if (decl.ident in shorthandMappingMapped) {
             shorthandMappingMapped[decl.ident].forEach(shorthand => {
                 // Short circuit if we eliminate this declaration below.
-                if (
-                    !decl ||
-                    !shorthand.decls.some(
-                        lhDecl => lhDecl in seenDeclarations && !seenDeclarations[lhDecl].important
-                    )
-                ) {
+                if (!decl) {
                     return;
                 }
+                let seenAny = false;
+                for (let lhDecl of shorthand.decls) {
+                    const seen = seenDeclarations[lhDecl];
+                    if (!seen) {
+                        continue;
+                    }
+
+                    if (seen.important && !decl.important) {
+                        continue;
+                    } else if (decl.important && !seen.important) {
+                        // Remove longhand overridden by important shorthand
+                        content.splice(content.indexOf(seen), 1);
+                        delete seenDeclarations[lhDecl];
+                        continue;
+                    }
+
+                    seenAny = true;
+                }
+                if (!seenAny) {
+                    return;
+                }
+
                 shorthand.decls.forEach(lhDeclName => {
                     // Short circuit if we eliminate this declaration below.
                     if (!decl) {
@@ -526,6 +550,10 @@ module.exports.optimizeDeclarations = (content, kw) => {
 
                     const lhDecl = seenDeclarations[lhDeclName];
                     if (!lhDecl) {
+                        return;
+                    }
+
+                    if (lhDecl.important && !decl.important) {
                         return;
                     }
 
@@ -546,6 +574,7 @@ module.exports.optimizeDeclarations = (content, kw) => {
                     }
                     decl = optimized;
                     content[i] = decl;
+                    seenDeclarations[decl.ident] = decl;
                 });
             });
             if (!decl) {
@@ -555,6 +584,7 @@ module.exports.optimizeDeclarations = (content, kw) => {
 
         seenDeclarations[decl.ident] = decl;
     }
+
     // OPT: Merge together 'piecemeal' declarations when all pieces are specified
     // Ex. padding-left, padding-right, padding-top, padding-bottom -> padding
     shorthandMapping.forEach(shMap => {

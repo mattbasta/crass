@@ -39,11 +39,22 @@ String.prototype.pretty = function pretty() {
     return this.toString();
 };
 
+const keywords = [
+    'cursive',
+    'sans-serif',
+    'serif',
+    'fantasy',
+    // no monospace because quoted monospace renders differently in Chrome ¯\_(ツ)_/¯
+];
+
 /**
  * @return {String}
  */
 String.prototype.optimize = function optimize(kw) {
-    if (kw.declarationName === 'font-family' && /[\w ]/.exec(this.value)) {
+    if (
+        kw.declarationName === 'font-family' && /[\w ]/.exec(this.value) &&
+        keywords.every(keyword => this.value.toLowerCase().indexOf(keyword) === -1)
+    ) {
         this._noQuotes = true;
     }
     return this;

@@ -116,7 +116,6 @@ exports.DECLARATIONS_REMOVED = {
     '-moz-perspective-origin': {firefox: 16},
 
     '-ms-filter': {ie: 10},
-    'filter': {ie: 10},
     // '-ms-interpolation-mode': {ie: 10}  // Deprecated but not removed?
 
     // Invalid declarations that folks generate:

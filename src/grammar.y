@@ -94,8 +94,13 @@ vendor_prefix       ((\-[a-zA-Z]+\-)?)
 "!"                                 return '!'
 "important"                         return 'IMPORTANT'
 "expression(".*?")"                 return 'IE_EXPRESSION'
-"filter"{ws}*":"{ws}*({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
-"-ms-filter"{ws}*":"{ws}*({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
+
+"-ms-filter"{ws}*":"{ws}*"progid:"?({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
+"-ms-filter"{ws}*":"{ws}*"alpha("{ie_junk}*")"{ws}*({ie_ident}+"("{ie_junk}*")"{ws}*)*  return 'IE_FILTER'
+"filter"{ws}*":"{ws}*"progid:"({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
+"filter"{ws}*":"{ws}*"progid:"?"DXImageTransform."({ie_ident}+"("{ie_junk}*")"{ws}*)+  return 'IE_FILTER'
+"filter"{ws}*":"{ws}*"alpha("{ie_junk}*")"{ws}*({ie_ident}+"("{ie_junk}*")"{ws}*)*  return 'IE_FILTER'
+
 "url("(\"(?:\\(?:.|{ws})|[^"\\])*\"|\'(?:\\(?:.|{ws})|[^'\\])*\'|[^)]*)")"                      return 'URL_FULL'
 {vendor_prefix}"calc"               return 'CALC'
 "attr"                              return 'ATTR'

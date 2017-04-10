@@ -25,6 +25,7 @@ describe('filter', () => {
 
     it('can be vanilla', () => {
         assert.equal(parseString('a{filter:foo}'), 'a{filter:foo}');
+        assert.equal(parseString('a{filter:progid:foo()}'), 'a{filter:progid:foo()}');
     });
     it('can be short', () => {
         parity('a{filter:alpha(opacity=50)}');
@@ -46,18 +47,19 @@ describe('filter', () => {
     });
 
     it('is removed in IE10+', () => {
-        assert.equal(crass.parse('a{filter:foo;zip:zap}').optimize(ie9_min).toString(), 'a{filter:foo;zip:zap}');
-        assert.equal(crass.parse('a{filter:foo;zip:zap}').optimize(ie10_min).toString(), 'a{zip:zap}');
+        assert.equal(crass.parse('a{filter:progid:foo();zip:zap}').optimize(ie9_min).toString(), 'a{filter:progid:foo();zip:zap}');
+        assert.equal(crass.parse('a{filter:progid:foo();zip:zap}').optimize(ie10_min).toString(), 'a{zip:zap}');
         assert.equal(crass.parse('a{filter:progid:DXBlahBlahBlah.foo.bar(lol=omg);zip:zap}').optimize(ie10_min).toString(), 'a{zip:zap}');
     });
 
     it('is removed when the -ms-filter variant is used in IE10', () => {
         var ie10_min = {browser_min: {ie: 10}};
-        assert.equal(crass.parse('a{-ms-filter:foo;zip:zap}').optimize(ie10_min).toString(), 'a{zip:zap}');
+        assert.equal(crass.parse('a{-ms-filter:alpha(foo=bar);zip:zap}').optimize(ie10_min).toString(), 'a{zip:zap}');
     });
 
     it('is has whitespace stripped during optimization', () => {
-        assert.equal(crass.parse('a{filter : foo;}').optimize({o1: true}).toString(), 'a{filter:foo}');
+        assert.equal(crass.parse('a{filter : alpha(foo=bar);}').optimize({o1: true}).toString(), 'a{filter:alpha(foo=bar)}');
+        assert.equal(crass.parse('a{-ms-filter : alpha(foo=bar);}').optimize({o1: true}).toString(), 'a{-ms-filter:alpha(foo=bar)}');
     });
 });
 

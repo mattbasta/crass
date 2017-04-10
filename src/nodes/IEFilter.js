@@ -4,6 +4,9 @@
  */
 function IEFilter(blob) {
     this.ident = 'filter'; // Hack so that we can duck-type this as a Declaration.
+    if (blob[0] === '-') {
+        this.ident = '-ms-filter';
+    }
     this.blob = blob;
 }
 
@@ -30,7 +33,7 @@ IEFilter.prototype.optimize = function optimize(kw) {
         return null;
     }
 
-    this.blob = 'filter:' + /filter\s*:\s*(.+)/.exec(this.blob)[1];
+    this.blob = this.ident + ':' + /(?:\-ms\-)?filter\s*:\s*(.+)/.exec(this.blob)[1];
 
     return this;
 };

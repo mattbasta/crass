@@ -1,31 +1,30 @@
-/**
- * @constructor
- * @param {string[]} color
- */
-function CustomIdent(idents) {
-    this.idents = idents;
-}
+module.exports = class CustomIdent {
+    /**
+     * @constructor
+     * @param {string[]} color
+     */
+    constructor(idents) {
+        this.idents = idents;
+    }
 
+    /**
+     * @return {string}
+     */
+    toString() {
+        return '[' + this.idents.join(' ') + ']';
+    }
 
-/**
- * @return {string}
- */
-CustomIdent.prototype.toString = function toString() {
-    return '[' + this.idents.join(' ') + ']';
+    /**
+     * @return {string}
+     */
+    pretty() {
+        return this.toString();
+    }
+
+    /**
+     * @return {CustomIdent}
+     */
+    optimize() {
+        return this;
+    }
 };
-
-/**
- * @return {string}
- */
-CustomIdent.prototype.pretty = function pretty() {
-    return this.toString();
-};
-
-/**
- * @return {CustomIdent}
- */
-CustomIdent.prototype.optimize = function optimize() {
-    return this;
-};
-
-module.exports = CustomIdent;

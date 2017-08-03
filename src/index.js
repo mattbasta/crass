@@ -1,8 +1,8 @@
-var grammar = require('./grammar');
-var objects = require('./objects');
+const grammar = require('./grammar');
+const objects = require('./objects');
 
 exports.parse = function parse(data) {
-    var parser = new grammar.Parser();
+    const parser = new grammar.Parser();
     parser.lexer.options.ranges = true;
     parser.yy = objects;
 

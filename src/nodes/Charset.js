@@ -1,30 +1,30 @@
-/**
- * @constructor
- * @param {string} charset Charset for the stylesheet
- */
-function Charset(charset) {
-    this.charset = charset;
-}
+module.exports = class Charset {
+    /**
+     * @constructor
+     * @param {string} charset Charset for the stylesheet
+     */
+    constructor(charset) {
+        this.charset = charset;
+    }
 
-/**
- * @return {string}
- */
-Charset.prototype.toString = function toString() {
-    return '@charset ' + this.charset.toString() + ';';
+    /**
+     * @return {string}
+     */
+    toString() {
+        return '@charset ' + this.charset.toString() + ';';
+    }
+
+    /**
+     * @return {string}
+     */
+    pretty() {
+        return this.toString() + '\n';
+    }
+
+    /**
+     * @return {Charset}
+     */
+    optimize() {
+        return this;
+    }
 };
-
-/**
- * @return {string}
- */
-Charset.prototype.pretty = function pretty() {
-    return this.toString() + '\n';
-};
-
-/**
- * @return {Charset}
- */
-Charset.prototype.optimize = function optimize() {
-    return this;
-};
-
-module.exports = Charset;

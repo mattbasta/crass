@@ -1,68 +1,4 @@
-var origNumber = Number;
-
-module.exports = (function() {
-
-    /**
-     * @constructor
-     * @param {number} value
-     */
-    function Number(value) {
-        this.value = origNumber(value);
-        if (origNumber.isNaN(this.value)) {
-            this.value = 0;
-        }
-    }
-
-    /**
-     * Changes the sign of the number based on a unary operator
-     * @param  {string} sign
-     * @return {void}
-     */
-    Number.prototype.applySign = function applySign(sign) {
-        if (sign === '-') {
-            this.value *= -1;
-        }
-    };
-
-    /**
-     * @return {number}
-     */
-    Number.prototype.asNumber = function asNumber() {
-        return this.value;
-    };
-
-    /**
-     * @return {number}
-     */
-    Number.prototype.asUnsigned = function asUnsigned() {
-        return new Number(Math.abs(this.value));
-    };
-
-    /**
-     * @return {string}
-     */
-    Number.prototype.toString = function toString() {
-        return postProcess(truncate(this.value));
-    };
-
-    /**
-     * @return {Number}
-     */
-    Number.prototype.pretty = function pretty() {
-        return this.value.toString();
-    };
-
-    /**
-     * @return {Number}
-     */
-    Number.prototype.optimize = function optimize() {
-        // TODO(opt): rounding and stuff
-        return this;
-    };
-
-    return Number;
-
-}());
+const origNumber = Number;
 
 /**
  * Post-processes a number
@@ -94,11 +30,11 @@ function truncate(num) {
         return Math.round(num).toString();
     }
 
-    var decimal = num.toString();
-    var decimalPos = decimal.indexOf('.');
+    let decimal = num.toString();
+    const decimalPos = decimal.indexOf('.');
     decimal = decimal.substr(decimalPos);
 
-    var integer = Math.abs(num) | 0;
+    let integer = Math.abs(num) | 0;
 
     if (decimal !== decimal.substr(0, 5)) {
         decimal = decimal.substr(0, 5);
@@ -115,3 +51,64 @@ function truncate(num) {
     }
     return integer;
 }
+
+
+module.exports = class Number {
+    /**
+     * @constructor
+     * @param {number} value
+     */
+    constructor(value) {
+        this.value = origNumber(value);
+        if (origNumber.isNaN(this.value)) {
+            this.value = 0;
+        }
+    }
+
+    /**
+     * Changes the sign of the number based on a unary operator
+     * @param  {string} sign
+     * @return {void}
+     */
+    applySign(sign) {
+        if (sign === '-') {
+            this.value *= -1;
+        }
+    }
+
+    /**
+     * @return {number}
+     */
+    asNumber() {
+        return this.value;
+    }
+
+    /**
+     * @return {number}
+     */
+    asUnsigned() {
+        return new Number(Math.abs(this.value));
+    }
+
+    /**
+     * @return {string}
+     */
+    toString() {
+        return postProcess(truncate(this.value));
+    }
+
+    /**
+     * @return {Number}
+     */
+    pretty() {
+        return this.value.toString();
+    }
+
+    /**
+     * @return {Number}
+     */
+    optimize() {
+        // TODO(opt): rounding and stuff
+        return this;
+    }
+};

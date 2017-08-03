@@ -1,5 +1,3 @@
-'use strict';
-
 const objects = require('./objects');
 
 
@@ -23,7 +21,6 @@ const opts = module.exports.opts = function opts(opts, defaults) {
     return out;
 };
 
-const identity = module.exports.identity = x => x;
 const stringIdentity = module.exports.stringIdentity = x => x.toString();
 
 module.exports.joinAll = function joinAll(list, joiner, mapper) {
@@ -49,17 +46,14 @@ module.exports.indent = function indent(value, indent) {
     return (new Array((indent || 0) + 1)).join('  ') + value;
 };
 
-module.exports.prettyMap = function prettyMap(indent) {
-    return x => x.pretty ? x.pretty(indent) : x.toString();
-};
+module.exports.prettyMap = indent => x => x.pretty ? x.pretty(indent) : x.toString();
 
 
-module.exports.func = function func(name, values, sep) {
-    sep = typeof sep !== 'undefined' ? sep : ',';
+module.exports.func = function func(name, values, sep = ',') {
     return new objects.Func(
         name,
         new objects.Expression(
-            values.map(function(v, index) {
+            values.map((v, index) => {
                 if (typeof v === 'number') {
                     v = new objects.Number(v);
                 }

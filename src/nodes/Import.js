@@ -1,36 +1,32 @@
-/**
- * @constructor
- * @param {URL} href
- * @param {MediaList} media
- */
-function Import(href, media) {
-    this.href = href;
-    this.media = media;
-}
+module.exports = class Import {
+    /**
+     * @constructor
+     * @param {URL} href
+     * @param {MediaList} media
+     */
+    constructor(href, media) {
+        this.href = href;
+        this.media = media;
+    }
 
-/**
- * @return {string}
- */
-Import.prototype.toString = function toString() {
-    if (this.media) {
-        return '@import ' + this.href.asString() + ' ' + this.media.toString() + ';';
-    } else {
-        return '@import ' + this.href.asString() + ';';
+    /**
+     * @return {string}
+     */
+    toString() {
+        return `@import ${this.href.asString()}${this.media ? ` ${this.media.toString()}` : ''};`;
+    }
+
+    /**
+     * @return {string}
+     */
+    pretty() {
+        return this.toString() + '\n';
+    }
+
+    /**
+     * @return {Import}
+     */
+    optimize() {
+        return this;
     }
 };
-
-/**
- * @return {string}
- */
-Import.prototype.pretty = function pretty() {
-    return this.toString() + '\n';
-};
-
-/**
- * @return {Import}
- */
-Import.prototype.optimize = function optimize() {
-    return this;
-};
-
-module.exports = Import;

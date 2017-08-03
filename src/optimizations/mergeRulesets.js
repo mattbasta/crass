@@ -1,4 +1,3 @@
-'use strict';
 /*
 
 Merging Rulesets
@@ -39,13 +38,6 @@ function manySome(arrX, arrY, func) {
                 return true;
             }
         }
-    }
-    return false;
-}
-
-function arrayFind(array, cb) {
-    for (let i = 0; i < array.length; i++) {
-        if (cb(array[i])) return array[i];
     }
     return false;
 }
@@ -98,8 +90,8 @@ function canSelectorsEverTouchSameElement(selX, selY) {
             return xFirst.ident === yFirst.ident && xFirst.ns === yFirst.ns;
         }
 
-        const xId = arrayFind(x, isIDSelector);
-        const yId = arrayFind(x, isIDSelector);
+        const xId = x.find(isIDSelector);
+        const yId = x.find(isIDSelector);
         if (xId && yId) {
             return xId.ident !== yId.ident;
         }
@@ -120,8 +112,8 @@ function canSelectorsEverTouchSameElement(selX, selY) {
         });
         if (attrTest) return false;
 
-        if (arrayFind(x, isPseudoElementSelector) ^ arrayFind(y, isPseudoElementSelector)) return false;
-        if (arrayFind(x, isPseudoClassSelector) ^ arrayFind(y, isPseudoClassSelector)) return false;
+        if (x.find(isPseudoElementSelector) ^ y.find(isPseudoElementSelector)) return false;
+        if (x.find(isPseudoClassSelector) ^ y.find(isPseudoClassSelector)) return false;
 
         // TODO: not() support for classes, attributes
 
@@ -131,8 +123,15 @@ function canSelectorsEverTouchSameElement(selX, selY) {
 exports.canSelectorsEverTouchSameElement = canSelectorsEverTouchSameElement;
 
 
+const supersetCache = new WeakMap();
 function isSubset(subset, superset) {
-    const strSuperset = superset.map(x => x.toString());
+    let strSuperset;
+    if (supersetCache.has(superset)) {
+        strSuperset = supersetCache.get(superset);
+    } else {
+        strSuperset = superset.map(x => x.toString());
+        supersetCache.set(superset, strSuperset);
+    }
     return subset.every(stmt => strSuperset.indexOf(stmt.toString()) !== -1);
 }
 
@@ -143,7 +142,6 @@ function canRulesetsBeCombined(parentBody, xIdx, yIdx) {
     if (!isSubset(y.content, x.content)) {
         return false;
     }
-
 
     // You can't combine rulesets if there are media queries between the two.
     if (anyBetween(parentBody, xIdx, yIdx, isMediaQuery)) {

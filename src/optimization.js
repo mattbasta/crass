@@ -419,7 +419,7 @@ function _combineAdjacentRulesets(content, kw) {
         }
     }
 
-    return didChange ? newContent.filter(utils.identity) : content;
+    return didChange ? newContent.filter(x => x) : content;
 }
 
 module.exports.optimizeBlocks = (content, kw) => {

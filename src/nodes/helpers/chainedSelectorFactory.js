@@ -1,5 +1,3 @@
-'use strict';
-
 const optimization = require('../../optimization');
 
 

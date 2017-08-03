@@ -15,8 +15,16 @@ function Media(media, content) {
 /**
  * @return {string}
  */
+Media.prototype.mediaQueriesToString = function mediaQueriesToString() {
+    return utils.joinAll(this.media, ',');
+};
+
+/**
+ * @return {string}
+ */
 Media.prototype.toString = function toString() {
-    return '@media ' + utils.joinAll(this.media, ',') + '{' + utils.joinAll(this.content) + '}';
+    const queryString = this.mediaQueriesToString();
+    return `@media${queryString[0] === '(' ? '' : ' '}${queryString}{${utils.joinAll(this.content)}}`;
 };
 
 /**
@@ -25,9 +33,7 @@ Media.prototype.toString = function toString() {
 Media.prototype.pretty = function pretty(indent) {
     var output = '';
     output += utils.indent('@media ' + utils.joinAll(this.media, ', ', utils.prettyMap(indent)) + ' {') + '\n';
-    output += this.content.map(function(line) {
-        return utils.indent(line.pretty(indent + 1), indent);
-    }).join('\n') + '\n';
+    output += this.content.map(line => utils.indent(line.pretty(indent + 1), indent)).join('\n') + '\n';
     output += utils.indent('}', indent) + '\n';
     return output;
 };
@@ -46,6 +52,14 @@ Media.prototype.optimize = function optimize(kw) {
         return null;
     }
 
+    return this.optimizeContent(kw);
+};
+
+/**
+ * @param {object} kw
+ * @return {Media}
+ */
+Media.prototype.optimizeContent = function optimizeContent(kw) {
     this.content = optimization.optimizeBlocks(this.content, kw);
     if (!this.content.length) {
         return null;

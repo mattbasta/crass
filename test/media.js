@@ -47,11 +47,11 @@ describe('@media', function() {
     });
 
     it('should parse media with only a constraint', function() {
-        parity('@media (min-width:450px){$$}');
+        parity('@media(min-width:450px){$$}');
     });
 
     it('should parse media block with no media type', function() {
-        parity('@media (min-width:768px) and (max-width:991px){$$}');
+        parity('@media(min-width:768px) and (max-width:991px){$$}');
     });
 
     it('should parse media with prefixes', function() {
@@ -68,13 +68,13 @@ describe('@media', function() {
     it('should optimize media expressions', function() {
         assert.equal(
             crass.parse('@media (min-width:12pt){x{y:z}}').optimize().toString(),
-            '@media (min-width:1pc){x{y:z}}'
+            '@media(min-width:1pc){x{y:z}}'
         );
     });
 
     describe('nested @media', function() {
         it('should parse properly', function() {
-            parity('@media screen{@media (min-width:450px){$$}}');
+            parity('@media screen{@media(min-width:450px){$$}}');
         });
     });
 
@@ -86,7 +86,7 @@ describe('@media', function() {
     });
 
     describe('slash 0', function() {
-        var example = '@media (min-width:0\\0){x{y:z}}';
+        var example = '@media(min-width:0\\0){x{y:z}}';
         it('is parsed', function() {
             parity(example);
         });

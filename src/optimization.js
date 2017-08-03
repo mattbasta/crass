@@ -306,29 +306,29 @@ function _combineAdjacentRulesets(content, kw) {
     const pushSel = (sel, temp) => {
         const strSel = sel.toString();
 
-        if (!(strSel in selectorMap))
-            selectorMap[strSel] = [];
-        else {
-            for (let i = 0; i < selectorMap[strSel].length; i++) {
-                const ruleset = selectorMap[strSel][i];
-                const firstRuleset = ruleset.ruleset;
-                if (!firstRuleset) continue;
-                // We can't remove declarations from a ruleset that's shared by multiple selectors.
-                if (!ruleset.canRemoveFrom) return;
-                const intersection = lastPushed.declarationIntersections(firstRuleset);
-                // If there's no overlap, there's nothing to do.
-                if (!intersection.length) return;
-                // Remove each of the intersected declarations from the initial ruleset.
-                for (let j = 0; j < intersection.length; j++) {
-                    firstRuleset.removeDeclaration(intersection[i]);
-                }
-
-                if (!firstRuleset.content.length) {
-                    newContent[ruleset.index] = ruleset.ruleset = null;
-                }
-                // Mark that a change did occur.
-                didChange = true;
+        if (!(strSel in selectorMap)) {
+            selectorMap[strSel] = [temp];
+            return;
+        }
+        for (let i = 0; i < selectorMap[strSel].length; i++) {
+            const ruleset = selectorMap[strSel][i];
+            const firstRuleset = ruleset.ruleset;
+            if (!firstRuleset) continue;
+            // We can't remove declarations from a ruleset that's shared by multiple selectors.
+            if (!ruleset.canRemoveFrom) return;
+            const intersection = lastPushed.declarationIntersections(firstRuleset);
+            // If there's no overlap, there's nothing to do.
+            if (!intersection.length) return;
+            // Remove each of the intersected declarations from the initial ruleset.
+            for (let j = 0; j < intersection.length; j++) {
+                firstRuleset.removeDeclaration(intersection[i]);
             }
+
+            if (!firstRuleset.content.length) {
+                newContent[ruleset.index] = ruleset.ruleset = null;
+            }
+            // Mark that a change did occur.
+            didChange = true;
         }
         selectorMap[strSel].push(temp);
     };
@@ -339,9 +339,16 @@ function _combineAdjacentRulesets(content, kw) {
             content[i] instanceof objects.Ruleset &&
             lastPushed instanceof objects.Ruleset
         );
+        const areAdjacentMediaBlocks = (
+            lastPushed &&
+            content[i] instanceof objects.Media &&
+            lastPushed instanceof objects.Media
+        );
 
-        if (areAdjacentRulesets &&
-            lastPushed.contentToString() === content[i].contentToString()) {
+        if (
+            areAdjacentRulesets &&
+            lastPushed.contentToString() === content[i].contentToString()
+        ) {
 
             // Step 1: Merge the selectors
             if (lastPushed.selector instanceof objects.SelectorList) {
@@ -366,8 +373,10 @@ function _combineAdjacentRulesets(content, kw) {
             didChange = true;
             continue;
 
-        } else if (areAdjacentRulesets &&
-                   lastPushed.selector.toString() === content[i].selector.toString()) {
+        } else if (
+            areAdjacentRulesets &&
+            lastPushed.selector.toString() === content[i].selector.toString()
+        ) {
 
             // Step 1: Combine the content of the adjacent rulesets.
             lastPushed.content = lastPushed.content.concat(content[i].content);
@@ -378,6 +387,16 @@ function _combineAdjacentRulesets(content, kw) {
             didChange = true;
             continue;
 
+        } else if (
+            // OPT: Combine adjacent media blocks
+            areAdjacentMediaBlocks &&
+            lastPushed.mediaQueriesToString() === content[i].mediaQueriesToString()
+        ) {
+            lastPushed.content.push(...content[i].content);
+            lastPushed.optimizeContent(kw);
+
+            didChange = true;
+            continue;
         }
 
         newContent.push(lastPushed = content[i]);

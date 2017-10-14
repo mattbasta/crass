@@ -1,6 +1,31 @@
 const optimization = require('../optimization');
 
 
+const LENGTH_UNITS = new Set([
+    'cap',
+    'ch',
+    'em',
+    'ex',
+    'ic',
+    'lh',
+    'rem',
+    'rlh',
+    'vh',
+    'vw',
+    'vi',
+    'vb',
+    'vmin',
+    'vmax',
+    'px',
+    'mm',
+    'q',
+    'cm',
+    'in',
+    'pt',
+    'pc',
+    'mozmm',
+]);
+
 const declsToNotOptimizePercents = {
     'height': true,
     'width': true,
@@ -31,7 +56,7 @@ module.exports = class Dimension {
      * @return {string}
      */
     toString() {
-        if (Math.abs(this.number.value) === 0 && this.unit !== '%') {
+        if (Math.abs(this.number.value) === 0 && this.unit !== '%' && LENGTH_UNITS.has(this.unit)) {
             return '0';
         } else {
             return this.number.toString() + this.unit;
@@ -58,7 +83,8 @@ module.exports = class Dimension {
             kw.func !== 'hsl' &&
             kw.func !== 'hsla' &&
             Math.abs(this.number.value) === 0 &&
-            !(kw.declarationName in declsToNotOptimizePercents)
+            !(kw.declarationName in declsToNotOptimizePercents) &&
+            LENGTH_UNITS.has(this.unit)
         ) {
             return this.number;
         }

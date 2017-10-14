@@ -7,15 +7,6 @@ var parseString = function(data, o1) {
     return crass.parse(data).optimize(params).toString();
 };
 
-
-describe('Units', function() {
-    it('should strip the unit if the value is 0', function() {
-        assert.equal(parseString('a{foo:0px}'), 'a{foo:0}');
-        assert.equal(parseString('a{foo:0kHz}'), 'a{foo:0}');
-    });
-});
-
-
 describe('Length', function() {
     it('should convert in', function() {
         assert.equal(parseString('a{width:96px}'), 'a{width:1in}');
@@ -94,5 +85,17 @@ describe('Resolution', function() {
     });
     it('should convert dppx', function() {
         assert.equal(parseString('a{foo:96dppx}'), 'a{foo:1dpi}');
+    });
+});
+
+
+describe('Zero', function() {
+    it('should drop units for length', function() {
+        assert.equal(parseString('a{foo:0px}'), 'a{foo:0}');
+        assert.equal(parseString('a{foo:0em}'), 'a{foo:0}');
+    });
+    it('should not drop units for non-length', function() {
+        assert.equal(parseString('a{foo:0s}'), 'a{foo:0s}');
+        assert.equal(parseString('a{foo:0deg}'), 'a{foo:0deg}');
     });
 });

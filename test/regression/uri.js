@@ -30,4 +30,11 @@ describe('URIs', () => {
         );
     });
 
+    it('should handle URL path separator (RFC 3986)', () => {
+        assert.equal(
+          crass.parse('a{foo:url(http://mysite.com/images\\foo//bar\\baz/asdf.jpg)}').optimize({o1: true}).toString(),
+          'a{foo:url(http://mysite.com/images/foo/bar/baz/asdf.jpg)}'
+        );
+    });
+
 });

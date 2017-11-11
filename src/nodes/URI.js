@@ -78,6 +78,7 @@ module.exports = class URI {
             } else {
                 this.uri = path.normalize(rawURI);
             }
+            this.uri = this.uri.replace(/\\/g, '\/');
         } else if (kw.o1 && !isURL) {
             const content = this.asRawString();
             if (content.slice(0, 5) === 'data:') {

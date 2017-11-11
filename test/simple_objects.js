@@ -52,6 +52,13 @@ describe('URIs', () => {
         assert.equal(crass.parse(unnormalized).optimize({o1: true}).toString(), 'a{foo:url(../bar/zap)}');
     });
 
+    it('should normalize URIs handling windows path separator', () => {
+        assert.equal(
+          crass.parse('a{foo:url(\\images/foo\\bar)}').optimize({o1: true}).toString(),
+          'a{foo:url(/images/foo/bar)}'
+        );
+    });
+
 });
 
 

@@ -13,9 +13,6 @@ test_script:
 
 build: off
 
-matrix:
-  fast_finish: true
-
 cache:
   - node_modules -> appveyor.yml,package.json,package-lock.json
   

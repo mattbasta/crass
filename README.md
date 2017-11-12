@@ -2,7 +2,7 @@
 
 A CSS minification, pretty printing, and general utility library written in JS.
 
-[![Build Status](https://travis-ci.org/mattbasta/crass.png?branch=master)](https://travis-ci.org/mattbasta/crass)
+[![Build Status](https://travis-ci.org/mattbasta/crass.svg?branch=master)](https://travis-ci.org/mattbasta/crass)
 [![Build status](https://ci.appveyor.com/api/projects/status/vwp3b6p6jf9563dg?svg=true)](https://ci.appveyor.com/project/mattbasta/crass)
 
 ## Why Crass?
@@ -21,6 +21,7 @@ which makes it impossible to perform all types of optimizations.
 - Unsafe optimizations are opt-in only
 
 **Cons:**
+
 - Slower minification times
 - Cannot minify CSS with syntax errors
 - Certain "CSS hacks" that use invalid syntax are unsupported
@@ -119,7 +120,7 @@ You can import Crass into your project using any appropriate build tool, like br
 
 Check out the Github pages for Crass for a simple browser-ready version:
 
-http://mattbasta.github.io/crass
+<http://www.mattbasta.com/crass/>
 
 ### What about comments? Docblocks?
 

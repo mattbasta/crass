@@ -1,6 +1,11 @@
+sudo: false
 language: node_js
 node_js:
+  - "4"
   - "6"
-  - "7"
   - "8"
-sudo: false
+matrix:
+  fast_finish: true
+cache:
+  directories:
+    - node_modules

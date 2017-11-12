@@ -3,6 +3,7 @@
 A CSS minification, pretty printing, and general utility library written in JS.
 
 [![Build Status](https://travis-ci.org/mattbasta/crass.png?branch=master)](https://travis-ci.org/mattbasta/crass)
+[![Build status](https://ci.appveyor.com/api/projects/status/vwp3b6p6jf9563dg?svg=true)](https://ci.appveyor.com/project/mattbasta/crass)
 
 ## Why Crass?
 

@@ -29,7 +29,7 @@ which makes it impossible to perform all types of optimizations.
 
 ## Installation
 
-Crass 0.8 is built with ES2015 and requires Node 4.6.2 or higher.
+Crass is built with ES2015 and requires Node 6 or higher.
 
 ```sh
 npm install --save-dev crass
@@ -39,7 +39,6 @@ npm install --save-dev crass
 ## API
 
 ```js
-
 var crass = require('crass');
 
 // Parse any valid CSS stylesheet:
@@ -56,7 +55,6 @@ console.log(parsed.toString());
 
 // The constructors for the AST nodes used to represent the
 // parsed CSS are available on `crass.objects`.
-
 ```
 
 Improvements on the API will be made in the future.

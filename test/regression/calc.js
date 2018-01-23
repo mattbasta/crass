@@ -7,7 +7,7 @@ describe('calc()', () => {
     it('should handle MathSum sign changes correctly', () => {
         assert.equal(
             crass.parse('a{b:calc(1px - (2em + 3vh) + 4vw)}').optimize().toString(),
-            'a{b:calc(1px - (2em + 3vh) + 4vw)}'
+            'a{b:calc(1px - 2em - 3vh + 4vw)}'
         );
     });
     it('should handle MathSum evaluation well', () => {

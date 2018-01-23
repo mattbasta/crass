@@ -16,17 +16,29 @@ class MathSum {
     }
 
     /**
+     * @param {bool} flipSign Flips the sign of the operation
      * @return {string}
      */
-    toString() {
+    toString(flipSign) {
         let output = '';
         const base = this.base.toString();
-        const term = this.term.toString();
         output += base;
         output += ' ';
-        output += this.operator;
+        if (!flipSign) {
+            output += this.operator;
+        } else if (this.operator === '+') {
+            output += '-';
+        } else {
+            output += '+';
+        }
         output += ' ';
-        output += this.term instanceof MathSum && this.term.operator !== this.operator ? `(${term})` : term;
+
+        if (this.term instanceof MathSum) {
+            output += this.term.toString(this.term.operator !== this.operator);
+        } else {
+            output += this.term.toString();
+        }
+
         return output;
     }
 

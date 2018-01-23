@@ -131,7 +131,7 @@ module.exports = class Func {
      * @return {bool} Whether the function is calc or not.
      */
     isCalc() {
-        return Boolean(/^(\-[a-zA-Z]+\-)?calc$/i.exec(this.name));
+        return Boolean(/^(\-[a-z]+\-)?calc$/i.exec(this.name));
     }
 
     /**

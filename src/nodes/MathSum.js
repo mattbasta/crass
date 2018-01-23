@@ -2,7 +2,7 @@ const objects = require('../objects');
 const unitTypes = require('./helpers/unitTypes');
 
 
-module.exports = class MathSum {
+class MathSum {
     /**
      * @constructor
      * @param {*} base
@@ -19,14 +19,14 @@ module.exports = class MathSum {
      * @return {string}
      */
     toString() {
-        var output = '';
-        var base = this.base.toString();
-        var term = this.term.toString();
+        let output = '';
+        const base = this.base.toString();
+        const term = this.term.toString();
         output += base;
         output += ' ';
         output += this.operator;
         output += ' ';
-        output += term;
+        output += this.term instanceof MathSum && this.term.operator !== this.operator ? `(${term})` : term;
         return output;
     }
 
@@ -34,9 +34,9 @@ module.exports = class MathSum {
      * @return {string}
      */
     pretty() {
-        var output = '';
-        var base = this.base.pretty();
-        var term = this.term.pretty();
+        let output = '';
+        const base = this.base.pretty();
+        const term = this.term.pretty();
         output += base;
         output += ' ';
         output += this.operator;
@@ -55,6 +55,109 @@ module.exports = class MathSum {
 
         if (!this.base || !this.term) {
             return null;
+        }
+
+        // OPT: Try to collapse MathSum expressions
+        if (this.base instanceof MathSum && this.term instanceof objects.Dimension) {
+            if (this.base.base instanceof objects.Dimension && this.base.base.unit === this.term.unit) {
+                if (this.operator === '+') {
+                    return new MathSum(
+                        new objects.Dimension(
+                            new objects.Number(this.base.base.asNumber() + this.term.asNumber()),
+                            this.term.unit
+                        ),
+                        this.base.operator,
+                        this.base.term
+                    );
+                } else {
+                    return new MathSum(
+                        new objects.Dimension(
+                            new objects.Number(this.base.base.asNumber() - this.term.asNumber()),
+                            this.term.unit
+                        ),
+                        this.base.operator,
+                        this.base.term
+                    );
+                }
+            } else if (this.base.term instanceof objects.Dimension && this.base.term.unit === this.term.unit) {
+                if (this.operator === '+') {
+                    return new MathSum(
+                        this.base.base,
+                        this.base.operator,
+                        new objects.Dimension(
+                            new objects.Number(
+                                this.base.operator === '+' ?
+                                    this.base.term.asNumber() + this.term.asNumber() :
+                                    this.base.term.asNumber() - this.term.asNumber()
+                            ),
+                            this.term.unit
+                        )
+                    );
+                } else {
+                    return new MathSum(
+                        this.base.base,
+                        this.base.operator,
+                        new objects.Dimension(
+                            new objects.Number(
+                                this.base.operator === '+' ?
+                                    this.base.term.asNumber() - this.term.asNumber() :
+                                    this.base.term.asNumber() + this.term.asNumber()
+                            ),
+                            this.term.unit
+                        )
+                    );
+                }
+            }
+        } else if (this.term instanceof MathSum && this.base instanceof objects.Dimension) {
+            if (this.term.base instanceof objects.Dimension && this.term.base.unit === this.base.unit) {
+                if (this.operator === '+') {
+                    return new MathSum(
+                        new objects.Dimension(
+                            new objects.Number(this.base.asNumber() + this.term.base.asNumber()),
+                            this.base.unit
+                        ),
+                        this.term.operator,
+                        this.term.term
+                    );
+                } else {
+                    return new MathSum(
+                        new objects.Dimension(
+                            new objects.Number(this.base.asNumber() - this.term.base.asNumber()),
+                            this.base.unit
+                        ),
+                        this.term.operator === '+' ? '-' : '+',
+                        this.term.term
+                    );
+                }
+            } else if (this.term.term instanceof objects.Dimension && this.term.term.unit === this.base.unit) {
+                if (this.operator === '+') {
+                    return new MathSum(
+                        new objects.Dimension(
+                            new objects.Number(
+                                this.term.operator === '+' ?
+                                    this.base.asNumber() + this.term.term.asNumber() :
+                                    this.base.asNumber() - this.term.term.asNumber()
+                            ),
+                            this.base.unit
+                        ),
+                        this.operator,
+                        this.term.base
+                    );
+                } else {
+                    return new MathSum(
+                        new objects.Dimension(
+                            new objects.Number(
+                                this.term.operator === '+' ?
+                                    this.base.asNumber() - this.term.term.asNumber() :
+                                    this.base.asNumber() + this.term.term.asNumber()
+                            ),
+                            this.base.unit
+                        ),
+                        this.operator,
+                        this.term.base
+                    );
+                }
+            }
         }
 
         // OPT: Handle zero gracefully
@@ -133,4 +236,6 @@ module.exports = class MathSum {
         return this;
     }
 
-};
+}
+
+module.exports = MathSum;

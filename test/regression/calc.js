@@ -10,6 +10,12 @@ describe('calc()', () => {
             'a{b:calc(1px - 2em - 3vh + 4vw)}'
         );
     });
+    it('should handle MathSum sign changes correctly, but in reverse this time', () => {
+        assert.equal(
+            crass.parse('a{b:calc(1px - (2em - 3vh) + 4vw)}').optimize().toString(),
+            'a{b:calc(1px - 2em + 3vh + 4vw)}'
+        );
+    });
     it('should handle MathSum evaluation well', () => {
         assert.equal(
             crass.parse('a{b:calc(3px - 2px + 1px - 0px)}').optimize().toString(),

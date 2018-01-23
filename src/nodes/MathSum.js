@@ -2,6 +2,8 @@ const objects = require('../objects');
 const unitTypes = require('./helpers/unitTypes');
 
 
+const flipSignFlag = Symbol();
+
 class MathSum {
     /**
      * @constructor
@@ -16,7 +18,7 @@ class MathSum {
     }
 
     /**
-     * @param {bool} flipSign Flips the sign of the operation
+     * @param {Symbol} flipSign Flips the sign of the operation
      * @return {string}
      */
     toString(flipSign) {
@@ -24,7 +26,7 @@ class MathSum {
         const base = this.base.toString();
         output += base;
         output += ' ';
-        if (!flipSign) {
+        if (flipSign !== flipSignFlag) {
             output += this.operator;
         } else if (this.operator === '+') {
             output += '-';
@@ -34,7 +36,7 @@ class MathSum {
         output += ' ';
 
         if (this.term instanceof MathSum) {
-            output += this.term.toString(this.term.operator !== this.operator);
+            output += this.term.toString(this.operator === '-' ? flipSignFlag : null);
         } else {
             output += this.term.toString();
         }
@@ -43,17 +45,27 @@ class MathSum {
     }
 
     /**
+     * @param {Symbol} flipSign Flips the sign of the operation
      * @return {string}
      */
-    pretty() {
+    pretty(flipSign) {
         let output = '';
-        const base = this.base.pretty();
-        const term = this.term.pretty();
-        output += base;
+        output += this.base.pretty();
         output += ' ';
-        output += this.operator;
+        if (flipSign !== flipSignFlag) {
+            output += this.operator;
+        } else if (this.operator === '+') {
+            output += '-';
+        } else {
+            output += '+';
+        }
         output += ' ';
-        output += term;
+
+        if (this.term instanceof MathSum) {
+            output += this.term.pretty(this.operator === '-' ? flipSignFlag : null);
+        } else {
+            output += this.term.pretty();
+        }
         return output;
     }
 

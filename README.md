@@ -74,7 +74,7 @@ If you don't specify `--min`, crass will automatically default to the latest bro
 - **`--min`**: Setting this flag followed by a comma-separated list of browser versions will instruct Crass to strip CSS that would otherwise only apply to browsers older than the versions listed. For example, `--min ie9,fx30` would strip CSS that applies only to Firefox 29 and below and Internet Explorer 8 and below. The following prefixes are supported: `ie`, `op`, `fx`, `chr`
 - **`--pretty`**: Flag to enable pretty printing of output
 - **`--saveie`**: Flag to enable features to specifically support Internet Explorer 6 and below
-- **`--css4`**: Flag that allows optimized output to contain CSS4 features and syntax. Note that this may not be supported in all modern browsers.
+- **`--css4`**: Flag that allows optimized output to contain CSS4 features and syntax. This is not be supported in all modern browsers. You should only use this if you explicitly want CSS4 output.
 
 
 ## Minification

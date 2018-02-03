@@ -73,7 +73,7 @@ describe('Attribute Selectors', () => {
         );
         assert.equal(
             crass.parse('[foo="ba r"]{a:b}').toString(),
-            '[foo=ba\\ r]{a:b}'
+            '[foo="ba r"]{a:b}'
         );
         assert.equal(
             crass.parse('[foo="ba   r"]{a:b}').toString(),

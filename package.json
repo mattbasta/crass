@@ -1,6 +1,6 @@
 {
   "name": "crass",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "A CSS utility library for JS",
   "main": "dist/index.js",
   "jsnext:main": "src/index.js",

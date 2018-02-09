@@ -23,7 +23,7 @@ module.exports = class AttributeSelector {
             let value = this.value.toString();
             if (this.value.asString) {
                 const rawValue = this.value.asString(true);
-                const newValue = rawValue.match(/^[\w\\]+$/) ? rawValue : this.value.asString(false);
+                const newValue = rawValue.match(/^[a-z][\w\\]*$/i) ? rawValue : this.value.asString(false);
                 if (newValue.length <= value.length) {
                     value = newValue;
                 }

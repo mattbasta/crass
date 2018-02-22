@@ -132,7 +132,7 @@ function isSubset(subset, superset) {
         strSuperset = superset.map(x => x.toString());
         supersetCache.set(superset, strSuperset);
     }
-    return subset.every(stmt => strSuperset.indexOf(stmt.toString()) !== -1);
+    return subset.every(stmt => strSuperset.includes(stmt.toString()));
 }
 
 function canRulesetsBeCombined(parentBody, xIdx, yIdx) {

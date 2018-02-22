@@ -30,11 +30,18 @@ module.exports = class Ruleset {
      * @return {Declaration[]}
      */
     declarationIntersections(ruleset) {
-        const myDeclarations = this.content.map(decl => decl.ident);
+        const localDeclarations = this.content.reduce((acc, cur) => {
+            acc[cur.ident] = cur;
+            return acc;
+        }, {});
         const intersection = [];
-        for (let i = 0; i < this.content.length; i++) {
-            if (myDeclarations.indexOf(this.content[i].ident) !== -1) {
-                intersection.push(this.content[i].ident);
+        for (let i = 0; i < ruleset.content.length; i++) {
+            const foreignDecl = ruleset.content[i];
+            if (localDeclarations.hasOwnProperty(foreignDecl.ident)) {
+                const localDecl = localDeclarations[foreignDecl.ident];
+                if (localDecl.important === foreignDecl.important) {
+                    intersection.push(foreignDecl.ident);
+                }
             }
         }
         return intersection;

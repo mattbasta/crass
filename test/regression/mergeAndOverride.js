@@ -139,4 +139,15 @@ describe('merge and override', () => {
         );
     });
 
+    it('should not do distant merges without preserving !important', () => {
+        assert.equal(
+            crass.parse(`
+            a { left: 0 !important; }
+            div { color: red; }
+            a { left: 1px; }
+            `).optimize({o1: true}).toString(),
+            'a{left:0!important}div{color:red}a{left:1px}'
+        );
+    });
+
 });

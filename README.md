@@ -45,13 +45,13 @@ var crass = require('crass');
 var parsed = crass.parse('b {font-weight: bold;}');
 
 // Optimize the stylesheet:
-parsed = parsed.optimize();
+parsed.optimize().then(optimized => {
+    // Pretty print the stylesheet:
+    console.log(optimized.pretty());
 
-// Pretty print the stylesheet:
-console.log(parsed.pretty());
-
-// Print a minified version of the stylesheet:
-console.log(parsed.toString());
+    // Print a minified version of the stylesheet:
+    console.log(optimized.toString());
+});
 
 // The constructors for the AST nodes used to represent the
 // parsed CSS are available on `crass.objects`.

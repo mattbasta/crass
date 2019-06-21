@@ -20,16 +20,12 @@ describe('@-viewport', function() {
 
 
     it('should optimize contents', function() {
-        assert.equal(
-            crass.parse('@viewport{x:y;x:y}').optimize().toString(),
-            '@viewport{x:y}'
-        );
+        return crass.parse('@viewport{x:y;x:y}').optimize()
+            .then(optimized => assert.equal(optimized.toString(), '@viewport{x:y}'));
     });
     it('should optimize away vendor prefixes', function() {
-        assert.equal(
-            crass.parse('@-ms-viewport{-webkit-x:y;}').optimize().toString(),
-            ''
-        );
+        return crass.parse('@-ms-viewport{-webkit-x:y;}').optimize()
+            .then(optimized => assert.equal(optimized.toString(), ''));
     });
 
 });

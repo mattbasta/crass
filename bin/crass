@@ -79,11 +79,19 @@ fs.readFile(process.argv[2], function(err, data) {
         if (opts.o1 || opts.O1) kw.o1 = true;
         if (opts.saveie) kw.saveie = true;
         parsed = parsed.optimize(kw);
+    } else {
+        parsed = Promise.resolve(parsed)
     }
 
-    if (opts.pretty) {
-        console.log(parsed.pretty());
-    } else {
-        console.log(parsed.toString());
-    }
+    parsed
+        .then(parsed => {
+            if (opts.pretty) {
+                console.log(parsed.pretty());
+            } else {
+                console.log(parsed.toString());
+            }
+        })
+        .catch(error => {
+            console.error(error);
+        })
 });

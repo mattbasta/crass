@@ -62,7 +62,7 @@ module.exports = class Stylesheet {
      * @param {object} kw
      * @return {Stylesheet}
      */
-    optimize(kw = {}) {
+    async optimize(kw = {}) {
         if (this.charset) {
             this.charset = optimization.try_(this.charset, kw);
         }

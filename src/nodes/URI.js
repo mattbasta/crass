@@ -63,7 +63,7 @@ module.exports = class URI {
     /**
      * @return {URI}
      */
-    optimize(kw) {
+    async optimize(kw) {
         let self = this;
         const isURL = this.isURL();
 
@@ -94,7 +94,7 @@ module.exports = class URI {
                     out = split[1];
                 }
                 try {
-                    self = this.optimizeDataURI(out);
+                    self = await this.optimizeDataURI(out);
                     if (!self) {
                         return null;
                     }
@@ -118,12 +118,12 @@ module.exports = class URI {
      * @param  {Buffer} data The output of strong-data-uri
      * @return {URI}      The optimized URI
      */
-    optimizeDataURI(data) {
+    async optimizeDataURI(data) {
         let newContent;
         if (data.mimetype === 'image/svg+xml') {
             const s = new svgo({});
             try {
-                s.optimize(data.toString('utf-8'), data => {
+                await s.optimize(data.toString('utf-8'), data => {
                     newContent = data.data;
                 });
             } catch (e) {

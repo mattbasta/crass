@@ -28,15 +28,15 @@
   "dependencies": {
     "color-convert": "^2.0.0",
     "strong-data-uri": "^1.0.6",
-    "svgo": "^0.7.2"
+    "svgo": "^1.2.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.4.3",
-    "@babel/core": "^7.4.3",
-    "@babel/preset-env": "^7.4.3",
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
     "browserify": "^16.2.3",
     "jison": "^0.4.18",
-    "mocha": "^6.1.2"
+    "mocha": "^6.1.4"
   },
   "engines": {
     "node": ">=6.11.2"

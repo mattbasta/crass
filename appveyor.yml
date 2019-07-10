@@ -13,7 +13,7 @@ test_script:
   - node --version && npm --version
   - npm test
 
-build: off
+build: "Off"
 
 cache:
   - node_modules -> appveyor.yml,package.json,package-lock.json

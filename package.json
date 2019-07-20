@@ -23,13 +23,15 @@
   "author": "Matt Basta",
   "license": "MIT",
   "dependencies": {
+    "@types/node": "^12.6.8",
     "color-convert": "^2.0.0",
     "strong-data-uri": "^1.0.6",
     "svgo": "^0.7.2"
   },
   "devDependencies": {
     "jest": "^24.8.0",
-    "jison": "^0.4.18"
+    "jison": "^0.4.18",
+    "typescript": "^3.5.3"
   },
   "engines": {
     "node": ">=10.16.0"

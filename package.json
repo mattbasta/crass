@@ -24,6 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/node": "^12.6.8",
+    "@types/svgo": "^1.2.0",
     "color-convert": "^2.0.0",
     "strong-data-uri": "^1.0.6",
     "svgo": "^0.7.2"

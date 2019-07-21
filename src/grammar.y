@@ -200,7 +200,7 @@ optional_medium_list
     : medium_list junk
         { $$ = $1; }
     |
-        { $$ = null; }
+        { $$ = []; }
     ;
 
 namespace_list

@@ -122,7 +122,7 @@ export default class Stylesheet implements Node {
     });
     kw.keyframeMap = kwKFM;
 
-    this.content = optimization.optimizeBlocks(this.content, kw);
+    this.content = await optimization.optimizeBlocks(this.content, kw);
 
     return this;
   }

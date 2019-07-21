@@ -1,8 +1,8 @@
-const browserSupport = require('../browser_support');
+import * as browserSupport from '../browser_support';
 import * as objects from '../objects';
 import * as optimization from '../optimization';
 import * as utils from '../utils';
-import {Block, Node, OptimizeKeywords} from './Node';
+import {Block, OptimizeKeywords} from './Node';
 
 export default class Keyframes implements Block {
   name: string;
@@ -75,17 +75,20 @@ export default class Keyframes implements Block {
     >;
 
     // OPT: Combine duplicate keyframes
-    const cache = {};
-    this.content = this.content.reduce((a, b) => {
-      const content = b.content.toString();
-      if (content in cache) {
-        cache[content].stop = cache[content].stop.concat(b.stop);
-        return a;
-      }
-      cache[content] = b;
-      a.push(b);
-      return a;
-    }, []);
+    const cache: {[content: string]: objects.Keyframe} = {};
+    this.content = this.content.reduce(
+      (acc, cur) => {
+        const content = cur.content.toString();
+        if (content in cache) {
+          cache[content].stop = cache[content].stop.concat(cur.stop);
+          return acc;
+        }
+        cache[content] = cur;
+        acc.push(cur);
+        return acc;
+      },
+      [] as Array<objects.Keyframe>,
+    );
 
     delete kw.vendorPrefix;
     delete kw.insideKeyframes;

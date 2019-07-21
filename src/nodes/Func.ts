@@ -38,7 +38,10 @@ const GRADIENT_ANGLES: {[position: string]: () => NumberableExpression} = {
   left: () => new objects.Dimension(new objects.Number(270), 'deg'),
 };
 
-function asRealNum(num: objects.Dimension | objects.Number): number {
+function asRealNum(num: NumberableExpression | string): number {
+  if (typeof num === 'string') {
+    return new objects.Number(num).asNumber();
+  }
   if (num instanceof objects.Dimension) {
     if (num.unit === '%') return asRealNum(num.number);
     if (num.unit === 'deg') return ((num.number.asNumber() % 360) / 360) * 255;
@@ -98,21 +101,19 @@ export default class Func implements NodeExpression {
       return self;
     }
 
-    self = self.optimizeLinearGradient(kw);
+    self = await self.optimizeLinearGradient(kw);
     if (!self || !self.content) {
       kw.func = oldkwf;
       return null;
     }
 
-    self = self.optimizeRadialGradient(kw);
+    self = await self.optimizeRadialGradient(kw);
     if (!self || !self.content) {
       kw.func = oldkwf;
       return null;
     }
 
-    if (this.isCalc()) {
-      self = self.optimizeCalc(kw);
-    }
+    self = await self.optimizeCalc(kw);
 
     kw.func = oldkwf;
     return self;
@@ -419,6 +420,9 @@ export default class Func implements NodeExpression {
   }
 
   async optimizeCalc(kw: OptimizeKeywords) {
+    if (!this.isCalc()) {
+      return this;
+    }
     const content = await this.content.optimize(kw);
     if (!content) {
       return null;

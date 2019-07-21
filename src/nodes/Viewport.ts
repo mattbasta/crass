@@ -52,7 +52,9 @@ export default class Viewport implements Block {
     this.content = await optimization.optimizeDeclarations(this.content, kw);
     kw.vendorPrefix = oldPrefix;
 
-    if (!this.content.length) return null;
+    if (!this.content.length) {
+      return null;
+    }
 
     return this;
   }

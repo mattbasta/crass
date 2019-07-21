@@ -68,10 +68,6 @@ export default class Ruleset implements Node {
     return output;
   }
 
-  async optimizeContent(kw: OptimizeKeywords) {
-    this.content = await optimization.optimizeDeclarations(this.content, kw);
-  }
-
   async optimize(kw: OptimizeKeywords) {
     // OPT: Ignore `* html` hacks from IE6
     if (
@@ -96,5 +92,9 @@ export default class Ruleset implements Node {
       return null;
     }
     return this;
+  }
+
+  async optimizeContent(kw: OptimizeKeywords) {
+    this.content = await optimization.optimizeDeclarations(this.content, kw);
   }
 }

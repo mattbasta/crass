@@ -25,8 +25,12 @@ export default class IEFilter implements Node {
       return null;
     }
 
-    this.blob =
-      this.ident + ':' + /(?:\-ms\-)?filter\s*:\s*(.+)/.exec(this.blob)[1];
+    const parsedBlob = /(?:\-ms\-)?filter\s*:\s*(.+)/.exec(this.blob);
+    if (!parsedBlob) {
+      throw new Error(`Could not parse IE filter: ${this.blob}`);
+    }
+
+    this.blob = this.ident + ':' + parsedBlob[1];
 
     return this;
   }

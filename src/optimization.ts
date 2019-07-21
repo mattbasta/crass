@@ -166,12 +166,8 @@ type LonghandDeclaration = {
   allDeclsQualify?: (decls: Array<objects.Declaration>) => boolean;
   canMerge?:
     | false
-    | ((
-        shChain: Array<ChainLink>,
-        lhChain: Array<ChainLink>,
-        idx: number,
-      ) => boolean);
-  shorthandMerger?: (
+    | ((shChain: Array<ChainLink>, lhChain: Array<ChainLink>) => boolean);
+  shorthandMerger: (
     shChain: Array<ChainLink>,
     lhChain: Array<ChainLink>,
     idx: number,
@@ -234,7 +230,7 @@ const shorthandMapping: Array<LonghandDeclaration> = [
     decls: ['border-width', 'border-style', 'border-color'],
     declQualifies: defaultShorthandExpressionQualifier,
     expressionBuilder: defaultShorthandExpressionBuilder,
-    canMerge: (shChain, lhChain, idx) => {
+    canMerge: (shChain, lhChain) => {
       // TODO: maybe there's a way to do more?
       return shChain.length === 3 && lhChain.length === 1;
     },
@@ -272,6 +268,7 @@ const shorthandMapping: Array<LonghandDeclaration> = [
     expressionBuilder: rules =>
       rules.reduce((a, b) => a.concat(b.expr.chain), [] as Array<ChainLink>),
     canMerge: false, // TODO: maybe there's a way?
+    shorthandMerger: shChain => shChain,
   },
   {
     name: 'text-emphasis',
@@ -279,6 +276,7 @@ const shorthandMapping: Array<LonghandDeclaration> = [
     declQualifies: defaultShorthandExpressionQualifier,
     expressionBuilder: defaultShorthandExpressionBuilder,
     canMerge: false, // TODO: maybe there's a way?
+    shorthandMerger: shChain => shChain,
   },
 
   {
@@ -369,7 +367,10 @@ type Temp = {
   canRemoveFrom: boolean;
 };
 
-async function _combineAdjacentRulesets(content, kw: OptimizeKeywords) {
+async function _combineAdjacentRulesets(
+  content: Array<Node>,
+  kw: OptimizeKeywords,
+) {
   let didChange = false;
   const newContent = [];
   let lastPushed: objects.Ruleset | null = null;
@@ -384,8 +385,7 @@ async function _combineAdjacentRulesets(content, kw: OptimizeKeywords) {
       selectorMap[strSel] = [temp];
       return;
     }
-    for (let i = 0; i < selectorMap[strSel].length; i++) {
-      const ruleset = selectorMap[strSel][i];
+    for (const ruleset of selectorMap[strSel]) {
       const firstRuleset = ruleset.ruleset;
       if (!firstRuleset) continue;
       // We can't remove declarations from a ruleset that's shared by multiple selectors.
@@ -407,37 +407,38 @@ async function _combineAdjacentRulesets(content, kw: OptimizeKeywords) {
     selectorMap[strSel].push(temp);
   };
 
-  for (let i = 0; i < content.length; i++) {
+  for (const item of content) {
     const areAdjacentRulesets =
       lastPushed &&
-      content[i] instanceof objects.Ruleset &&
+      item instanceof objects.Ruleset &&
       lastPushed instanceof objects.Ruleset;
     const areAdjacentMediaBlocks =
       lastPushed &&
-      content[i] instanceof objects.Media &&
+      item instanceof objects.Media &&
       lastPushed instanceof objects.Media;
 
     if (
       lastPushed &&
+      item instanceof objects.Ruleset &&
       areAdjacentRulesets &&
-      lastPushed.contentToString() === content[i].contentToString()
+      lastPushed.contentToString() === item.contentToString()
     ) {
       // Step 1: Merge the selectors
       if (lastPushed.selector instanceof objects.SelectorList) {
-        if (content[i].selector instanceof objects.SelectorList) {
+        if (item.selector instanceof objects.SelectorList) {
           lastPushed.selector.selectors = lastPushed.selector.selectors.concat(
-            content[i].selector.selectors,
+            item.selector.selectors,
           );
         } else {
-          lastPushed.selector.selectors.push(content[i].selector);
+          lastPushed.selector.selectors.push(item.selector);
         }
-      } else if (content[i].selector instanceof objects.SelectorList) {
-        content[i].selector.selectors.push(lastPushed.selector);
-        lastPushed.selector = content[i].selector;
+      } else if (item.selector instanceof objects.SelectorList) {
+        item.selector.selectors.push(lastPushed.selector);
+        lastPushed.selector = item.selector;
       } else {
         lastPushed.selector = new objects.SelectorList([
           lastPushed.selector,
-          content[i].selector,
+          item.selector,
         ]);
       }
 
@@ -450,11 +451,12 @@ async function _combineAdjacentRulesets(content, kw: OptimizeKeywords) {
       continue;
     } else if (
       lastPushed &&
+      item instanceof objects.Ruleset &&
       areAdjacentRulesets &&
-      lastPushed.selector.toString() === content[i].selector.toString()
+      lastPushed.selector.toString() === item.selector.toString()
     ) {
       // Step 1: Combine the content of the adjacent rulesets.
-      lastPushed.content = lastPushed.content.concat(content[i].content);
+      lastPushed.content = lastPushed.content.concat(item.content);
 
       // Step 2: Re-optimize the ruleset body.
       lastPushed.optimizeContent(kw);
@@ -463,18 +465,19 @@ async function _combineAdjacentRulesets(content, kw: OptimizeKeywords) {
       continue;
     } else if (
       lastPushed &&
+      item instanceof objects.Media &&
       // OPT: Combine adjacent media blocks
       areAdjacentMediaBlocks &&
-      lastPushed.mediaQueriesToString() === content[i].mediaQueriesToString()
+      lastPushed.mediaQueriesToString() === item.mediaQueriesToString()
     ) {
-      lastPushed.content.push(...content[i].content);
+      lastPushed.content.push(...item.content);
       await lastPushed.optimizeContent(kw);
 
       didChange = true;
       continue;
     }
 
-    newContent.push((lastPushed = content[i]));
+    newContent.push((lastPushed = item));
     // OPT: Remove declarations that are overridden later in the stylesheet.
     if (lastPushed instanceof objects.Ruleset) {
       const lastPushedSelector = lastPushed.selector;
@@ -497,16 +500,21 @@ async function _combineAdjacentRulesets(content, kw: OptimizeKeywords) {
   return didChange ? newContent.filter(x => x) : content;
 }
 
-export const optimizeBlocks = async (content, kw: OptimizeKeywords) => {
+export const optimizeBlocks = async (
+  content: Array<Node>,
+  kw: OptimizeKeywords,
+) => {
   content = await optimizeList(content, kw);
 
   // OPT: Remove duplicate blocks.
   if (kw.o1) {
-    const values = {};
-    const removalMap = [];
+    const values: {[key: string]: number} = {};
+    const removalMap: Array<boolean> = [];
     for (let i = 0; i < content.length; i++) {
       const lval = content[i].toString();
-      if (lval in values) removalMap[values[lval]] = true;
+      if (lval in values) {
+        removalMap[values[lval]] = true;
+      }
       values[lval] = i;
     }
     if (removalMap.length) {
@@ -518,32 +526,39 @@ export const optimizeBlocks = async (content, kw: OptimizeKeywords) => {
   // OPT: Combine nearby rulesets
   if (kw.o1 && content.length > 1) {
     for (let i = 0; i < content.length - 1; i++) {
+      const iRuleset = content[i];
+      if (!(iRuleset instanceof objects.Ruleset)) continue;
       for (let j = i + 1; j < content.length; j++) {
+        const jRuleset = content[j];
+        if (!(jRuleset instanceof objects.Ruleset)) continue;
+
         const canCombine = mergeRulesets.canRulesetsBeCombined(content, i, j);
         if (!canCombine) continue;
 
-        if (content[i].selector instanceof objects.SelectorList) {
-          if (content[j].selector instanceof objects.SelectorList) {
-            content[i].selector.selectors = content[
-              i
-            ].selector.selectors.concat(content[j].selector.selectors);
-          } else {
-            content[i].selector.selectors.push(content[j].selector);
-          }
-        } else {
-          if (content[j].selector instanceof objects.SelectorList) {
-            content[i].selector = new objects.SelectorList(
-              [content[i].selector].concat(content[j].selector.selectors),
+        if (iRuleset.selector instanceof objects.SelectorList) {
+          if (jRuleset.selector instanceof objects.SelectorList) {
+            iRuleset.selector.selectors = iRuleset.selector.selectors.concat(
+              jRuleset.selector.selectors,
             );
           } else {
-            content[i].selector = new objects.SelectorList([
-              content[i].selector,
-              content[j].selector,
+            iRuleset.selector.selectors.push(jRuleset.selector);
+          }
+        } else {
+          if (jRuleset.selector instanceof objects.SelectorList) {
+            iRuleset.selector = new objects.SelectorList(
+              [iRuleset.selector].concat(jRuleset.selector.selectors),
+            );
+          } else {
+            iRuleset.selector = new objects.SelectorList([
+              iRuleset.selector,
+              jRuleset.selector,
             ]);
           }
         }
 
-        content[i] = content[i].optimize(kw);
+        const optimized = await iRuleset.optimize(kw);
+        if (!optimized) continue;
+        content[i] = optimized;
 
         content.splice(j, 1);
         j--;
@@ -555,7 +570,11 @@ export const optimizeBlocks = async (content, kw: OptimizeKeywords) => {
   return _combineAdjacentRulesets(content, kw);
 };
 
-function mergeDeclarations(rule, shorthand, longhand) {
+function mergeDeclarations(
+  rule: LonghandDeclaration,
+  shorthand: objects.Declaration,
+  longhand: objects.Declaration,
+) {
   if (!rule.declQualifies(longhand)) {
     return null;
   }
@@ -590,7 +609,9 @@ export const optimizeDeclarations = async (
   kw: OptimizeKeywords,
 ): Promise<Array<objects.Declaration>> => {
   content = (await optimizeList(content, kw)) as Array<objects.Declaration>;
-  if (!content.length) return [];
+  if (!content.length) {
+    return [];
+  }
 
   // OPT: Remove longhand declarations that are overridden by shorthand declarations
   const seenDeclarations: {[identifier: string]: objects.Declaration} = {};
@@ -794,9 +815,9 @@ export const unit = (unit: objects.Dimension, kw: OptimizeKeywords): Node => {
     unit: objects.Dimension,
     units: {[unit: string]: number},
   ) {
-    const versions = {};
+    const versions: {[unit: string]: objects.Dimension} = {};
     const base_unit = units[unit.unit] * unit.number.asNumber();
-    let shortest: string;
+    let shortest: string | null = null;
     let shortestLen = unit.toString().length;
 
     for (let i in units) {
@@ -849,12 +870,19 @@ export const unit = (unit: objects.Dimension, kw: OptimizeKeywords): Node => {
   }
 };
 
-export const combineList = (mapper, reducer, list) => {
-  const values = {};
+export const combineList = <T>(
+  mapper: (value: T) => string,
+  reducer: (a: T, b: T) => T,
+  list: Array<T>,
+) => {
+  const values: {[key: string]: T} = {};
   for (let i = 0; i < list.length; i++) {
     const lval = mapper(list[i]);
-    if (!(lval in values)) values[lval] = list[i];
-    else values[lval] = reducer(values[lval], list[i]);
+    if (!(lval in values)) {
+      values[lval] = list[i];
+    } else {
+      values[lval] = reducer(values[lval], list[i]);
+    }
   }
   const output = [];
   for (let key in values) {

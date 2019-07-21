@@ -51,7 +51,7 @@ export default class Media {
     >;
 
     // OPT: Remove duplicate media queries.
-    this.media = utils.uniq(null, this.media);
+    this.media = utils.uniq(utils.stringIdentity, this.media);
 
     if (!this.media.length) {
       return null;

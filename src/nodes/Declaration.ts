@@ -34,10 +34,6 @@ export default class Declaration {
     );
   }
 
-  /**
-   * @param {int} indent
-   * @return {string}
-   */
   async pretty(indent: number) {
     return (
       this.ident +
@@ -72,7 +68,13 @@ export default class Declaration {
     }
 
     // OPT: Remove `-webkit-transform` inside unprefixed `@keyframes` when a prefixed version exists
-    if (kw.o1 && kw.insideKeyframes && !kw.vendorPrefix && this.isPrefixed()) {
+    if (
+      kw.o1 &&
+      kw.insideKeyframes &&
+      !kw.vendorPrefix &&
+      this.isPrefixed() &&
+      kw.keyframeMap
+    ) {
       const prefix = this.getPrefix();
       if (
         prefix in kw.keyframeMap &&
@@ -133,6 +135,6 @@ export default class Declaration {
   }
 
   getPrefix() {
-    return /(\-[a-z]+\-).+/.exec(this.ident)[1];
+    return /(\-[a-z]+\-).+/.exec(this.ident)![1];
   }
 }

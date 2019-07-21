@@ -49,9 +49,9 @@ export function uniq<T>(lambda: (v: any) => string, list: Array<T>): Array<T> {
   return Object.keys(values).map(key => list[values[key]]);
 }
 
-export const isNum = (obj: Node): obj is objects.Number =>
+export const isNum = (obj: any): obj is objects.Number =>
   obj && obj instanceof objects.Number;
-export const isPositiveNum = (obj: Node) => isNum(obj) && obj.asNumber() >= 0;
+export const isPositiveNum = (obj: any) => isNum(obj) && obj.asNumber() >= 0;
 
 export function indent(value: string, indent: number = 0) {
   if (!value) return '';

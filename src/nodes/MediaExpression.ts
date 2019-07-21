@@ -1,44 +1,57 @@
+import * as objects from '../objects';
 import * as optimization from '../optimization';
-import { OptimizeKeywords } from './Node';
+import {OptimizeKeywords} from './Node';
 
-
+type IECrap = {slashZero: boolean};
 export default class MediaExpression {
-    desciptor: string;
+  descriptor: string;
+  value: objects.Expression | null;
+  ieCrap: IECrap;
 
-    /**
-     * @constructor
-     * @param {string} descriptor
-     * @param {Expression} value
-     * @param {object} ieCrap Flags for IE
-     */
-    constructor(descriptor, value, ieCrap) {
-        this.descriptor = descriptor;
-        this.value = value;
-        this.ieCrap = ieCrap;
-    }
+  constructor(
+    descriptor: string,
+    value: objects.Expression | null,
+    ieCrap: IECrap,
+  ) {
+    this.descriptor = descriptor;
+    this.value = value;
+    this.ieCrap = ieCrap;
+  }
 
-    toString() {
-        const descriptor = this.descriptor.toString();
-        const slashZero = this.ieCrap.slashZero ? '\\0' : '';
-        if (this.value) {
-            return '(' + descriptor + ':' + this.value.toString() + slashZero + ')';
-        } else {
-            return '(' + descriptor + slashZero + ')';
-        }
+  toString() {
+    const descriptor = this.descriptor.toString();
+    const slashZero = this.ieCrap.slashZero ? '\\0' : '';
+    if (this.value) {
+      return '(' + descriptor + ':' + this.value.toString() + slashZero + ')';
+    } else {
+      return '(' + descriptor + slashZero + ')';
     }
+  }
 
-    async pretty(indent: number) {
-        const descriptor = this.descriptor.toString();
-        const slashZero = this.ieCrap.slashZero ? '\\0' : '';
-        if (this.value) {
-            return '(' + descriptor + ': ' + this.value.pretty(indent) + slashZero + ')';
-        } else {
-            return '(' + descriptor + slashZero + ')';
-        }
+  async pretty(indent: number) {
+    const descriptor = this.descriptor.toString();
+    const slashZero = this.ieCrap.slashZero ? '\\0' : '';
+    if (this.value) {
+      return (
+        '(' +
+        descriptor +
+        ': ' +
+        (await this.value.pretty(indent)) +
+        slashZero +
+        ')'
+      );
+    } else {
+      return '(' + descriptor + slashZero + ')';
     }
+  }
 
-    async optimize(kw: OptimizeKeywords) {
-        this.value = await optimization.try_(this.value, kw);
-        return this;
+  async optimize(kw: OptimizeKeywords) {
+    if (this.value) {
+      this.value = (await optimization.try_(
+        this.value,
+        kw,
+      )) as objects.Expression | null;
     }
-};
+    return this;
+  }
+}

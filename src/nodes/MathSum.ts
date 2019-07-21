@@ -1,5 +1,5 @@
 import * as objects from '../objects';
-import {Expression, OptimizeKeywords} from './Node';
+import {Expression, OptimizeKeywords, Node} from './Node';
 import unitTypes from './helpers/unitTypes';
 
 export default class MathSum implements Expression {
@@ -48,9 +48,9 @@ export default class MathSum implements Expression {
     return output;
   }
 
-  async optimize(kw: OptimizeKeywords) {
-    this.base = await this.base.optimize(kw);
-    this.term = await this.term.optimize(kw);
+  async optimize(kw: OptimizeKeywords): Promise<Node | null> {
+    this.base = (await this.base.optimize(kw))!;
+    this.term = (await this.term.optimize(kw))!;
 
     if (!this.base || !this.term) {
       return null;

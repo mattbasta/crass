@@ -1,7 +1,7 @@
-import path = require('path');
+import * as path from 'path';
 
 import sdu = require('strong-data-uri');
-import svgo = require('svgo');
+import * as svgo from 'svgo';
 
 import * as objects from '../objects';
 import {StringableExpression, OptimizeKeywords} from '../nodes/Node';
@@ -15,9 +15,10 @@ export default class URI implements StringableExpression {
       (uri[0] === uri[uri.length - 1] && (uri[0] === '"' || uri[0] === "'")) ||
       uri.indexOf(')') !== -1
     ) {
-      uri = new objects.String(uri.substring(1, uri.length - 1));
+      this.uri = new objects.String(uri.substring(1, uri.length - 1));
+    } else {
+      this.uri = uri;
     }
-    this.uri = uri;
   }
 
   asString() {

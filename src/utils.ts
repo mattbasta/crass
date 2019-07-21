@@ -1,5 +1,5 @@
-// import {Node} from './nodes/Node';
 import * as objects from './objects';
+import {ChainLinkValue} from './nodes/Expression';
 
 import {Node} from './nodes/Node';
 
@@ -8,7 +8,7 @@ export function opts(
   defaults: {[key: string]: string} = {},
 ): {[key: string]: string | boolean} {
   const out: {[key: string]: string | boolean} = {...defaults};
-  let last: string;
+  let last: string | null = null;
   for (let i = 0; i < opts.length; i++) {
     const is_flag = opts[i].substr(0, 1) === '-';
     if (is_flag && last) {
@@ -32,7 +32,7 @@ export function joinAll<T>(
   if (!list) return '';
   return list.map(mapper).join(joiner || '');
 }
-export async function joinAllAsync<T>(
+export async function joinAllAsync<T extends Node>(
   list: Array<T>,
   joiner: string = '',
   mapper: (x: T) => Promise<string> = async x => x.toString(),
@@ -41,8 +41,8 @@ export async function joinAllAsync<T>(
   return (await Promise.all(list.map(mapper))).join(joiner || '');
 }
 
-export function uniq<T>(lambda: (v: T) => string, list: Array<T>): Array<T> {
-  const values = {};
+export function uniq<T>(lambda: (v: any) => string, list: Array<T>): Array<T> {
+  const values: {[mapped: string]: number} = {};
   for (let i = 0; i < list.length; i++) {
     values[lambda(list[i])] = i;
   }
@@ -63,8 +63,8 @@ export const prettyMap = (indent: number) => async (x: Node) =>
 
 export function func(
   name: string,
-  values,
-  sep: string | ((idx: number) => string) = ',',
+  values: Array<ChainLinkValue | number>,
+  sep: string | ((idx: number) => string | null) = ',',
 ) {
   return new objects.Func(
     name,

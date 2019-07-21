@@ -21,7 +21,11 @@ export default class PseudoSelectorFunction implements Selector {
   async optimize(kw: OptimizeKeywords) {
     // OPT: Lowercase pseudo function names.
     this.funcName = this.funcName.toLowerCase();
-    this.expr = await optimization.try_(this.expr, kw);
+    const expr = await optimization.try_(this.expr, kw);
+    if (!expr) {
+      return null;
+    }
+    this.expr = expr;
     return this;
   }
 }

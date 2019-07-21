@@ -1,12 +1,18 @@
-import colorConvert = require('color-convert');
+import * as colorConvert from 'color-convert';
 
-const colorOptimizer = require('../optimizations/color');
+import * as colorOptimizer from '../optimizations/color';
 import * as objects from '../objects';
 import * as optimization from '../optimization';
 import * as utils from '../utils';
-import {Expression as NodeExpression, OptimizeKeywords} from './Node';
+import {
+  Expression as NodeExpression,
+  OptimizeKeywords,
+  NumberableExpression,
+} from './Node';
 
-const recognizedColorFuncs = {
+const recognizedColorFuncs: {
+  [func: string]: {minArgs: number; maxArgs: number};
+} = {
   rgb: {minArgs: 3, maxArgs: 3},
   hsl: {minArgs: 3, maxArgs: 3},
   rgba: {minArgs: 4, maxArgs: 4},
@@ -16,7 +22,7 @@ const recognizedColorFuncs = {
   lab: {minArgs: 3, maxArgs: 4},
   lch: {minArgs: 3, maxArgs: 4},
 };
-const ALPHA_INDEX = {
+const ALPHA_INDEX: {[func: string]: number} = {
   gray: 1,
   rgba: 3,
   hsla: 3,
@@ -25,19 +31,14 @@ const ALPHA_INDEX = {
   lch: 3,
 };
 
-const GRADIENT_ANGLES = {
+const GRADIENT_ANGLES: {[position: string]: () => NumberableExpression} = {
   top: () => new objects.Number(0),
   right: () => new objects.Dimension(new objects.Number(90), 'deg'),
   bottom: () => new objects.Dimension(new objects.Number(180), 'deg'),
   left: () => new objects.Dimension(new objects.Number(270), 'deg'),
 };
 
-/**
- * Converts Number to JS number
- * @param  {Number} num
- * @return {number}
- */
-function asRealNum(num: objects.Dimension | objects.Number) {
+function asRealNum(num: objects.Dimension | objects.Number): number {
   if (num instanceof objects.Dimension) {
     if (num.unit === '%') return asRealNum(num.number);
     if (num.unit === 'deg') return ((num.number.asNumber() % 360) / 360) * 255;
@@ -197,7 +198,7 @@ export default class Func implements NodeExpression {
       case 'rgba':
       case 'hsla':
         alpha = components[3];
-        applier = funcName => {
+        applier = (funcName: string) => {
           const name = this.name.substr(0, 3);
           if (funcName === name) {
             return components.slice(0, 3);
@@ -211,7 +212,7 @@ export default class Func implements NodeExpression {
         break;
       case 'rgb':
       case 'hsl':
-        applier = funcName => {
+        applier = (funcName: string) => {
           if (funcName === this.name) {
             return components.slice(0, 3);
           }
@@ -226,7 +227,8 @@ export default class Func implements NodeExpression {
         if (components.length > 1) {
           alpha = components[1];
         }
-        applier = funcName => colorConvert.gray[funcName](components[0]);
+        applier = (funcName: string) =>
+          colorConvert.gray[funcName](components[0]);
         break;
       case 'hwb':
       case 'lab':
@@ -234,7 +236,7 @@ export default class Func implements NodeExpression {
         if (components.length > 3) {
           alpha = components[3];
         }
-        applier = funcName => {
+        applier = (funcName: string) => {
           if (funcName === this.name) {
             return components.slice(0, 3);
           }
@@ -412,15 +414,16 @@ export default class Func implements NodeExpression {
       }
     });
 
-    this.content = new objects.Expression(chain).optimize(kw);
+    this.content = (await new objects.Expression(chain).optimize(kw))!;
     return this;
   }
 
   async optimizeCalc(kw: OptimizeKeywords) {
-    this.content = await this.content.optimize(kw);
-    if (!this.content) {
+    const content = await this.content.optimize(kw);
+    if (!content) {
       return null;
     }
+    this.content = content;
     return this;
   }
 }

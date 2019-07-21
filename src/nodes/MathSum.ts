@@ -1,13 +1,13 @@
 import * as objects from '../objects';
 import {Expression, OptimizeKeywords} from './Node';
-import unitTypes = require('./helpers/unitTypes');
+import unitTypes from './helpers/unitTypes';
 
-class MathSum implements Expression {
-  base: MathSum | objects.MathProduct | Expression;
+export default class MathSum implements Expression {
+  base: Expression;
   operator: string;
   term: Expression;
 
-  constructor(base, operator, term) {
+  constructor(base: Expression, operator: string, term: Expression) {
     this.base = base;
     this.operator = operator;
     this.term = term;
@@ -256,5 +256,3 @@ class MathSum implements Expression {
     return this;
   }
 }
-
-module.exports = MathSum;

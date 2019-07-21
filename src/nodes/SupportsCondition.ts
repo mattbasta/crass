@@ -1,6 +1,7 @@
 import * as objects from '../objects';
+import {OptimizeKeywords, Node} from './Node';
 
-export default class SupportsCondition {
+export default class SupportsCondition implements Node {
   condition:
     | objects.Declaration
     | objects.SupportsConditionList
@@ -31,8 +32,13 @@ export default class SupportsCondition {
     return this.toString();
   }
 
-  async optimize(kw) {
-    this.condition = await this.condition.optimize(kw);
+  async optimize(kw: OptimizeKeywords): Promise<Node | null> {
+    const condition = await this.condition.optimize(kw);
+    if (!condition) {
+      return null;
+    }
+    this.condition = condition as SupportsCondition['condition'];
+
     // OPT: not(not(foo:bar)) -> (foo:bar)
     if (
       this.condition instanceof objects.SupportsCondition &&

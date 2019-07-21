@@ -1,24 +1,21 @@
-export default class ClassSelector {
-    /**
-     * @constructor
-     * @param {string} ident
-     */
-    constructor(ident) {
-        this.ident = ident;
-    }
+import {Selector, OptimizeKeywords} from './Node';
 
-    toString() {
-        return '.' + this.ident;
-    }
+export default class ClassSelector implements Selector {
+  ident: string;
 
-    pretty() {
-        return this.toString();
-    }
+  constructor(ident: string) {
+    this.ident = ident;
+  }
 
-    /**
-     * @return {ClassSelector}
-     */
-    optimize() {
-        return this;
-    }
-};
+  toString() {
+    return '.' + this.ident;
+  }
+
+  async pretty(indent: number) {
+    return this.toString();
+  }
+
+  async optimize(kw: OptimizeKeywords) {
+    return this;
+  }
+}

@@ -1,4 +1,4 @@
-export const HEX_TO_COLOR = {
+export const HEX_TO_COLOR: {[hex: string]: string} = {
     '#f0ffff': 'azure',
     '#f5f5dc': 'beige',
     '#ffe4c4': 'bisque',
@@ -32,7 +32,7 @@ export const HEX_TO_COLOR = {
     '#f5deb3': 'wheat'
 };
 
-export const COLOR_TO_HEX = {
+export const COLOR_TO_HEX: {[keyword: string]: string} = {
     aliceblue: '#f0f8ff',
     antiquewhite: '#faebd7',
     aqua: '#0ff',

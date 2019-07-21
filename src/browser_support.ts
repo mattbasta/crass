@@ -1,10 +1,8 @@
-import * as objects from './objects';
-import * as utils from './utils';
 import {OptimizeKeywords} from './nodes/Node';
 
 export type BrowserSupport = {[browser: string]: number};
 
-export const BROWSERS = {
+export const BROWSERS: {[short: string]: string} = {
   fx: 'firefox',
   chr: 'chrome',
   ie: 'ie',
@@ -22,6 +20,9 @@ export class BrowserMin {
 
 export function parseBrowser(str: string) {
   const matches = /([a-z]+)([0-9]+)/.exec(str);
+  if (!matches) {
+    throw new Error(`Error parsing browser string "${str}"`);
+  }
   return new BrowserMin(BROWSERS[matches[1]], Number(matches[2]));
 }
 
@@ -143,7 +144,7 @@ export const DECLARATIONS_REMOVED: {
   '-moz-window-shadow': {firefox: 44},
 };
 
-export const KEYFRAMES_PREFIX_REMOVED = {
+export const KEYFRAMES_PREFIX_REMOVED: {[prefix: string]: BrowserSupport} = {
   '-webkit-': {chrome: 43},
   '-moz-': {firefox: 16},
   '-o-': {opera: 13},
@@ -154,12 +155,14 @@ function match_browser(
   kw: OptimizeKeywords,
 ): boolean {
   const supportedBrowsers = Object.keys(browserObj).filter(
-    key => key in kw.browser_min,
+    key => key in (kw.browser_min || {}),
   );
   if (!supportedBrowsers.length) {
     return true;
   }
-  return supportedBrowsers.some(key => kw.browser_min[key] < browserObj[key]);
+  return supportedBrowsers.some(
+    key => (kw.browser_min || {})[key] < browserObj[key],
+  );
 }
 
 export function supportsDeclaration(

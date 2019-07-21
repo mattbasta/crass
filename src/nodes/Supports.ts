@@ -1,4 +1,4 @@
-import {Block} from './Node';
+import {Block, OptimizeKeywords} from './Node';
 import * as objects from '../objects';
 import SupportsConditionList from './SupportsConditionList';
 
@@ -38,8 +38,10 @@ export default class Supports implements Block {
     return output;
   }
 
-  async optimize(kw) {
-    this.conditionList = await this.conditionList.optimize(kw);
+  async optimize(kw: OptimizeKeywords) {
+    this.conditionList = (await this.conditionList.optimize(
+      kw,
+    )) as Supports['conditionList'];
     this.content = optimization.optimizeBlocks(this.content, kw);
     return this;
   }

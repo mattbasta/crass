@@ -1,6 +1,6 @@
 import * as objects from '../objects';
 import * as utils from '../utils';
-import {Node} from './Node';
+import {Node, OptimizeKeywords} from './Node';
 
 export default class SupportsConditionList implements Node {
   combinator: string;
@@ -20,11 +20,11 @@ export default class SupportsConditionList implements Node {
     this.conditions = conditions;
   }
 
-  unshift(item: objects.SupportsCondition) {
+  unshift(item: objects.SupportsCondition | SupportsConditionList) {
     this.conditions.unshift(item);
   }
 
-  toString() {
+  toString(): string {
     return utils.joinAll(this.conditions, ` ${this.combinator} `, item => {
       const output = item.toString();
       return (item instanceof objects.SupportsConditionList &&
@@ -40,14 +40,20 @@ export default class SupportsConditionList implements Node {
   }
 
   async optimize(
-    kw,
+    kw: OptimizeKeywords,
   ): Promise<SupportsConditionList | objects.SupportsCondition> {
-    this.conditions = await Promise.all(
+    const conditions = await Promise.all(
       this.conditions.map(async condition => condition.optimize(kw)),
     );
+    if (conditions.some(condition => condition == null)) {
+      throw new Error(
+        'Supports condition was optimized away, but should not have.',
+      );
+    }
+    this.conditions = conditions as SupportsConditionList['conditions'];
 
     // OPT: Remove duplicate delcarations in @supports condition lists
-    this.conditions = utils.uniq(null, this.conditions);
+    this.conditions = utils.uniq(utils.stringIdentity, this.conditions);
 
     // OPT: not(x) and not(y) and not(z) -> not(x or y or z)
     if (

@@ -4,7 +4,7 @@ import sdu = require('strong-data-uri');
 import svgo = require('svgo');
 
 import * as objects from '../objects';
-import {StringableExpression} from '../nodes/Node';
+import {StringableExpression, OptimizeKeywords} from '../nodes/Node';
 
 export default class URI implements StringableExpression {
   uri: objects.String | string;
@@ -41,15 +41,19 @@ export default class URI implements StringableExpression {
     } else if (typeof uri === 'string') {
       return `url(${uri.trim().replace(/\s/g, '\\ ')})`;
     }
-    const rawStr = uri.asString(true);
-    return 'url(' + uri.asString(rawStr.indexOf(')') === -1) + ')';
+    const rawStr = uri.asRawString();
+    return (
+      'url(' +
+      (!rawStr.includes(')') ? uri.asRawString() : uri.asString()) +
+      ')'
+    );
   }
 
   async pretty() {
     return this.toString();
   }
 
-  async optimize(kw) {
+  async optimize(kw: OptimizeKeywords) {
     let self: URI | null = this;
     const isURL = this.isURL();
 
@@ -69,7 +73,7 @@ export default class URI implements StringableExpression {
     } else if (kw.o1 && !isURL) {
       const content = this.asRawString();
       if (content.slice(0, 5) === 'data:') {
-        let out: Buffer;
+        let out: Buffer | string | null = null;
         try {
           out = sdu.decode(content);
         } catch (e) {}
@@ -101,10 +105,10 @@ export default class URI implements StringableExpression {
   }
 
   async optimizeDataURI(
-    data: Buffer & {mimetype?: string},
+    data: Buffer & {mimetype?: string} | string,
   ): Promise<URI | null> {
     let newContent: string;
-    if (data.mimetype === 'image/svg+xml') {
+    if (typeof data !== 'string' && data.mimetype === 'image/svg+xml') {
       const s = new svgo({});
       try {
         newContent = (await s.optimize(data.toString('utf-8'))).data;

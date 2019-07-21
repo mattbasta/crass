@@ -1,4 +1,4 @@
-import {Block} from './Node';
+import {Block, OptimizeKeywords} from './Node';
 import * as objects from '../objects';
 import * as optimization from '../optimization';
 import * as utils from '../utils';
@@ -7,7 +7,10 @@ export default class Viewport implements Block {
   content: Array<objects.Declaration>;
   vendorPrefix: string | null;
 
-  constructor(content: Array<objects.Declaration>, vendorPrefix: string | null = null) {
+  constructor(
+    content: Array<objects.Declaration>,
+    vendorPrefix: string | null = null,
+  ) {
     this.content = content;
     this.vendorPrefix = vendorPrefix;
   }
@@ -39,11 +42,7 @@ export default class Viewport implements Block {
     return output;
   }
 
-  /**
-   * @param {object} kw
-   * @return {Viewport}
-   */
-  async optimize(kw) {
+  async optimize(kw: OptimizeKeywords) {
     let oldPrefix;
     if (this.vendorPrefix) {
       oldPrefix = kw.vendorPrefix;
@@ -57,4 +56,4 @@ export default class Viewport implements Block {
 
     return this;
   }
-};
+}

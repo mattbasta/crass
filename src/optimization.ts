@@ -1,5 +1,5 @@
 import * as objects from './objects';
-import {Node, OptimizeKeywords} from './nodes/Node';
+import {Node, OptimizeKeywords, Selector} from './nodes/Node';
 import {ChainLink} from './nodes/Expression';
 
 const mergeRulesets = require('./optimizations/mergeRulesets');
@@ -154,6 +154,7 @@ export const expandQuadList = (chain: Array<ChainLink>): Array<ChainLink> => {
       .concat(chain)
       .concat(chain);
   }
+  return chain;
 };
 
 type LonghandDeclaration = {
@@ -269,7 +270,7 @@ const shorthandMapping: Array<LonghandDeclaration> = [
     ],
     declQualifies: decl => decl.expr.chain.length >= 1,
     expressionBuilder: rules =>
-      rules.reduce((a, b) => a.concat(b.expr.chain), []),
+      rules.reduce((a, b) => a.concat(b.expr.chain), [] as Array<ChainLink>),
     canMerge: false, // TODO: maybe there's a way?
   },
   {
@@ -337,14 +338,17 @@ const shorthandMapping: Array<LonghandDeclaration> = [
   // TODO: transition
   // TODO: animation
 ];
-const shorthandMappingMapped = shorthandMapping.reduce((acc, cur) => {
-  if (cur.name in acc) {
-    acc[cur.name].push(cur);
-  } else {
-    acc[cur.name] = [cur];
-  }
-  return acc;
-}, {});
+const shorthandMappingMapped = shorthandMapping.reduce(
+  (acc, cur) => {
+    if (cur.name in acc) {
+      acc[cur.name].push(cur);
+    } else {
+      acc[cur.name] = [cur];
+    }
+    return acc;
+  },
+  {} as {[name: string]: Array<LonghandDeclaration>},
+);
 
 export const optimizeList = async (
   list: Array<Node>,
@@ -359,15 +363,21 @@ export const optimizeList = async (
   return output;
 };
 
-function _combineAdjacentRulesets(content, kw) {
+type Temp = {
+  ruleset: objects.Ruleset | null;
+  index: number;
+  canRemoveFrom: boolean;
+};
+
+async function _combineAdjacentRulesets(content, kw: OptimizeKeywords) {
   let didChange = false;
   const newContent = [];
-  let lastPushed;
+  let lastPushed: objects.Ruleset | null = null;
 
   // A map of selectors to rulesets in this block.
-  const selectorMap = {};
+  const selectorMap: {[selector: string]: Array<Temp>} = {};
 
-  const pushSel = (sel, temp) => {
+  const pushSel = (sel: Selector, temp: Temp): void => {
     const strSel = sel.toString();
 
     if (!(strSel in selectorMap)) {
@@ -408,6 +418,7 @@ function _combineAdjacentRulesets(content, kw) {
       lastPushed instanceof objects.Media;
 
     if (
+      lastPushed &&
       areAdjacentRulesets &&
       lastPushed.contentToString() === content[i].contentToString()
     ) {
@@ -431,11 +442,14 @@ function _combineAdjacentRulesets(content, kw) {
       }
 
       // Step 2: Optimize the new selector
-      lastPushed.selector = lastPushed.selector.optimize(kw);
+      lastPushed.selector = (await lastPushed.selector.optimize(kw)) as
+        | Selector
+        | objects.SelectorList;
 
       didChange = true;
       continue;
     } else if (
+      lastPushed &&
       areAdjacentRulesets &&
       lastPushed.selector.toString() === content[i].selector.toString()
     ) {
@@ -448,12 +462,13 @@ function _combineAdjacentRulesets(content, kw) {
       didChange = true;
       continue;
     } else if (
+      lastPushed &&
       // OPT: Combine adjacent media blocks
       areAdjacentMediaBlocks &&
       lastPushed.mediaQueriesToString() === content[i].mediaQueriesToString()
     ) {
       lastPushed.content.push(...content[i].content);
-      lastPushed.optimizeContent(kw);
+      await lastPushed.optimizeContent(kw);
 
       didChange = true;
       continue;
@@ -482,8 +497,8 @@ function _combineAdjacentRulesets(content, kw) {
   return didChange ? newContent.filter(x => x) : content;
 }
 
-export const optimizeBlocks = (content, kw) => {
-  content = optimizeList(content, kw);
+export const optimizeBlocks = async (content, kw: OptimizeKeywords) => {
+  content = await optimizeList(content, kw);
 
   // OPT: Remove duplicate blocks.
   if (kw.o1) {
@@ -578,9 +593,9 @@ export const optimizeDeclarations = async (
   if (!content.length) return [];
 
   // OPT: Remove longhand declarations that are overridden by shorthand declarations
-  const seenDeclarations = {};
+  const seenDeclarations: {[identifier: string]: objects.Declaration} = {};
   for (let i = content.length - 1; i >= 0; i--) {
-    let decl = content[i];
+    let decl: objects.Declaration | null = content[i];
     if (decl.ident in seenDeclarations) {
       const seen = seenDeclarations[decl.ident];
       if (decl.important && !seen.important) {
@@ -595,6 +610,7 @@ export const optimizeDeclarations = async (
     // If we match an overridable declaration and we've seen one of the
     // things that overrides it, remove it from the ruleset.
     if (
+      decl &&
       decl.ident in overrideList &&
       overrideList[decl.ident].some(
         ident =>
@@ -606,11 +622,11 @@ export const optimizeDeclarations = async (
       continue;
     }
 
-    if (decl.ident in shorthandMappingMapped) {
-      for (const shorthand of shorthandMappingMapped[decl.ident]) {
+    if (decl && decl.ident in shorthandMappingMapped) {
+      shorthand: for (const shorthand of shorthandMappingMapped[decl.ident]) {
         // Short circuit if we eliminate this declaration below.
         if (!decl) {
-          return;
+          break;
         }
         let seenAny = false;
         for (let lhDecl of shorthand.decls) {
@@ -631,27 +647,27 @@ export const optimizeDeclarations = async (
           seenAny = true;
         }
         if (!seenAny) {
-          return;
+          break shorthand;
         }
         for (const lhDeclName of shorthand.decls) {
           // Short circuit if we eliminate this declaration below.
           if (!decl) {
-            return;
+            break;
           }
 
           const lhDecl = seenDeclarations[lhDeclName];
           if (!lhDecl) {
-            return;
+            break;
           }
 
           if (lhDecl.important && !decl.important) {
-            return;
+            break;
           }
 
           const output = mergeDeclarations(shorthand, decl, lhDecl);
           // A null result means they could not be merged.
           if (!output) {
-            return;
+            break;
           }
 
           content.splice(content.indexOf(lhDecl), 1);
@@ -661,7 +677,7 @@ export const optimizeDeclarations = async (
           if (!optimized) {
             content.splice(i, 1);
             decl = null;
-            return;
+            break;
           }
           decl = optimized;
           content[i] = decl;
@@ -678,18 +694,18 @@ export const optimizeDeclarations = async (
 
   // OPT: Merge together 'piecemeal' declarations when all pieces are specified
   // Ex. padding-left, padding-right, padding-top, padding-bottom -> padding
-  for (const shMap of shorthandMapping) {
+  shorthand: for (const shMap of shorthandMapping) {
     const subRules = [];
     for (let rule of shMap.decls) {
       const seen = seenDeclarations[rule];
       if (!seen || !shMap.declQualifies(seen)) {
-        return;
+        break shorthand;
       }
 
       subRules.push(seen);
     }
     if (shMap.allDeclsQualify && !shMap.allDeclsQualify(subRules)) {
-      return;
+      break;
     }
 
     // Remove the declarations that will be merged
@@ -703,8 +719,10 @@ export const optimizeDeclarations = async (
       new objects.Expression(shMap.expressionBuilder(subRules)),
     );
     const optimized = await mergedRule.optimize(kw);
-    content.push(optimized);
-    seenDeclarations[shMap.name] = optimized;
+    if (optimized) {
+      content.push(optimized);
+      seenDeclarations[shMap.name] = optimized;
+    }
   }
 
   // TODO: Under O1, do these sorts of reductions:

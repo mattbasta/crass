@@ -1,13 +1,9 @@
-const colors = require('../colors');
+import * as colors from '../colors';
 import * as objects from '../objects';
 import * as optimization from '../optimization';
 import {Node, Expression as NodeExpression, OptimizeKeywords} from './Node';
 
-/**
- * @param {array[][]} list
- * @return {array[][]}
- */
-function processQuadList(list) {
+function processQuadList(list: Array<ChainLink>): Array<ChainLink> {
   const keys = list.map(v => v[1].toString());
   if (
     keys.length === 4 &&
@@ -32,8 +28,8 @@ function processQuadList(list) {
   return list;
 }
 
-type ChainLinkValue = NodeExpression | string;
-export type ChainLink = [string, ChainLinkValue];
+export type ChainLinkValue = NodeExpression | string;
+export type ChainLink = [string | null, ChainLinkValue];
 
 export default class Expression implements Node {
   chain: Array<ChainLink>;

@@ -1,24 +1,21 @@
-export default class CustomIdent {
-    /**
-     * @constructor
-     * @param {string[]} color
-     */
-    constructor(idents) {
-        this.idents = idents;
-    }
+import {Node, OptimizeKeywords} from './Node';
 
-    toString() {
-        return '[' + this.idents.join(' ') + ']';
-    }
+export default class CustomIdent implements Node {
+  idents: Array<string>;
 
-    pretty() {
-        return this.toString();
-    }
+  constructor(idents: Array<string>) {
+    this.idents = idents;
+  }
 
-    /**
-     * @return {CustomIdent}
-     */
-    optimize() {
-        return this;
-    }
-};
+  toString() {
+    return '[' + this.idents.join(' ') + ']';
+  }
+
+  async pretty(indent: number) {
+    return this.toString();
+  }
+
+  async optimize(kw: OptimizeKeywords) {
+    return this;
+  }
+}

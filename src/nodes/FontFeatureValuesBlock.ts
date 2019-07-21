@@ -1,12 +1,13 @@
+import * as objects from '../objects';
 import * as optimization from '../optimization';
 import * as utils from '../utils';
-import {Block, Node, OptimizeKeywords} from './Node';
+import {Block, OptimizeKeywords} from './Node';
 
 export default class FontFeatureValuesBlock implements Block {
   blockName: string;
-  content: Array<Node>;
+  content: Array<objects.Declaration>;
 
-  constructor(blockName: string, content: Array<Node>) {
+  constructor(blockName: string, content: Array<objects.Declaration>) {
     this.blockName = blockName;
     this.content = content;
   }

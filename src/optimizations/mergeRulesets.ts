@@ -17,14 +17,14 @@ rules.
 
 */
 
-import { Node } from "../nodes/Node";
-import * as objects from "../objects";
+import {Node, Selector} from '../nodes/Node';
+import * as objects from '../objects';
 
 function anyBetween<T>(
   body: Array<T>,
   i: number,
   j: number,
-  filter: (val: T) => boolean
+  filter: (val: T) => boolean,
 ): boolean {
   for (let x = i + 1; x < j; x++) {
     if (filter(body[x])) {
@@ -37,7 +37,7 @@ function anyBetween<T>(
 function manySome<T>(
   arrX: Array<T>,
   arrY: Array<T>,
-  func: (a: T, b: T) => boolean
+  func: (a: T, b: T) => boolean,
 ): boolean {
   for (let i = 0; i < arrX.length; i++) {
     if (!arrX[i]) continue;
@@ -61,25 +61,23 @@ const isPseudoElementSelector = (item: Node) =>
 const isPseudoClassSelector = (item: Node) =>
   item instanceof objects.PseudoClassSelector;
 
-function normalizeSelector(selector) {
+function normalizeSelector(selector: objects.SelectorList | Selector) {
   return selector instanceof objects.SelectorList
     ? selector.selectors
     : [selector];
 }
 
-function getLastInSelectorChain(selector) {
+function getLastInSelectorChain(selector: objects.SelectorList | Selector) {
   if (selector instanceof objects.SimpleSelector) return selector;
   return getLastInSelectorChain(selector.descendant);
 }
 
-const mutuallyExclusiveAttrSelectors = {
-  "=": true,
-  "|=": true,
-  "^=": true,
-  "$=": true
-};
+const mutuallyExclusiveAttrSelectors = ['=', '|=', '^=', '$='];
 
-function canSelectorsEverTouchSameElement(selX, selY) {
+export function canSelectorsEverTouchSameElement(
+  selX: Array<Selector>,
+  selY: Array<Selector>,
+) {
   selX = selX.map(getLastInSelectorChain);
   selY = selY.map(getLastInSelectorChain);
 
@@ -121,7 +119,7 @@ function canSelectorsEverTouchSameElement(selX, selY) {
       return (
         x.ident.toString() === y.ident.toString() &&
         x.comparison === y.comparison &&
-        x.comparison in mutuallyExclusiveAttrSelectors &&
+        mutuallyExclusiveAttrSelectors.includes(x.comparison) &&
         x.value.toString() !== y.value.toString()
       );
     });
@@ -137,13 +135,15 @@ function canSelectorsEverTouchSameElement(selX, selY) {
     return true;
   });
 }
-exports.canSelectorsEverTouchSameElement = canSelectorsEverTouchSameElement;
 
 const supersetCache = new WeakMap<Array<Node>, Array<string>>();
-function isSubset(subset: Array<Node>, superset: Array<Node>): boolean {
+function isSubset(
+  subset: Array<objects.Declaration>,
+  superset: Array<objects.Declaration>,
+): boolean {
   let strSuperset: Array<string>;
   if (supersetCache.has(superset)) {
-    strSuperset = supersetCache.get(superset);
+    strSuperset = supersetCache.get(superset)!;
   } else {
     strSuperset = superset.map(x => x.toString());
     supersetCache.set(superset, strSuperset);
@@ -152,9 +152,9 @@ function isSubset(subset: Array<Node>, superset: Array<Node>): boolean {
 }
 
 export function canRulesetsBeCombined(
-  parentBody: Array<Node>,
+  parentBody: Array<objects.Ruleset>,
   xIdx: number,
-  yIdx: number
+  yIdx: number,
 ): boolean {
   const x = parentBody[xIdx];
   const y = parentBody[yIdx];
@@ -168,7 +168,7 @@ export function canRulesetsBeCombined(
     return false;
   }
 
-  const xSelector = normalizeSelector(x.selector);
+  // const xSelector = normalizeSelector(x.selector);
   const ySelector = normalizeSelector(y.selector);
 
   // Adjacent rulesets are fine to merge.

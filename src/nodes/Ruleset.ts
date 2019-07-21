@@ -24,10 +24,13 @@ export default class Ruleset implements Node {
    * declarations for a provided ruleset.
    */
   declarationIntersections(ruleset: Ruleset) {
-    const localDeclarations = this.content.reduce((acc, cur) => {
-      acc[cur.ident] = cur;
-      return acc;
-    }, {});
+    const localDeclarations = this.content.reduce(
+      (acc, cur) => {
+        acc[cur.ident] = cur;
+        return acc;
+      },
+      {} as {[ident: string]: objects.Declaration},
+    );
     const intersection = [];
     for (let i = 0; i < ruleset.content.length; i++) {
       const foreignDecl = ruleset.content[i];
@@ -80,10 +83,11 @@ export default class Ruleset implements Node {
       return null;
     }
 
-    this.selector = await optimization.try_(this.selector, kw);
-    if (!this.selector) {
+    const selector = await optimization.try_(this.selector, kw);
+    if (!selector) {
       return null;
     }
+    this.selector = selector;
 
     await this.optimizeContent(kw);
 

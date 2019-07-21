@@ -23,6 +23,7 @@
   "author": "Matt Basta",
   "license": "MIT",
   "dependencies": {
+    "@types/color-convert": "^1.9.0",
     "@types/node": "^12.6.8",
     "@types/svgo": "^1.2.0",
     "color-convert": "^2.0.0",

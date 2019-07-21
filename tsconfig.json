@@ -3,6 +3,7 @@
     "allowJs": true,
     "alwaysStrict": true,
     "baseUrl": ".",
+    "checkJs": false,
     "forceConsistentCasingInFileNames": true,
     "lib": [
       "es5",

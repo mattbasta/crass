@@ -1,5 +1,6 @@
 export type OptimizeKeywords = {
   browser_min?: {[browser: string]: number};
+  css4?: boolean;
   declarationName?: string;
   func?: string;
   insideKeyframes?: string;
@@ -12,7 +13,7 @@ export type OptimizeKeywords = {
 export interface Node {
   toString(): string;
   pretty(indent: number): Promise<string>;
-  optimize(kw: OptimizeKeywords): Promise<Node>;
+  optimize(kw: OptimizeKeywords): Promise<Node | null>;
 }
 
 export interface Expression extends Node {}

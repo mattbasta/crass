@@ -1,5 +1,5 @@
 import * as optimization from '../../optimization';
-import {Selector} from '../Node';
+import {Selector, OptimizeKeywords} from '../Node';
 
 export default function chainedSelectorFactory(name: string, operator: string) {
   return class implements Selector {
@@ -26,13 +26,18 @@ export default function chainedSelectorFactory(name: string, operator: string) {
       );
     }
 
-    async optimize(kw) {
-      this.ancestor = await optimization.try_(this.ancestor, kw);
-      this.descendant = await optimization.try_(this.descendant, kw);
-
-      if (!this.ancestor || !this.descendant) {
+    async optimize(kw: OptimizeKeywords) {
+      const ancestor = await optimization.try_(this.ancestor, kw);
+      if (!ancestor) {
         return null;
       }
+      this.ancestor = ancestor;
+
+      const descendant = await optimization.try_(this.descendant, kw);
+      if (!descendant) {
+        return null;
+      }
+      this.descendant = descendant;
 
       return this;
     }

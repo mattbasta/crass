@@ -46,21 +46,21 @@ export default class Stylesheet implements Node {
     if (this.imports.length) {
       output += await utils.joinAllAsync(
         this.imports,
-        null,
+        undefined,
         utils.prettyMap(indent),
       );
     }
     if (this.namespaces.length) {
       output += await utils.joinAllAsync(
         this.namespaces,
-        null,
+        undefined,
         utils.prettyMap(indent),
       );
     }
     if (this.content.length) {
       output += await utils.joinAllAsync(
         this.content,
-        null,
+        undefined,
         utils.prettyMap(indent),
       );
     }
@@ -114,7 +114,7 @@ export default class Stylesheet implements Node {
 
     const kwKFM: {[vendorPrefix: string]: {[keyframeName: string]: Node}} = {};
     Object.keys(keyframeMap).forEach(prefix => {
-      const m = {};
+      const m: {[keyframe: string]: Node} = {};
       Object.keys(keyframeMap[prefix]).forEach(name => {
         m[name] = this.content[keyframeMap[prefix][name]];
       });

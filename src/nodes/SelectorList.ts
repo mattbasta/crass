@@ -1,4 +1,3 @@
-import * as objects from '../objects';
 import * as optimization from '../optimization';
 import * as utils from '../utils';
 import {Node, Selector, OptimizeKeywords} from './Node';
@@ -45,7 +44,7 @@ export default class SelectorList implements Node {
       a.toString() < b.toString() ? -1 : 1,
     );
     // OPT: Remove duplicate selectors in a selector list.
-    this.selectors = utils.uniq(null, this.selectors);
+    this.selectors = utils.uniq(utils.stringIdentity, this.selectors);
 
     this.selectors = this.selectors.filter(x => x);
     if (!this.selectors.length) {

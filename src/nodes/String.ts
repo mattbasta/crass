@@ -1,4 +1,4 @@
-import {StringableExpression} from './Node';
+import {StringableExpression, OptimizeKeywords} from './Node';
 
 const keywords = ['cursive', 'fantasy', 'monospace', 'sans-serif', 'serif'];
 
@@ -34,7 +34,7 @@ export default class String implements StringableExpression {
     return this.toString();
   }
 
-  async optimize(kw) {
+  async optimize(kw: OptimizeKeywords) {
     if (
       kw.declarationName === 'font-family' &&
       /[\w ]/.exec(this.value) &&

@@ -1,6 +1,6 @@
-import colorConvert = require('color-convert');
+import * as colorConvert from 'color-convert';
 
-import * as colorOptimizer from '../optimizations/color';
+import colorOptimizer from '../optimizations/color';
 import * as colors from '../colors';
 import {Expression, OptimizeKeywords} from './Node';
 
@@ -27,7 +27,7 @@ export default class HexColor implements Expression {
 
     if (this.color.length === 5 || this.color.length === 9) {
       const unalphaed = this.color.substr(1, this.color.length === 5 ? 3 : 6);
-      const applier = funcName => colorConvert.hex[funcName](unalphaed);
+      const applier = (funcName: string) => colorConvert.hex[funcName](unalphaed);
       const alpha =
         this.color.length === 5
           ? parseInt(this.color.substr(-1), 16) / 15

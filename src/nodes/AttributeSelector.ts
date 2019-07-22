@@ -21,7 +21,7 @@ export default class AttributeSelector implements Selector {
     if (this.value) {
       let value = this.value.toString();
       if (typeof this.value !== 'string') {
-        const rawValue = this.value.asRawString();
+        const rawValue = this.value.asRawString(true);
         const newValue = rawValue.match(/^[a-z][\w\\]*$/i)
           ? rawValue
           : this.value.asRawString();

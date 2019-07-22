@@ -340,7 +340,11 @@ export default class Func implements NodeExpression {
     });
 
     chain = chain.filter(x => x[1]);
-    this.content = new objects.Expression(chain).optimize(kw);
+    const content = await new objects.Expression(chain).optimize(kw);
+    if (!content) {
+      return null;
+    }
+    this.content = content;
     return this;
   }
 

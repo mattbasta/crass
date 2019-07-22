@@ -28,7 +28,7 @@ export default class URI implements StringableExpression {
     return new objects.String(this.uri);
   }
 
-  asRawString() {
+  asRawString(escaped?: boolean) {
     if (this.uri instanceof objects.String) {
       return this.uri.value.trim();
     }

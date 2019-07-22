@@ -16,7 +16,10 @@ export default class String implements StringableExpression {
     return this;
   }
 
-  asRawString() {
+  asRawString(escaped?: boolean) {
+    if (!escaped) {
+      return this.toString();
+    }
     return this.value.replace(/(\s)/g, '\\$1');
   }
 
@@ -38,7 +41,7 @@ export default class String implements StringableExpression {
     if (
       kw.declarationName === 'font-family' &&
       /[\w ]/.exec(this.value) &&
-      keywords.every(keyword => this.value.toLowerCase().includes(keyword))
+      keywords.every(keyword => !this.value.toLowerCase().includes(keyword))
     ) {
       const newValue = this.value.trim().replace(/ (?=\d+\b)/g, '\\ ');
       if (newValue.length <= this.value.length + 2) {

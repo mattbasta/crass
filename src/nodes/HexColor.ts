@@ -1,6 +1,6 @@
 import * as colorConvert from 'color-convert';
 
-import colorOptimizer from '../optimizations/color';
+import colorOptimizer, {shortenHexColor} from '../optimizations/color';
 import * as colors from '../colors';
 import {Expression, OptimizeKeywords} from './Node';
 
@@ -27,7 +27,10 @@ export default class HexColor implements Expression {
 
     if (this.color.length === 5 || this.color.length === 9) {
       const unalphaed = this.color.substr(1, this.color.length === 5 ? 3 : 6);
-      const applier = (funcName: string) => colorConvert.hex[funcName](unalphaed);
+      const applier = (funcName: keyof (typeof colorConvert.hex)) =>
+        (colorConvert.hex[funcName] as (
+          color: string,
+        ) => [number, number, number])(unalphaed);
       const alpha =
         this.color.length === 5
           ? parseInt(this.color.substr(-1), 16) / 15
@@ -36,7 +39,7 @@ export default class HexColor implements Expression {
     }
 
     // OPT: Shorten hex colors
-    this.color = colorOptimizer.shortenHexColor(this.color);
+    this.color = shortenHexColor(this.color);
     // OPT: Convert hex -> name when possible.
     if (this.color in colors.HEX_TO_COLOR) {
       return colors.HEX_TO_COLOR[this.color];
@@ -45,9 +48,6 @@ export default class HexColor implements Expression {
     return this;
   }
 
-  /**
-   * @return {void}
-   */
   stripColorAlpha() {
     if (this.color.length === 5 && this.color[4] === 'f') {
       this.color = this.color.substr(0, 4);

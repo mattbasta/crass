@@ -15,7 +15,7 @@ export default class Import implements Node {
 
   toString() {
     return `@import ${this.href.asString()}${
-      this.media ? ` ${this.media.join(',')}` : ''
+      this.media.length ? ` ${this.media.join(',')}` : ''
     };`;
   }
 

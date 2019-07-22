@@ -19,7 +19,7 @@ export interface Node {
 export interface Expression extends Node {}
 export interface StringableExpression extends Expression {
   asString(): StringableExpression;
-  asRawString(): string;
+  asRawString(escaped?: boolean): string;
 }
 export interface NumberableExpression extends Expression {
   asNumber(): number;

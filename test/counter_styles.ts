@@ -7,7 +7,7 @@ describe('@counter-styles', () => {
     await parityFilled('@counter-style foo{$$}');
   });
   it('should optimize away empty counter styles', async () => {
-    assert.ok(await optimized('@counter-style foo{}'));
+    assert.ok(!await optimized('@counter-style foo{}'));
   });
 
   it('should optimize declarations', async () => {

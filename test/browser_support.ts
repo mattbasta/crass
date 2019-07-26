@@ -6,22 +6,22 @@ import * as browser_support from '../src/browser_support';
 
 describe('parseBrowser', () => {
   it('should parse basic values', () => {
-    var chrome23 = browser_support.parseBrowser('chr23');
+    const chrome23 = browser_support.parseBrowser('chr23');
     assert.equal(chrome23.browser, 'chrome');
     assert.equal(chrome23.version, 23);
 
-    var ie9 = browser_support.parseBrowser('ie9');
+    const ie9 = browser_support.parseBrowser('ie9');
     assert.equal(ie9.browser, 'ie');
     assert.equal(ie9.version, 9);
   });
 });
 
 function getMins(str: string) {
-  var kw = {browser_min: {}};
+  const kw = {browser_min: {}};
   str
     .split(',')
     .map(browser_support.parseBrowser)
-    .forEach((plat) => {
+    .forEach(plat => {
       kw.browser_min[plat.browser] = plat.version;
     });
   return kw;
@@ -47,7 +47,7 @@ describe('supportsDeclaration', () => {
     );
   });
   it('should return true when the declaration is recognized but all browsers support the decl', async () => {
-    var kw = getMins('ie1,fx1,chr1');
+    const kw = getMins('ie1,fx1,chr1');
     assert(browser_support.supportsDeclaration('-moz-border-radius', kw));
     assert.equal(
       await optimized('a{-moz-border-radius:0}', kw),
@@ -55,22 +55,22 @@ describe('supportsDeclaration', () => {
     );
   });
   it('should return false when at least one supported browser uses the feature', () => {
-    var kw = getMins('ie5,fx10');
+    const kw = getMins('ie5,fx10');
     assert(browser_support.supportsDeclaration('-foo-bar', kw));
   });
   it('should return false when the declaration is unrecognized by the selected browsers', async () => {
-    var kw = getMins('ie1,fx5,chr1');
+    const kw = getMins('ie1,fx5,chr1');
     assert(!browser_support.supportsDeclaration('-moz-border-radius', kw));
-    assert.equal(await optimized('a{-moz-border-radius:0}'), '');
+    assert.equal(await optimized('a{-moz-border-radius:0}', kw), '');
     assert.equal(
-      optimized('a{-moz-border-radius:0;foo:bar}', kw),
+      await optimized('a{-moz-border-radius:0;foo:bar}', kw),
       'a{foo:bar}',
     );
   });
 
   it('should handle ie5/6 hacks', () => {
-    var oldIE = getMins('ie1,fx1,chr1');
-    var newIE = getMins('ie7,fx1,chr1');
+    const oldIE = getMins('ie1,fx1,chr1');
+    const newIE = getMins('ie7,fx1,chr1');
     assert(browser_support.supportsDeclaration('_font-face', oldIE));
     assert(!browser_support.supportsDeclaration('_font-face', newIE));
   });

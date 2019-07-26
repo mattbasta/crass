@@ -1,7 +1,9 @@
 import * as objects from '../objects';
-import * as optimization from '../optimization';
+import optimizeList from '../optimizations/optimizeList';
+import try_ from '../optimizations/try';
 import * as utils from '../utils';
 import {Node, OptimizeKeywords} from './Node';
+import optimizeBlocks from '../optimizations/optimizeBlocks';
 
 export default class Stylesheet implements Node {
   charset: objects.Charset;
@@ -69,19 +71,19 @@ export default class Stylesheet implements Node {
 
   async optimize(kw: OptimizeKeywords = {}) {
     if (this.charset) {
-      this.charset = (await optimization.try_(
+      this.charset = (await try_(
         this.charset,
         kw,
       )) as objects.Charset;
     }
     if (this.imports.length) {
-      this.imports = (await optimization.optimizeList(
+      this.imports = (await optimizeList(
         this.imports,
         kw,
       )) as Array<objects.Import>;
     }
     if (this.namespaces.length) {
-      this.namespaces = (await optimization.optimizeList(
+      this.namespaces = (await optimizeList(
         this.namespaces,
         kw,
       )) as Array<objects.Namespace>;
@@ -122,7 +124,7 @@ export default class Stylesheet implements Node {
     });
     kw.keyframeMap = kwKFM;
 
-    this.content = await optimization.optimizeBlocks(this.content, kw);
+    this.content = await optimizeBlocks(this.content, kw);
 
     return this;
   }

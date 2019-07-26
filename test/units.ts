@@ -1,8 +1,8 @@
 import * as assert from 'assert';
 import {optimized} from './_helpers';
 
-var parseString = function(data, o1) {
-  var params = {};
+const parseString = function(data, o1) {
+  const params = {};
   if (o1) params.o1 = true;
   return crass
     .parse(data)

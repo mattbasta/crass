@@ -23,10 +23,7 @@ export default class MathSum implements Expression {
     output += ' ';
 
     if (this.term instanceof MathSum) {
-      output +=
-        this.operator === '-'
-          ? this.term.toStringWithFlippedSign()
-          : this.term.toString();
+      output += this.term.toStringWithFlippedSign();
     } else {
       output += this.term.toString();
     }

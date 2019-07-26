@@ -1,15 +1,15 @@
-import * as objects from '../objects';
-import * as optimization from '../optimization';
-import * as utils from '../utils';
 import {Node, OptimizeKeywords} from './Node';
+import * as objects from '../objects';
+import optimizeList from '../optimizations/optimizeList';
+import * as utils from '../utils';
 
 export default class MediaQuery implements Node {
-  type: string | null;
+  type: objects.Identifier | null;
   prefix: string | null;
   expression: Array<objects.MediaExpression>;
 
   constructor(
-    type: string | null,
+    type: objects.Identifier | null,
     prefix: string | null,
     expression: Array<objects.MediaExpression>,
   ) {
@@ -48,7 +48,11 @@ export default class MediaQuery implements Node {
     }
     if (this.expression.length) {
       output.push(
-        await utils.joinAllAsync(this.expression, ' and ', utils.prettyMap(indent)),
+        await utils.joinAllAsync(
+          this.expression,
+          ' and ',
+          utils.prettyMap(indent),
+        ),
       );
     }
     return output.join(' ');
@@ -58,8 +62,8 @@ export default class MediaQuery implements Node {
     // TODO(opt): sort expressions
     // TODO(opt): filter bunk expressions
     // OPT: Remove duplicate media expressions
-    this.expression = utils.uniq(null, this.expression);
-    this.expression = await optimization.optimizeList(this.expression, kw);
+    this.expression = utils.uniq(utils.stringIdentity, this.expression);
+    this.expression = await optimizeList(this.expression, kw);
 
     // OPT: Remove unsupported media queries.
     if (kw.browser_min && kw.browser_min.ie >= 10) {

@@ -1,5 +1,3 @@
-import * as assert from 'assert';
-
 import * as crass from '../src';
 import {OptimizeKeywords} from '../src/nodes/Node';
 
@@ -47,4 +45,14 @@ export async function parityOptSaveIE(
 }
 export async function parityFilled(data: string, filler: string = 'a:b;c:d') {
   return parity(data.replace(/\$\$/g, filler));
+}
+export async function parityExpFilled(
+  data: string,
+  expectation: string,
+  filler: string = 'a:b;c:d',
+) {
+  return parity(
+    data.replace(/\$\$/g, filler),
+    expectation.replace(/\$\$/g, filler),
+  );
 }

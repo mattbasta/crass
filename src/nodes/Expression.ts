@@ -1,7 +1,28 @@
 import * as colors from '../colors';
-import * as objects from '../objects';
-import * as optimization from '../optimization';
+import expandQuadList from '../optimizations/expandQuadList';
 import {Node, Expression as NodeExpression, OptimizeKeywords} from './Node';
+import * as objects from '../objects';
+import try_ from '../optimizations/try';
+
+const noneables = {
+  border: 1,
+  'border-top': 1,
+  'border-right': 1,
+  'border-bottom': 1,
+  'border-left': 1,
+  outline: 1,
+  background: 1,
+};
+const quadLists = [
+  'border-color',
+  '-webkit-border-radius',
+  '-moz-border-radius',
+  'border-radius',
+  'border-style',
+  'border-width',
+  'margin',
+  'padding',
+];
 
 function processQuadList(list: Array<ChainLink>): Array<ChainLink> {
   const keys = list.map(v => v[1].toString());
@@ -73,7 +94,7 @@ export default class Expression implements Node {
         if (typeof v[1] === 'string') {
           return v;
         }
-        return [v[0], await optimization.try_(v[1], kw)] as ChainLink;
+        return [v[0], await try_(v[1], kw)] as ChainLink;
       }),
     )).filter(v => !!v[1]);
     if (!this.chain.length) {
@@ -85,7 +106,7 @@ export default class Expression implements Node {
     // OPT: Try to minify lists of lengths.
     // e.g.: `margin:0 0 0 0` -> `margin:0`
     if (
-      kw.declarationName in optimization.quadLists &&
+      quadLists.includes(kw.declarationName) &&
       this.chain.length > 1 &&
       this.chain.length < 5 &&
       this.chain.every(c => c[0] !== '/')
@@ -96,10 +117,8 @@ export default class Expression implements Node {
       this.chain.some(x => x[0] === '/')
     ) {
       const slashIdx = this.findSlash();
-      const leftChain = optimization.expandQuadList(
-        this.chain.slice(0, slashIdx),
-      );
-      const rightChain = optimization.expandQuadList(
+      const leftChain = expandQuadList(this.chain.slice(0, slashIdx));
+      const rightChain = expandQuadList(
         this.chain.slice(slashIdx).map(x => [null, x[1]]),
       );
 
@@ -197,7 +216,7 @@ export default class Expression implements Node {
     }
 
     if (
-      kw.declarationName in optimization.noneables &&
+      kw.declarationName in noneables &&
       this.chain.length === 1 &&
       this.chain[0][1].toString() === 'none'
     ) {

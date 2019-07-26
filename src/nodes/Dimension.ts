@@ -1,6 +1,6 @@
 import {NumberableExpression, OptimizeKeywords} from './Node';
 import * as objects from '../objects';
-import * as optimization from '../optimization';
+import unit from '../optimizations/unit';
 
 const LENGTH_UNITS = new Set([
   'cap',
@@ -74,11 +74,11 @@ export default class Dimension implements NumberableExpression {
       kw.func !== 'hsl' &&
       kw.func !== 'hsla' &&
       Math.abs(this.number.value) === 0 &&
-      !(kw.declarationName in declsToNotOptimizePercents) &&
+      !(kw.declarationName! in declsToNotOptimizePercents) &&
       LENGTH_UNITS.has(this.unit)
     ) {
       return this.number;
     }
-    return optimization.unit(this, kw);
+    return unit(this, kw);
   }
 }

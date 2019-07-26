@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var version = require('../package.json').version;
+const version = require('../package.json').version;
 
 function help() {
     console.log([
@@ -23,7 +23,7 @@ function help() {
     ].join('\n'));
 }
 
-var fs = require('fs');
+const fs = require('fs');
 
 function tryRequire(module) {
     try {
@@ -33,11 +33,11 @@ function tryRequire(module) {
     }
 }
 
-var browser_support = tryRequire('browser_support');
-var utils = tryRequire('utils');
-var opts = utils.opts(process.argv.slice(3));
+const browser_support = tryRequire('browser_support');
+const utils = tryRequire('utils');
+const opts = utils.opts(process.argv.slice(3));
 
-var crass = tryRequire('');
+const crass = tryRequire('');
 
 if (process.argv.length < 3) {
     help();
@@ -52,13 +52,13 @@ fs.readFile(process.argv[2], function(err, data) {
         process.exit(1);
     }
 
-    var parsed = crass.parse(data);
+    const parsed = crass.parse(data);
 
-    var kw = {};
+    const kw = {};
     if ('min' in opts) {
-        var minPlatsUnparsed = opts.min.split(',');
+        const minPlatsUnparsed = opts.min.split(',');
         if (minPlatsUnparsed.length) {
-            var minPlats = minPlatsUnparsed.map(browser_support.parseBrowser);
+            const minPlats = minPlatsUnparsed.map(browser_support.parseBrowser);
             kw.browser_min = {};
             minPlats.forEach(function(plat) {
                 kw.browser_min[plat.browser] = plat.version;

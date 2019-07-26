@@ -1,13 +1,18 @@
-import * as optimization from '../../optimization';
-import {Selector, OptimizeKeywords} from '../Node';
+import {
+  OptimizeKeywords,
+  DepthSelector,
+  TerminalSelector,
+  TreeSelector,
+} from '../Node';
+import try_ from '../../optimizations/try';
 
 export default function chainedSelectorFactory(name: string, operator: string) {
-  return class implements Selector {
+  return class implements DepthSelector {
     operator: string;
-    ancestor: Selector;
-    descendant: Selector;
+    ancestor: TerminalSelector;
+    descendant: TreeSelector;
 
-    constructor(ancestor: Selector, descendant: Selector) {
+    constructor(ancestor: TerminalSelector, descendant: TreeSelector) {
       this.ancestor = ancestor;
       this.descendant = descendant;
       this.operator = operator;
@@ -27,13 +32,13 @@ export default function chainedSelectorFactory(name: string, operator: string) {
     }
 
     async optimize(kw: OptimizeKeywords) {
-      const ancestor = await optimization.try_(this.ancestor, kw);
+      const ancestor = await try_(this.ancestor, kw);
       if (!ancestor) {
         return null;
       }
       this.ancestor = ancestor;
 
-      const descendant = await optimization.try_(this.descendant, kw);
+      const descendant = await try_(this.descendant, kw);
       if (!descendant) {
         return null;
       }

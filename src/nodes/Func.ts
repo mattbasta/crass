@@ -1,14 +1,14 @@
 import * as colorConvert from 'color-convert';
 
 import * as colorOptimizer from '../optimizations/color';
-import * as objects from '../objects';
-import * as optimization from '../optimization';
-import * as utils from '../utils';
 import {
   Expression as NodeExpression,
   OptimizeKeywords,
   NumberableExpression,
 } from './Node';
+import * as objects from '../objects';
+import try_ from '../optimizations/try';
+import * as utils from '../utils';
 
 const recognizedColorFuncs: {
   [func: string]: {minArgs: number; maxArgs: number};
@@ -67,7 +67,9 @@ export default class Func implements NodeExpression {
   }
 
   async pretty(indent: number) {
-    return `${this.name}(${this.content ? this.content.pretty(indent) : ''})`;
+    return `${this.name}(${
+      this.content ? await this.content.pretty(indent) : ''
+    })`;
   }
 
   async optimize(kw: OptimizeKeywords) {
@@ -77,10 +79,7 @@ export default class Func implements NodeExpression {
     const oldkwf = kw.func;
     kw.func = this.name;
     if (this.content) {
-      this.content = (await optimization.try_(
-        this.content,
-        kw,
-      )) as objects.Expression;
+      this.content = (await try_(this.content, kw)) as objects.Expression;
     } else if (this.name.indexOf('linear-gradient') !== -1) {
       return null;
     }
@@ -383,7 +382,7 @@ export default class Func implements NodeExpression {
       ) {
         return;
       }
-      var isFinal = idx === segments.length - 1;
+      const isFinal = idx === segments.length - 1;
       if (!lastStop) {
         lastStop = group[1][1];
         if (isFinal) {

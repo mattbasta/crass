@@ -1,6 +1,6 @@
 import * as browserSupport from '../browser_support';
 import * as objects from '../objects';
-import * as optimization from '../optimization';
+import try_ from '../optimizations/try';
 import {OptimizeKeywords} from './Node';
 
 export default class Declaration {
@@ -114,7 +114,7 @@ export default class Declaration {
 
     kw.declarationName = this.ident.toLowerCase();
 
-    this.expr = (await optimization.try_(this.expr, kw)) as objects.Expression;
+    this.expr = (await try_(this.expr, kw)) as objects.Expression;
     if (!this.expr) {
       return null;
     }

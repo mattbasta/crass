@@ -7,10 +7,10 @@ describe('merge and override', () => {
     assert.equal(
       await optimized(
         `
-            a {
-                padding-bottom: bottom !important;
-                padding: 0 1 2 3;
-            }
+        a {
+            padding-bottom: bottom !important;
+            padding: 0 1 2 3;
+        }
         `,
         {o1: true},
       ),
@@ -19,11 +19,11 @@ describe('merge and override', () => {
     assert.equal(
       await optimized(
         `
-            a {
-                padding: 0 1 2 3;
-                padding-bottom: bottom !important;
-            }
-            `,
+        a {
+            padding: 0 1 2 3;
+            padding-bottom: bottom !important;
+        }
+        `,
         {o1: true},
       ),
       'a{padding:0 1 2 3;padding-bottom:bottom!important}',
@@ -31,13 +31,13 @@ describe('merge and override', () => {
     assert.equal(
       await optimized(
         `
-            a {
-                padding: 0 1 2 3;
-            }
-            a {
-                padding-bottom: bottom !important;
-            }
-            `,
+        a {
+            padding: 0 1 2 3;
+        }
+        a {
+            padding-bottom: bottom !important;
+        }
+        `,
         {o1: true},
       ),
       'a{padding:0 1 2 3;padding-bottom:bottom!important}',
@@ -48,11 +48,11 @@ describe('merge and override', () => {
     assert.equal(
       await optimized(
         `
-            a {
-                padding: 0 1 2 3;
-                padding-bottom: bottom;
-            }
-            `,
+        a {
+            padding: 0 1 2 3;
+            padding-bottom: bottom;
+        }
+        `,
         {o1: true},
       ),
       'a{padding:0 1 bottom 3}',
@@ -63,13 +63,13 @@ describe('merge and override', () => {
     assert.equal(
       await optimized(
         `
-            a {
-                padding: 0 1 2 3;
-            }
-            a {
-                padding-bottom: bottom;
-            }
-            `,
+        a {
+            padding: 0 1 2 3;
+        }
+        a {
+            padding-bottom: bottom;
+        }
+        `,
         {o1: true},
       ),
       'a{padding:0 1 bottom 3}',
@@ -80,13 +80,13 @@ describe('merge and override', () => {
     assert.equal(
       await optimized(
         `
-            .box {
-                margin: 0 !important;
-            }
-            .box {
-                margin: 1px;
-            }
-            `,
+        .box {
+            margin: 0 !important;
+        }
+        .box {
+            margin: 1px;
+        }
+        `,
         {o1: true},
       ),
       '.box{margin:0!important}',
@@ -94,11 +94,11 @@ describe('merge and override', () => {
     assert.equal(
       await optimized(
         `
-            .box {
-                margin: 0 !important;
-                margin-top: 1px;
-            }
-            `,
+        .box {
+            margin: 0 !important;
+            margin-top: 1px;
+        }
+        `,
         {o1: true},
       ),
       '.box{margin:0!important}',
@@ -106,11 +106,11 @@ describe('merge and override', () => {
     assert.equal(
       await optimized(
         `
-            .box {
-                margin-top: 1px;
-                margin: 0 !important;
-            }
-            `,
+        .box {
+            margin-top: 1px;
+            margin: 0 !important;
+        }
+        `,
         {o1: true},
       ),
       '.box{margin:0!important}',
@@ -121,11 +121,11 @@ describe('merge and override', () => {
     assert.equal(
       await optimized(
         `
-            .box {
-                margin: 0;
-                margin-top: 1px !important;
-            }
-            `,
+        .box {
+            margin: 0;
+            margin-top: 1px !important;
+        }
+        `,
         {o1: true},
       ),
       '.box{margin:0;margin-top:1px!important}',
@@ -133,11 +133,11 @@ describe('merge and override', () => {
     assert.equal(
       await optimized(
         `
-            .box {
-                margin-top: 1px !important;
-                margin: 0;
-            }
-            `,
+        .box {
+            margin-top: 1px !important;
+            margin: 0;
+        }
+        `,
         {o1: true},
       ),
       '.box{margin:0;margin-top:1px!important}',
@@ -148,12 +148,12 @@ describe('merge and override', () => {
     assert.equal(
       await optimized(
         `
-            .box {
-                margin: 0 !important;
-                margin-left: 2px !important;
-                margin-top: 1px;
-            }
-            `,
+        .box {
+            margin: 0 !important;
+            margin-left: 2px !important;
+            margin-top: 1px;
+        }
+        `,
         {o1: true},
       ),
       '.box{margin:0 0 0 2px!important}',
@@ -161,12 +161,12 @@ describe('merge and override', () => {
     assert.equal(
       await optimized(
         `
-            .box {
-                margin-top: 1px;
-                margin-left: 2px !important;
-                margin: 0 !important;
-            }
-            `,
+        .box {
+            margin-top: 1px;
+            margin-left: 2px !important;
+            margin: 0 !important;
+        }
+        `,
         {o1: true},
       ),
       '.box{margin:0!important}', // margin-left is overriden by the shorthand "naturally"
@@ -177,10 +177,10 @@ describe('merge and override', () => {
     assert.equal(
       await optimized(
         `
-            a { left: 0 !important; }
-            div { color: red; }
-            a { left: 1px; }
-            `,
+        a { left: 0 !important; }
+        div { color: red; }
+        a { left: 1px; }
+        `,
         {o1: true},
       ),
       'a{left:0!important}div{color:red}a{left:1px}',

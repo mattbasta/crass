@@ -1,13 +1,13 @@
 import * as objects from '../objects';
-import * as optimization from '../optimization';
 import * as utils from '../utils';
 import {Node, OptimizeKeywords} from './Node';
+import optimizeBlocks from '../optimizations/optimizeBlocks';
 
 export default class Page {
-  name: string;
+  name: objects.Identifier;
   content: Array<Node>;
 
-  constructor(name: string, content: Array<Node>) {
+  constructor(name: objects.Identifier, content: Array<Node>) {
     this.name = name;
     this.content = content;
   }
@@ -49,7 +49,7 @@ export default class Page {
   }
 
   async optimize(kw: OptimizeKeywords) {
-    this.content = await optimization.optimizeBlocks(this.content, kw);
+    this.content = await optimizeBlocks(this.content, kw);
     return this;
   }
 }

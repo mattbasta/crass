@@ -17,7 +17,12 @@ rules.
 
 */
 
-import {Node, Selector} from '../nodes/Node';
+import {
+  Node,
+  TreeSelector,
+  DepthSelector,
+  TerminalSelector,
+} from '../nodes/Node';
 import * as objects from '../objects';
 
 function anyBetween<T>(
@@ -51,35 +56,51 @@ function manySome<T>(
   return false;
 }
 
-const isRuleset = (item: Node) => item instanceof objects.Ruleset;
-const isMediaQuery = (item: Node) => item instanceof objects.Media;
-const isIDSelector = (item: Node) => item instanceof objects.IDSelector;
-const isAttributeSelector = (item: Node) =>
+const isRuleset = (item: Node): item is objects.Ruleset =>
+  item instanceof objects.Ruleset;
+const isMediaQuery = (item: Node): item is objects.Media =>
+  item instanceof objects.Media;
+const isIDSelector = (item: Node): item is objects.IDSelector =>
+  item instanceof objects.IDSelector;
+const isAttributeSelector = (item: Node): item is objects.AttributeSelector =>
   item instanceof objects.AttributeSelector;
-const isPseudoElementSelector = (item: Node) =>
+const isPseudoElementSelector = (
+  item: Node,
+): item is objects.PseudoElementSelector =>
   item instanceof objects.PseudoElementSelector;
-const isPseudoClassSelector = (item: Node) =>
+const isPseudoClassSelector = (
+  item: Node,
+): item is objects.PseudoClassSelector =>
   item instanceof objects.PseudoClassSelector;
 
-function normalizeSelector(selector: objects.SelectorList | Selector) {
+function normalizeSelector(
+  selector: objects.SelectorList | TreeSelector,
+): Array<TreeSelector> {
   return selector instanceof objects.SelectorList
     ? selector.selectors
     : [selector];
 }
 
-function getLastInSelectorChain(selector: objects.SelectorList | Selector) {
+function getLastInSelectorChain(
+  selector: objects.SelectorList | TreeSelector,
+): TerminalSelector {
   if (selector instanceof objects.SimpleSelector) return selector;
-  return getLastInSelectorChain(selector.descendant);
+  return getLastInSelectorChain((selector as DepthSelector).descendant);
+}
+
+function xor<T>(a: T | null, b: T | null): boolean;
+function xor(a: boolean, b: boolean) {
+  return (a || b) && !(a && b);
 }
 
 const mutuallyExclusiveAttrSelectors = ['=', '|=', '^=', '$='];
 
 export function canSelectorsEverTouchSameElement(
-  selX: Array<Selector>,
-  selY: Array<Selector>,
+  fullX: Array<TreeSelector>,
+  fullY: Array<TreeSelector>,
 ) {
-  selX = selX.map(getLastInSelectorChain);
-  selY = selY.map(getLastInSelectorChain);
+  const selX = fullX.map(getLastInSelectorChain);
+  const selY = fullY.map(getLastInSelectorChain);
 
   // TODO: Look at ID usage elsewhere in the selector. You might find
   // something like this:
@@ -88,9 +109,9 @@ export function canSelectorsEverTouchSameElement(
   // This otherwise looks (based on the last element in the selector) like
   // they might match, but the #foo usage tells otherwise.
 
-  return manySome(selX, selY, (x, y) => {
-    x = x.conditions;
-    y = y.conditions;
+  return manySome(selX, selY, (xSel, ySel) => {
+    const x = xSel.conditions;
+    const y = ySel.conditions;
 
     const xFirst = x[0];
     const yFirst = y[0];
@@ -116,8 +137,9 @@ export function canSelectorsEverTouchSameElement(
       // TODO: There's a lot of other combinations that could be mutually
       // exclusive. `[x=abc]` and `[x^=b]` could be determined to never
       // match, for instance.
-      return (
+      return Boolean(
         x.ident.toString() === y.ident.toString() &&
+        x.comparison &&
         x.comparison === y.comparison &&
         mutuallyExclusiveAttrSelectors.includes(x.comparison) &&
         x.value.toString() !== y.value.toString()
@@ -125,10 +147,12 @@ export function canSelectorsEverTouchSameElement(
     });
     if (attrTest) return false;
 
-    if (x.find(isPseudoElementSelector) ^ y.find(isPseudoElementSelector))
+    if (xor(x.find(isPseudoElementSelector), y.find(isPseudoElementSelector))) {
       return false;
-    if (x.find(isPseudoClassSelector) ^ y.find(isPseudoClassSelector))
+    }
+    if (xor(x.find(isPseudoClassSelector), y.find(isPseudoClassSelector))) {
       return false;
+    }
 
     // TODO: not() support for classes, attributes
 

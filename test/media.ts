@@ -9,7 +9,7 @@ import {
   parsed,
 } from './_helpers';
 
-var filler = 'a{x:y}';
+const filler = 'a{x:y}';
 const parity = async (data: string) => parityFilled(data, filler);
 
 describe('@media', () => {

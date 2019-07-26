@@ -1,15 +1,15 @@
 import * as objects from '../objects';
-import * as optimization from '../optimization';
 import {OptimizeKeywords} from './Node';
+import try_ from '../optimizations/try';
 
 type IECrap = {slashZero: boolean};
 export default class MediaExpression {
-  descriptor: string;
+  descriptor: objects.Identifier;
   value: objects.Expression | null;
   ieCrap: IECrap;
 
   constructor(
-    descriptor: string,
+    descriptor: objects.Identifier,
     value: objects.Expression | null,
     ieCrap: IECrap,
   ) {
@@ -47,10 +47,7 @@ export default class MediaExpression {
 
   async optimize(kw: OptimizeKeywords) {
     if (this.value) {
-      this.value = (await optimization.try_(
-        this.value,
-        kw,
-      )) as objects.Expression | null;
+      this.value = (await try_(this.value, kw)) as objects.Expression | null;
     }
     return this;
   }

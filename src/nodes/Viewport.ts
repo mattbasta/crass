@@ -1,7 +1,7 @@
 import {Block, OptimizeKeywords} from './Node';
 import * as objects from '../objects';
-import * as optimization from '../optimization';
 import * as utils from '../utils';
+import optimizeDeclarations from '../optimizations/optimizeDeclarations';
 
 export default class Viewport implements Block {
   content: Array<objects.Declaration>;
@@ -49,7 +49,7 @@ export default class Viewport implements Block {
       kw.vendorPrefix = this.vendorPrefix;
     }
 
-    this.content = await optimization.optimizeDeclarations(this.content, kw);
+    this.content = await optimizeDeclarations(this.content, kw);
     kw.vendorPrefix = oldPrefix;
 
     if (!this.content.length) {

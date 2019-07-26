@@ -1,7 +1,7 @@
 import * as objects from '../objects';
-import * as optimization from '../optimization';
 import * as utils from '../utils';
 import {Node, OptimizeKeywords} from './Node';
+import optimizeDeclarations from '../optimizations/optimizeDeclarations';
 
 export default class FontFace implements Node {
   content: Array<objects.Declaration>;
@@ -28,7 +28,7 @@ export default class FontFace implements Node {
   }
 
   async optimize(kw: OptimizeKeywords) {
-    this.content = await optimization.optimizeDeclarations(this.content, kw);
+    this.content = await optimizeDeclarations(this.content, kw);
     if (!this.content.length) {
       return null;
     }

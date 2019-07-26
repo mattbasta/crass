@@ -1,14 +1,14 @@
 import * as objects from '../objects';
-import * as optimization from '../optimization';
 import * as utils from '../utils';
 import {OptimizeKeywords} from './Node';
+import optimizeBlocks from '../optimizations/optimizeBlocks';
 
 export default class FontFeatureValues {
-  fontName: string;
+  fontName: objects.Identifier;
   content: Array<objects.FontFeatureValuesBlock>;
 
   constructor(
-    fontName: string,
+    fontName: objects.Identifier,
     content: Array<objects.FontFeatureValuesBlock>,
   ) {
     this.fontName = fontName;
@@ -36,7 +36,7 @@ export default class FontFeatureValues {
   }
 
   async optimize(kw: OptimizeKeywords) {
-    this.content = await optimization.optimizeBlocks(this.content, kw);
+    this.content = await optimizeBlocks(this.content, kw);
     if (!this.content.length) {
       return null;
     }

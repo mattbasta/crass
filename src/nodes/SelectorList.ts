@@ -1,15 +1,15 @@
-import * as optimization from '../optimization';
+import {Node, OptimizeKeywords, TreeSelector} from './Node';
+import optimizeList from '../optimizations/optimizeList';
 import * as utils from '../utils';
-import {Node, Selector, OptimizeKeywords} from './Node';
 
 export default class SelectorList implements Node {
-  selectors: Array<Selector>;
+  selectors: Array<TreeSelector>;
 
-  constructor(selectors: Array<Selector>) {
+  constructor(selectors: Array<TreeSelector>) {
     this.selectors = selectors;
   }
 
-  push(selector: Selector) {
+  push(selector: TreeSelector) {
     this.selectors.push(selector);
   }
 
@@ -30,7 +30,7 @@ export default class SelectorList implements Node {
   }
 
   async optimize(kw: OptimizeKeywords) {
-    this.selectors = await optimization.optimizeList(this.selectors, kw);
+    this.selectors = await optimizeList(this.selectors, kw);
 
     // OPT: Ignore `* html` hacks from IE6
     if (!kw.saveie) {

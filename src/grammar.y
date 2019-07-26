@@ -145,8 +145,13 @@ string
 string_or_ident
     : string
         { $$ = $1; }
-    | IDENT
+    | identifier
         { $$ = $1; }
+    ;
+
+identifier
+    : IDENT
+        { $$ = new yy.Identifier($1); }
     ;
 
 string_or_uri
@@ -294,11 +299,11 @@ media_query
     ;
 
 media_query_type
-    : ONLY junk IDENT junk optional_media_query_expression
+    : ONLY junk identifier junk optional_media_query_expression
         { $$ = new yy.MediaQuery($3, 'only', $5); $$.range = @$; }
-    | NOT junk IDENT junk optional_media_query_expression
+    | NOT junk identifier junk optional_media_query_expression
         { $$ = new yy.MediaQuery($3, 'not', $5); $$.range = @$; }
-    | IDENT junk optional_media_query_expression
+    | identifier junk optional_media_query_expression
         { $$ = new yy.MediaQuery($1, null, $3); $$.range = @$; }
     ;
 
@@ -322,7 +327,7 @@ media_query_expr_and
     ;
 
 media_expr
-    : '(' junk IDENT junk media_expr_value junk media_expr_slashzero ')' junk
+    : '(' junk identifier junk media_expr_value junk media_expr_slashzero ')' junk
         { $$ = new yy.MediaExpression($3, $5, $7); $$.range = @$; }
     ;
 
@@ -342,7 +347,7 @@ media_expr_slashzero
 
 page_block
     : BLOCK_PAGE junk page_name '{' junk page_declaration_list '}'
-        { $$ = new yy.Page($3, $6); $$.range = @$; }
+        { $$ = new yy.Page(new yy.Identifier($3), $6); $$.range = @$; }
     ;
 
 page_name
@@ -423,11 +428,11 @@ font_face_block
 
 font_feature_values_block
     : BLOCK_FONT_FEATURE_VALUES junk font_feature_name '{' junk font_feature_values_contents '}'
-        { $$ = new yy.FontFeatureValues($3, $6); $$.range = @$; }
+        { $$ = new yy.FontFeatureValues(new yy.Identifier($3), $6); $$.range = @$; }
     ;
 
 font_feature_name
-    : IDENT junk font_feature_name_extended
+    : identifier junk font_feature_name_extended
         { $$ = $1 + $3; }
     ;
 
@@ -466,9 +471,9 @@ font_feature_values_content_block
     ;
 
 keyframes_block
-    : BLOCK_KEYFRAMES junk IDENT junk '{' junk keyframe_list '}'
+    : BLOCK_KEYFRAMES junk identifier junk '{' junk keyframe_list '}'
         { $$ = new yy.Keyframes($3, $7); $$.range = @$; }
-    | BLOCK_VENDOR_KEYFRAMES junk IDENT junk '{' junk keyframe_list '}'
+    | BLOCK_VENDOR_KEYFRAMES junk identifier junk '{' junk keyframe_list '}'
         { $$ = new yy.Keyframes($3, $7, $1.substring(1, $1.length - 9)); $$.range = @$; }
     ;
 
@@ -566,7 +571,7 @@ supports_negation_base
     ;
 
 counter_styles_block
-    : BLOCK_COUNTERSTYLE junk IDENT junk block_of_declarations
+    : BLOCK_COUNTERSTYLE junk identifier junk block_of_declarations
         { $$ = new yy.CounterStyle($3, $5); $$.range = @$; }
     ;
 

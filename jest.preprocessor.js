@@ -8,7 +8,6 @@ module.exports = {
         src,
         {...tsConfig.compilerOptions, module: 'commonjs'},
         path,
-        [],
       );
     }
     return src;

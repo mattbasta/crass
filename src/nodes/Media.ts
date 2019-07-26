@@ -1,7 +1,8 @@
 import * as objects from '../objects';
-import * as optimization from '../optimization';
+import optimizeList from '../optimizations/optimizeList';
 import * as utils from '../utils';
 import {Node, OptimizeKeywords} from './Node';
+import optimizeBlocks from '../optimizations/optimizeBlocks';
 
 export default class Media {
   media: Array<objects.MediaQuery>;
@@ -46,7 +47,7 @@ export default class Media {
   }
 
   async optimize(kw: OptimizeKeywords) {
-    this.media = (await optimization.optimizeList(this.media, kw)) as Array<
+    this.media = (await optimizeList(this.media, kw)) as Array<
       objects.MediaQuery
     >;
 
@@ -61,7 +62,7 @@ export default class Media {
   }
 
   async optimizeContent(kw: OptimizeKeywords) {
-    this.content = await optimization.optimizeBlocks(this.content, kw);
+    this.content = await optimizeBlocks(this.content, kw);
     if (!this.content.length) {
       return null;
     }

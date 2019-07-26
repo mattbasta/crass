@@ -1,6 +1,6 @@
 import * as objects from '../objects';
-import * as optimization from '../optimization';
 import {Selector, OptimizeKeywords} from './Node';
+import try_ from '../optimizations/try';
 
 export default class NotSelector implements Selector {
   selector: objects.SelectorList;
@@ -18,10 +18,7 @@ export default class NotSelector implements Selector {
   }
 
   async optimize(kw: OptimizeKeywords) {
-    this.selector = (await optimization.try_(
-      this.selector,
-      kw,
-    )) as objects.SelectorList;
+    this.selector = (await try_(this.selector, kw)) as objects.SelectorList;
     return this;
   }
 }

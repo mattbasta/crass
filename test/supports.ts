@@ -2,12 +2,12 @@ import * as assert from 'assert';
 
 import {parityFilled, parse, optimized} from './_helpers';
 
-var filler = '.foo{x:y}';
+const filler = '.foo{x:y}';
 const parity = async (data: string) => parityFilled(data, filler);
 
 describe('@supports', () => {
   it('should parse basic supports block', () => {
-    var parsed = parse('@supports (foo: bar) {a{x:y}}');
+    const parsed = parse('@supports (foo: bar) {a{x:y}}');
     assert.equal(parsed.content.length, 1);
     assert(parsed.content[0].conditionList);
 

@@ -1,6 +1,6 @@
-import * as objects from '../objects';
-import * as optimization from '../optimization';
 import {NumberableExpression, OptimizeKeywords} from './Node';
+import * as objects from '../objects';
+import try_ from '../optimizations/try';
 
 export default class LinearFunction {
   nValue: objects.NValue;
@@ -34,7 +34,7 @@ export default class LinearFunction {
   }
 
   async optimize(kw: OptimizeKeywords) {
-    this.nValue = (await optimization.try_(this.nValue, kw)) as objects.NValue;
+    this.nValue = (await try_(this.nValue, kw)) as objects.NValue;
     return this;
   }
 }

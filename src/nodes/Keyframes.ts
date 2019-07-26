@@ -1,16 +1,17 @@
 import * as browserSupport from '../browser_support';
+import combineList from '../optimizations/combineList';
 import * as objects from '../objects';
-import * as optimization from '../optimization';
+import optimizeList from '../optimizations/optimizeList';
 import * as utils from '../utils';
 import {Block, OptimizeKeywords} from './Node';
 
 export default class Keyframes implements Block {
-  name: string;
+  name: objects.Identifier;
   content: Array<objects.Keyframe>;
   vendorPrefix: string | null;
 
   constructor(
-    name: string,
+    name: objects.Identifier,
     content: Array<objects.Keyframe>,
     vendorPrefix: string | null,
   ) {
@@ -49,18 +50,21 @@ export default class Keyframes implements Block {
 
   async optimize(kw: OptimizeKeywords) {
     // OPT: Remove unsupported keyframes blocks.
-    if (!browserSupport.supportsKeyframe(this.vendorPrefix, kw)) {
+    if (
+      this.vendorPrefix &&
+      !browserSupport.supportsKeyframe(this.vendorPrefix, kw)
+    ) {
       return null;
     }
 
-    kw.insideKeyframes = this.name;
+    kw.insideKeyframes = this.name.value;
 
     if (this.vendorPrefix) {
       kw.vendorPrefix = this.vendorPrefix;
     }
 
     // OPT: Combine keyframes with identical stops.
-    this.content = optimization.combineList(
+    this.content = combineList(
       item => item.stop.toString(),
       (a, b) => new objects.Keyframe(a.stop, a.content.concat(b.content)),
       this.content,
@@ -70,7 +74,7 @@ export default class Keyframes implements Block {
       return a.stop.toString().localeCompare(b.stop.toString());
     });
 
-    this.content = (await optimization.optimizeList(this.content, kw)) as Array<
+    this.content = (await optimizeList(this.content, kw)) as Array<
       objects.Keyframe
     >;
 

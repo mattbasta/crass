@@ -1,6 +1,8 @@
 import * as assert from 'assert';
 
-import {parityFilled, parity, optimized} from './_helpers';
+import {parityExpFilled, optimized} from './_helpers';
+
+const parity = parityExpFilled;
 
 describe('Lowercase', () => {
   it('descriptors', async () => {

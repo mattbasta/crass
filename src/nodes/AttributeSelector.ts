@@ -1,14 +1,14 @@
-import * as optimization from '../optimization';
 import {Selector, StringableExpression, OptimizeKeywords} from './Node';
+import try_ from '../optimizations/try';
 
 export default class AttributeSelector implements Selector {
   ident: Selector;
-  comparison: StringableExpression | null;
+  comparison: string | null;
   value: StringableExpression | string | null;
 
   constructor(
     ident: Selector,
-    comparison: StringableExpression,
+    comparison: string | null,
     value: StringableExpression,
   ) {
     this.ident = ident;
@@ -41,19 +41,13 @@ export default class AttributeSelector implements Selector {
 
   async optimize(kw: OptimizeKeywords) {
     // OPT: Lowercase attribute names.
-    this.ident = (await optimization.try_(
-      this.ident,
-      kw,
-    )) as StringableExpression;
-    if (typeof this.value !== 'string') {
-      this.value = (await optimization.try_(
-        this.value,
-        kw,
-      )) as StringableExpression;
-    }
-
+    this.ident = (await try_(this.ident, kw)) as StringableExpression;
     if (!this.ident) {
       return null;
+    }
+
+    if (typeof this.value !== 'string') {
+      this.value = (await try_(this.value, kw)) as StringableExpression;
     }
 
     return this;

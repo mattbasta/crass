@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import {parityFilled, optimized} from './_helpers';
 
-var filler = 'a{a:b;x:y}';
+const filler = 'a{a:b;x:y}';
 const parity = async (data: string) => parityFilled(data, filler);
 
 describe('@-viewport', () => {

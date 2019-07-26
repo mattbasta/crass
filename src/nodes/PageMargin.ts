@@ -1,7 +1,7 @@
 import * as objects from '../objects';
-import * as optimization from '../optimization';
 import * as utils from '../utils';
 import {OptimizeKeywords} from './Node';
+import optimizeDeclarations from '../optimizations/optimizeDeclarations';
 
 export default class PageMargin {
   margin: string;
@@ -30,7 +30,7 @@ export default class PageMargin {
   }
 
   async optimize(kw: OptimizeKeywords) {
-    this.content = await optimization.optimizeDeclarations(this.content, kw);
+    this.content = await optimizeDeclarations(this.content, kw);
     return this;
   }
 }

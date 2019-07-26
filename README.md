@@ -39,7 +39,7 @@ npm install --save-dev crass
 ## API
 
 ```js
-var crass = require('crass');
+const crass = require('crass');
 
 // Parse any valid CSS stylesheet:
 var parsed = crass.parse('b {font-weight: bold;}');

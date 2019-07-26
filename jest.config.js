@@ -1,6 +1,8 @@
 module.exports = {
   verbose: true,
   testMatch: [
+    '**/src/**.test.ts',
+    '**/src/*/**.test.ts',
     '**/test/**.ts',
     '**/test/**.js',
     '**/test/**/*.ts',
@@ -13,5 +15,5 @@ module.exports = {
   transform: {
     '^.+\\.ts$': '<rootDir>/jest.preprocessor.js',
   },
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  moduleFileExtensions: ['ts', 'js', 'json'],
 };

@@ -1,11 +1,11 @@
-import * as optimization from '../optimization';
+import optimizeList from '../optimizations/optimizeList';
+import {OptimizeKeywords, TerminalSelector, SelectorCondition} from './Node';
 import * as utils from '../utils';
-import {Selector, OptimizeKeywords} from './Node';
 
-export default class SimpleSelector implements Selector {
-  conditions: Array<Selector>;
+export default class SimpleSelector implements TerminalSelector {
+  conditions: Array<SelectorCondition>;
 
-  constructor(conditions: Array<Selector>) {
+  constructor(conditions: Array<SelectorCondition>) {
     this.conditions = conditions;
   }
 
@@ -22,7 +22,7 @@ export default class SimpleSelector implements Selector {
   }
 
   async optimize(kw: OptimizeKeywords) {
-    this.conditions = await optimization.optimizeList(this.conditions, kw);
+    this.conditions = await optimizeList(this.conditions, kw);
 
     if (!this.conditions.length || this.conditions.some(x => x === null)) {
       return null;

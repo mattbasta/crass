@@ -24,6 +24,7 @@ export {
 } from './nodes/FontFeatureValuesBlock';
 export {default as Func} from './nodes/Func';
 export {default as HexColor} from './nodes/HexColor';
+export {default as Identifier} from './nodes/Identifier';
 export {default as IDSelector} from './nodes/IDSelector';
 export {default as IEFilter} from './nodes/IEFilter';
 export {default as Import} from './nodes/Import';

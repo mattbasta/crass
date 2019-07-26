@@ -1,13 +1,13 @@
 import * as objects from '../objects';
-import * as optimization from '../optimization';
 import * as utils from '../utils';
 import {OptimizeKeywords} from './Node';
+import optimizeDeclarations from '../optimizations/optimizeDeclarations';
 
 export default class CounterStyle {
-  name: string;
+  name: objects.Identifier;
   content: Array<objects.Declaration>;
 
-  constructor(name: string, content: Array<objects.Declaration>) {
+  constructor(name: objects.Identifier, content: Array<objects.Declaration>) {
     this.name = name;
     this.content = content;
   }
@@ -34,7 +34,7 @@ export default class CounterStyle {
   }
 
   async optimize(kw: OptimizeKeywords) {
-    this.content = await optimization.optimizeDeclarations(this.content, kw);
+    this.content = await optimizeDeclarations(this.content, kw);
     if (!this.content.length) {
       return null;
     }

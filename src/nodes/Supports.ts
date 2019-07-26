@@ -2,8 +2,8 @@ import {Block, OptimizeKeywords} from './Node';
 import * as objects from '../objects';
 import SupportsConditionList from './SupportsConditionList';
 
-import * as optimization from '../optimization';
 import * as utils from '../utils';
+import optimizeBlocks from '../optimizations/optimizeBlocks';
 
 export default class Supports implements Block {
   conditionList: SupportsConditionList | objects.SupportsCondition;
@@ -42,7 +42,7 @@ export default class Supports implements Block {
     this.conditionList = (await this.conditionList.optimize(
       kw,
     )) as Supports['conditionList'];
-    this.content = optimization.optimizeBlocks(this.content, kw);
+    this.content = await optimizeBlocks(this.content, kw);
     return this;
   }
 }

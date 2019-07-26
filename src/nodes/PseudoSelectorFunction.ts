@@ -1,5 +1,5 @@
-import * as optimization from '../optimization';
 import {Selector, Expression, OptimizeKeywords} from './Node';
+import try_ from '../optimizations/try';
 
 export default class PseudoSelectorFunction implements Selector {
   funcName: string;
@@ -21,7 +21,7 @@ export default class PseudoSelectorFunction implements Selector {
   async optimize(kw: OptimizeKeywords) {
     // OPT: Lowercase pseudo function names.
     this.funcName = this.funcName.toLowerCase();
-    const expr = await optimization.try_(this.expr, kw);
+    const expr = await try_(this.expr, kw);
     if (!expr) {
       return null;
     }

@@ -1,6 +1,6 @@
 import * as objects from '../objects';
-import * as optimization from '../optimization';
 import {Selector, OptimizeKeywords} from './Node';
+import try_ from '../optimizations/try';
 
 export default class NthSelector implements Selector {
   funcName: string;
@@ -25,7 +25,7 @@ export default class NthSelector implements Selector {
 
   async optimize(kw: OptimizeKeywords) {
     if (typeof this.linearFunc !== 'string') {
-      this.linearFunc = (await optimization.try_(
+      this.linearFunc = (await try_(
         this.linearFunc,
         kw,
       )) as objects.LinearFunction;

@@ -1,10 +1,11 @@
+import {Node, OptimizeKeywords, TreeSelector} from './Node';
 import * as objects from '../objects';
-import * as optimization from '../optimization';
+import try_ from '../optimizations/try';
 import * as utils from '../utils';
-import {Node, OptimizeKeywords, Selector} from './Node';
+import optimizeDeclarations from '../optimizations/optimizeDeclarations';
 
 export default class Ruleset implements Node {
-  selector: objects.SelectorList | Selector;
+  selector: objects.SelectorList | TreeSelector;
   content: Array<objects.Declaration>;
 
   constructor(
@@ -79,7 +80,9 @@ export default class Ruleset implements Node {
       return null;
     }
 
-    const selector = await optimization.try_(this.selector, kw);
+    const selector = (await try_(this.selector, kw)) as
+      | Ruleset['selector']
+      | null;
     if (!selector) {
       return null;
     }
@@ -95,6 +98,6 @@ export default class Ruleset implements Node {
   }
 
   async optimizeContent(kw: OptimizeKeywords) {
-    this.content = await optimization.optimizeDeclarations(this.content, kw);
+    this.content = await optimizeDeclarations(this.content, kw);
   }
 }

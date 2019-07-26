@@ -33,3 +33,12 @@ export interface Block<Contents = Node> extends Node {
 }
 
 export interface Selector extends Node {}
+export interface SelectorCondition extends Selector {}
+export interface TerminalSelector extends Selector {
+  conditions: Array<SelectorCondition>;
+}
+export interface DepthSelector extends Selector {
+  ancestor: TerminalSelector;
+  descendant: TreeSelector;
+}
+export type TreeSelector = TerminalSelector | DepthSelector;

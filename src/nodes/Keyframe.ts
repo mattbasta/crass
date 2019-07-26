@@ -1,7 +1,8 @@
 import * as objects from '../objects';
-import * as optimization from '../optimization';
+import optimizeList from '../optimizations/optimizeList';
 import * as utils from '../utils';
 import {OptimizeKeywords, Node} from './Node';
+import optimizeDeclarations from '../optimizations/optimizeDeclarations';
 
 export default class Keyframe implements Node {
   stop: Array<objects.KeyframeSelector>;
@@ -43,10 +44,10 @@ export default class Keyframe implements Node {
   }
 
   async optimize(kw: OptimizeKeywords) {
-    this.stop = (await optimization.optimizeList(this.stop, kw)) as Array<
+    this.stop = (await optimizeList(this.stop, kw)) as Array<
       objects.KeyframeSelector
     >;
-    this.content = await optimization.optimizeDeclarations(this.content, kw);
+    this.content = await optimizeDeclarations(this.content, kw);
     return this;
   }
 }

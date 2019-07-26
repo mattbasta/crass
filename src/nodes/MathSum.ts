@@ -1,6 +1,6 @@
 import * as objects from '../objects';
 import {Expression, OptimizeKeywords, Node} from './Node';
-import unitTypes from './helpers/unitTypes';
+import {unitTypes} from './helpers/unitTypes';
 
 export default class MathSum implements Expression {
   base: Expression;
@@ -13,14 +13,13 @@ export default class MathSum implements Expression {
     this.term = term;
   }
 
-  toStringWithFlippedSign() {
+  toStringWithFlippedSign(): string {
     let output = `${this.base.toString()} `;
     if (this.operator === '+') {
-      output += '-';
+      output += '- ';
     } else {
-      output += '+';
+      output += '+ ';
     }
-    output += ' ';
 
     if (this.term instanceof MathSum) {
       output += this.term.toStringWithFlippedSign();
@@ -31,8 +30,12 @@ export default class MathSum implements Expression {
     return output;
   }
 
-  toString() {
-    return `${this.base.toString()} ${this.operator} ${this.term.toString()}`;
+  toString(): string {
+    const term =
+      this.term instanceof MathSum && this.operator === '-'
+        ? this.term.toStringWithFlippedSign()
+        : this.term.toString();
+    return `${this.base.toString()} ${this.operator} ${term}`;
   }
 
   async pretty(indent: number) {

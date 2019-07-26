@@ -1,6 +1,6 @@
 import * as objects from '../objects';
 import {Expression, OptimizeKeywords} from './Node';
-import * as unitTypes from './helpers/unitTypes';
+import {unitTypes} from './helpers/unitTypes';
 
 export default class MathProduct implements Expression {
   base: Expression;
@@ -36,12 +36,17 @@ export default class MathProduct implements Expression {
   }
 
   async optimize(kw: OptimizeKeywords) {
-    this.base = await this.base.optimize(kw);
-    this.term = await this.term.optimize(kw);
-
-    if (!this.base || !this.term) {
+    const base = await this.base.optimize(kw);
+    if (!base) {
       return null;
     }
+    this.base = base;
+
+    const term = await this.term.optimize(kw);
+    if (!term) {
+      return null;
+    }
+    this.term = term;
 
     // OPT: drop invalid calculations
     if (

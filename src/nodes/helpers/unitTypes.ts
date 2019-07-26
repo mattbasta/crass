@@ -1,4 +1,4 @@
-export default {
+export const unitTypes = {
   em: 'length',
   ex: 'length',
   rem: 'length',

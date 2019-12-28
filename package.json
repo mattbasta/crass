@@ -4,6 +4,7 @@
   "description": "A CSS utility library for JS",
   "main": "src/index.js",
   "scripts": {
+    "check": "tsc src/index.ts --noEmit",
     "test": "jest",
     "grammar": "jison src/grammar.y --outfile=src/grammar.js"
   },

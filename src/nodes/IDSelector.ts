@@ -1,6 +1,6 @@
-import {Selector, OptimizeKeywords} from './Node';
+import {OptimizeKeywords, SelectorCondition} from './Node';
 
-export default class IDSelector implements Selector {
+export default class IDSelector implements SelectorCondition {
   ident: string;
 
   constructor(ident: string) {

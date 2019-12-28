@@ -71,22 +71,17 @@ export default class Stylesheet implements Node {
 
   async optimize(kw: OptimizeKeywords = {}) {
     if (this.charset) {
-      this.charset = (await try_(
-        this.charset,
-        kw,
-      )) as objects.Charset;
+      this.charset = (await try_(this.charset, kw)) as objects.Charset;
     }
     if (this.imports.length) {
-      this.imports = (await optimizeList(
-        this.imports,
-        kw,
-      )) as Array<objects.Import>;
+      this.imports = (await optimizeList(this.imports, kw)) as Array<
+        objects.Import
+      >;
     }
     if (this.namespaces.length) {
-      this.namespaces = (await optimizeList(
-        this.namespaces,
-        kw,
-      )) as Array<objects.Namespace>;
+      this.namespaces = (await optimizeList(this.namespaces, kw)) as Array<
+        objects.Namespace
+      >;
     }
 
     // OPT: Remove overridden keyframe blocks
@@ -102,10 +97,11 @@ export default class Stylesheet implements Node {
       if (!(prefix in keyframeMap)) {
         keyframeMap[prefix] = {};
       }
-      if (x.name in keyframeMap[prefix]) {
-        toRemove.add(keyframeMap[prefix][x.name]);
+      const xName = x.name.toString();
+      if (xName in keyframeMap[prefix]) {
+        toRemove.add(keyframeMap[prefix][xName]);
       }
-      keyframeMap[prefix][x.name] = i;
+      keyframeMap[prefix][xName] = i;
     });
     if (toRemove.size) {
       const ordered = Array.from(toRemove.values()).sort((a, b) => b - a);

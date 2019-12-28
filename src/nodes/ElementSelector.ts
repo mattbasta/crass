@@ -1,6 +1,6 @@
-import {Selector, OptimizeKeywords} from './Node';
+import {OptimizeKeywords, SelectorCondition} from './Node';
 
-export default class ElementSelector implements Selector {
+export default class ElementSelector implements SelectorCondition {
   ident: string;
   ns: string | null;
 

@@ -668,7 +668,7 @@ attribute_selector_body
     ;
 
 attribute_selector_body_name
-    : element_name junk
+    : identifier junk
         { $$ = $1; }
     ;
 
@@ -805,7 +805,7 @@ term
         { $$ = $1; }
     | UNICODE_RANGE
         { $$ = $1; }
-    | IDENT
+    | identifier
         { $$ = $1; }
     | hexcolor
         { $$ = $1; }

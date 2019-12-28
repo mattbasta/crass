@@ -1,18 +1,21 @@
 import * as colorConvert from 'color-convert';
 
-import * as colorOptimizer from '../optimizations/color';
+import colorOptimizer from '../optimizations/color';
 import {
   Expression as NodeExpression,
   OptimizeKeywords,
   NumberableExpression,
+  Node,
 } from './Node';
 import * as objects from '../objects';
 import try_ from '../optimizations/try';
 import * as utils from '../utils';
+import {ChainLink} from './Expression';
 
-const recognizedColorFuncs: {
-  [func: string]: {minArgs: number; maxArgs: number};
-} = {
+const recognizedColorFuncs: Record<
+  string,
+  {minArgs: number; maxArgs: number}
+> = {
   rgb: {minArgs: 3, maxArgs: 3},
   hsl: {minArgs: 3, maxArgs: 3},
   rgba: {minArgs: 4, maxArgs: 4},
@@ -22,7 +25,7 @@ const recognizedColorFuncs: {
   lab: {minArgs: 3, maxArgs: 4},
   lch: {minArgs: 3, maxArgs: 4},
 };
-const ALPHA_INDEX: {[func: string]: number} = {
+const ALPHA_INDEX: Record<string, number> = {
   gray: 1,
   rgba: 3,
   hsla: 3,
@@ -31,7 +34,7 @@ const ALPHA_INDEX: {[func: string]: number} = {
   lch: 3,
 };
 
-const GRADIENT_ANGLES: {[position: string]: () => NumberableExpression} = {
+const GRADIENT_ANGLES: Record<string, () => NumberableExpression> = {
   top: () => new objects.Number(0),
   right: () => new objects.Dimension(new objects.Number(90), 'deg'),
   bottom: () => new objects.Dimension(new objects.Number(180), 'deg'),
@@ -72,7 +75,7 @@ export default class Func implements NodeExpression {
     })`;
   }
 
-  async optimize(kw: OptimizeKeywords) {
+  async optimize(kw: OptimizeKeywords): Promise<Node | null> {
     // OPT: Lowercase function names.
     this.name = this.name.toLowerCase();
 
@@ -94,13 +97,13 @@ export default class Func implements NodeExpression {
       return this.content;
     }
 
-    let self = await this.optimizeColor(kw);
-    if (!self || !(self instanceof Func)) {
+    const optColor = await this.optimizeColor(kw);
+    if (!optColor || !(optColor instanceof Func)) {
       kw.func = oldkwf;
-      return self;
+      return optColor;
     }
 
-    self = await self.optimizeLinearGradient(kw);
+    let self: Func | null = await optColor.optimizeLinearGradient(kw);
     if (!self || !self.content) {
       kw.func = oldkwf;
       return null;
@@ -122,7 +125,7 @@ export default class Func implements NodeExpression {
     return Boolean(/^(\-[a-z]+\-)?calc$/i.exec(this.name));
   }
 
-  async optimizeColor(kw: OptimizeKeywords) {
+  async optimizeColor(kw: OptimizeKeywords): Promise<Node | null> {
     if (!(this.name in recognizedColorFuncs)) {
       return this;
     }
@@ -191,7 +194,7 @@ export default class Func implements NodeExpression {
     let alpha = 1;
 
     const components = this.content.chain
-      .map(v => asRealNum(v[1]))
+      .map(v => asRealNum(v[1].toString()))
       .map(v => Math.max(v, 0));
 
     switch (this.name) {
@@ -203,7 +206,7 @@ export default class Func implements NodeExpression {
           if (funcName === name) {
             return components.slice(0, 3);
           }
-          return colorConvert[name][funcName](
+          return (colorConvert as any)[name][funcName](
             components[0],
             components[1],
             components[2],
@@ -216,7 +219,7 @@ export default class Func implements NodeExpression {
           if (funcName === this.name) {
             return components.slice(0, 3);
           }
-          return colorConvert[this.name][funcName](
+          return (colorConvert as any)[this.name][funcName](
             components[0],
             components[1],
             components[2],
@@ -228,7 +231,7 @@ export default class Func implements NodeExpression {
           alpha = components[1];
         }
         applier = (funcName: string) =>
-          colorConvert.gray[funcName](components[0]);
+          (colorConvert.gray as any)[funcName](components[0]);
         break;
       case 'hwb':
       case 'lab':
@@ -240,7 +243,7 @@ export default class Func implements NodeExpression {
           if (funcName === this.name) {
             return components.slice(0, 3);
           }
-          return colorConvert[this.name][funcName](
+          return (colorConvert as any)[this.name][funcName](
             components[0],
             components[1],
             components[2],
@@ -273,10 +276,10 @@ export default class Func implements NodeExpression {
     if (
       chain.length > 2 &&
       chain[2][0] !== null &&
-      chain[0][1] === 'to' &&
-      chain[1][1] in GRADIENT_ANGLES
+      chain[0][1].toString() === 'to' &&
+      chain[1][1].toString() in GRADIENT_ANGLES
     ) {
-      const val = chain[1][1];
+      const val = chain[1][1].toString();
       chain = chain.slice(1);
       chain[0] = [null, GRADIENT_ANGLES[val]()];
     }
@@ -289,9 +292,9 @@ export default class Func implements NodeExpression {
         acc[acc.length - 1].push(cur);
         return acc;
       },
-      [[]],
+      [[]] as Array<Array<ChainLink>>,
     );
-    let lastStop = null;
+    let lastStop: NodeExpression | null = null;
     segments.forEach((group, idx) => {
       if (
         group.length !== 2 ||
@@ -323,6 +326,8 @@ export default class Func implements NodeExpression {
 
       // TODO: This should consider the units and transform to px if possible
       if (
+        lastStop instanceof objects.Dimension &&
+        group[1][1] instanceof objects.Dimension &&
         lastStop.unit === group[1][1].unit &&
         lastStop.asNumber() >= group[1][1].asNumber()
       ) {
@@ -331,6 +336,7 @@ export default class Func implements NodeExpression {
       lastStop = group[1][1];
       if (
         isFinal &&
+        group[1][1] instanceof objects.Dimension &&
         group[1][1].unit === '%' &&
         group[1][1].asNumber() === 100
       ) {
@@ -369,9 +375,9 @@ export default class Func implements NodeExpression {
         acc[acc.length - 1].push(cur);
         return acc;
       },
-      [[]],
+      [[]] as Array<Array<ChainLink>>,
     );
-    let lastStop = null;
+    let lastStop: NodeExpression | null = null;
     segments.forEach((group, idx) => {
       if (
         group.length !== 2 ||
@@ -403,6 +409,8 @@ export default class Func implements NodeExpression {
 
       // TODO: This should consider the units and transform to px if possible
       if (
+        lastStop instanceof objects.Dimension &&
+        group[1][1] instanceof objects.Dimension &&
         lastStop.unit === group[1][1].unit &&
         lastStop.asNumber() >= group[1][1].asNumber()
       ) {
@@ -411,6 +419,7 @@ export default class Func implements NodeExpression {
       lastStop = group[1][1];
       if (
         isFinal &&
+        group[1][1] instanceof objects.Dimension &&
         group[1][1].unit === '%' &&
         group[1][1].asNumber() === 100
       ) {

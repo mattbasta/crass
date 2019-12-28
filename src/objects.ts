@@ -1,7 +1,8 @@
-import {Node, Selector} from './nodes/Node';
+import {Node, Selector, TreeSelector} from './nodes/Node';
 import SelectorList from './nodes/SelectorList';
 import SupportsConditionList from './nodes/SupportsConditionList';
 import SupportsCondition from './nodes/SupportsCondition';
+import SimpleSelector from './nodes/SimpleSelector';
 
 export {default as AdjacentSelector} from './nodes/AdjacentSelector';
 export {default as AttributeSelector} from './nodes/AttributeSelector';
@@ -61,12 +62,20 @@ export {default as SupportsCondition} from './nodes/SupportsCondition';
 export {default as URI} from './nodes/URI';
 export {default as Viewport} from './nodes/Viewport';
 
-export function createSelectorList(base: Node, addon: Selector) {
+export function createSelectorList(base: Node, addon: Selector): SelectorList;
+export function createSelectorList(
+  base: SelectorList,
+  addon: TreeSelector,
+): SelectorList;
+export function createSelectorList(
+  base: SelectorList | SimpleSelector,
+  addon: SimpleSelector | TreeSelector,
+) {
   if (base instanceof SelectorList) {
-    base.push(addon);
+    base.push(addon as TreeSelector);
     return base;
   } else {
-    return new exports.SelectorList([base, addon]);
+    return new SelectorList([base, addon]);
   }
 }
 
@@ -74,7 +83,7 @@ export function createSupportsConditionList(
   addition: SupportsConditionList | SupportsCondition,
   combinator: 'and' | 'or',
   base: SupportsConditionList | SupportsCondition,
-) {
+): SupportsConditionList {
   if (base instanceof SupportsConditionList && base.combinator === combinator) {
     base.unshift(addition);
     return base;

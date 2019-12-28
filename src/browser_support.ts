@@ -1,8 +1,8 @@
 import {OptimizeKeywords} from './nodes/Node';
 
-export type BrowserSupport = {[browser: string]: number};
+export type BrowserSupport = Record<string, number>;
 
-export const BROWSERS: {[short: string]: string} = {
+export const BROWSERS: Record<string, string> = {
   fx: 'firefox',
   chr: 'chrome',
   ie: 'ie',
@@ -18,7 +18,7 @@ export class BrowserMin {
   }
 }
 
-export function parseBrowser(str: string) {
+export function parseBrowser(str: string): BrowserMin {
   const matches = /([a-z]+)([0-9]+)/.exec(str);
   if (!matches) {
     throw new Error(`Error parsing browser string "${str}"`);
@@ -27,9 +27,7 @@ export function parseBrowser(str: string) {
 }
 
 const NOBODY = {ie: 0, chrome: 0, firefox: 0, opera: 0};
-export const DECLARATIONS_REMOVED: {
-  [declaration: string]: BrowserSupport;
-} = {
+export const DECLARATIONS_REMOVED: Record<string, BrowserSupport> = {
   '-moz-border-radius': {firefox: 4},
   '-webkit-border-radius': {chrome: 5},
   '-o-border-radius': {opera: 12},
@@ -144,7 +142,7 @@ export const DECLARATIONS_REMOVED: {
   '-moz-window-shadow': {firefox: 44},
 };
 
-export const KEYFRAMES_PREFIX_REMOVED: {[prefix: string]: BrowserSupport} = {
+export const KEYFRAMES_PREFIX_REMOVED: Record<string, BrowserSupport> = {
   '-webkit-': {chrome: 43},
   '-moz-': {firefox: 16},
   '-o-': {opera: 13},

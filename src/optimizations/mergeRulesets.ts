@@ -25,7 +25,7 @@ import {
 } from '../nodes/Node';
 import * as objects from '../objects';
 
-function anyBetween<T>(
+export function anyBetween<T>(
   body: Array<T>,
   i: number,
   j: number,
@@ -39,7 +39,7 @@ function anyBetween<T>(
   return false;
 }
 
-function manySome<T>(
+export function manySome<T>(
   arrX: Array<T>,
   arrY: Array<T>,
   func: (a: T, b: T) => boolean,
@@ -102,13 +102,6 @@ export function canSelectorsEverTouchSameElement(
   const selX = fullX.map(getLastInSelectorChain);
   const selY = fullY.map(getLastInSelectorChain);
 
-  // TODO: Look at ID usage elsewhere in the selector. You might find
-  // something like this:
-  //   #foo *
-  //   bar#foo
-  // This otherwise looks (based on the last element in the selector) like
-  // they might match, but the #foo usage tells otherwise.
-
   return manySome(selX, selY, (xSel, ySel) => {
     const x = xSel.conditions;
     const y = ySel.conditions;
@@ -125,27 +118,39 @@ export function canSelectorsEverTouchSameElement(
     const xId = x.find(isIDSelector);
     const yId = x.find(isIDSelector);
     if (xId && yId) {
-      return xId.ident !== yId.ident;
+      return xId.ident === yId.ident;
     }
 
+    // This check will return whether there is no chance that the selectors
+    // would overlap
     const attrTest = manySome(x, y, (x, y) => {
-      if (!isAttributeSelector(x)) return false;
-      if (!isAttributeSelector(y)) return false;
+      if (!isAttributeSelector(x) || !isAttributeSelector(y)) {
+        // False because they might be anything and overlap
+        return false;
+      }
 
-      if (!x.value || !y.value) return false;
+      if (!x.value || !y.value) {
+        // If we're not comparing values, we have no way to know if the
+        // attributes overlap.
+        return false;
+      }
 
       // TODO: There's a lot of other combinations that could be mutually
       // exclusive. `[x=abc]` and `[x^=b]` could be determined to never
       // match, for instance.
+
+      // If the
       return Boolean(
         x.ident.toString() === y.ident.toString() &&
-        x.comparison &&
-        x.comparison === y.comparison &&
-        mutuallyExclusiveAttrSelectors.includes(x.comparison) &&
-        x.value.toString() !== y.value.toString()
+          x.comparison &&
+          x.comparison === y.comparison &&
+          !mutuallyExclusiveAttrSelectors.includes(x.comparison) &&
+          x.value.toString() === y.value.toString(),
       );
     });
-    if (attrTest) return false;
+    if (attrTest) {
+      return false;
+    }
 
     if (xor(x.find(isPseudoElementSelector), y.find(isPseudoElementSelector))) {
       return false;
@@ -160,11 +165,14 @@ export function canSelectorsEverTouchSameElement(
   });
 }
 
-const supersetCache = new WeakMap<Array<Node>, Array<string>>();
-function isSubset(
-  subset: Array<objects.Declaration>,
-  superset: Array<objects.Declaration>,
+const supersetCache = new WeakMap<Array<any>, Array<string>>();
+export function isSubset<T extends {toString: () => string}>(
+  subset: Array<T>,
+  superset: Array<T>,
 ): boolean {
+  if (!subset.length) {
+    return false;
+  }
   let strSuperset: Array<string>;
   if (supersetCache.has(superset)) {
     strSuperset = supersetCache.get(superset)!;
@@ -182,7 +190,9 @@ export function canRulesetsBeCombined(
 ): boolean {
   const x = parentBody[xIdx];
   const y = parentBody[yIdx];
-  if (!isRuleset(x) || !isRuleset(y)) return false;
+  if (!isRuleset(x) || !isRuleset(y)) {
+    return false;
+  }
   if (!isSubset(y.content, x.content)) {
     return false;
   }
@@ -192,17 +202,20 @@ export function canRulesetsBeCombined(
     return false;
   }
 
-  // const xSelector = normalizeSelector(x.selector);
   const ySelector = normalizeSelector(y.selector);
 
   // Adjacent rulesets are fine to merge.
   if (xIdx === yIdx - 1) return true;
 
   for (let i = yIdx - 1; i > xIdx; i--) {
-    if (!isRuleset(parentBody[i])) continue;
+    if (!isRuleset(parentBody[i])) {
+      continue;
+    }
 
     const tempSelector = normalizeSelector(parentBody[i].selector);
-    if (canSelectorsEverTouchSameElement(ySelector, tempSelector)) return false;
+    if (canSelectorsEverTouchSameElement(ySelector, tempSelector)) {
+      return false;
+    }
   }
 
   return true;

@@ -49,7 +49,7 @@ function processQuadList(list: Array<ChainLink>): Array<ChainLink> {
   return list;
 }
 
-export type ChainLinkValue = NodeExpression | string;
+export type ChainLinkValue = NodeExpression;
 export type ChainLink = [string | null, ChainLinkValue];
 
 export default class Expression implements Node {
@@ -81,9 +81,7 @@ export default class Expression implements Node {
           result += cur[0];
         }
       }
-      const val = cur[1];
-      result +=
-        typeof val !== 'string' ? await val.pretty(indent) : val.toString();
+      result += await cur[1].pretty(indent);
     }
     return result;
   }
@@ -143,11 +141,11 @@ export default class Expression implements Node {
         (chunk): ChainLink => {
           // OPT: font/font-weight: normal -> 400
           if (chunk[1].toString() === 'normal') {
-            return [chunk[0], '400'];
+            return [chunk[0], new objects.Number(400)];
           }
           // OPT: font/font-weight: bold -> 700
           else if (chunk[1].toString() === 'bold') {
-            return [chunk[0], '700'];
+            return [chunk[0], new objects.Number(700)];
           } else {
             return chunk;
           }
@@ -156,39 +154,39 @@ export default class Expression implements Node {
     } else if (
       kw.o1 &&
       kw.declarationName === 'content' &&
-      this.chain[0][1] === 'none'
+      this.chain[0][1].toString() === 'none'
     ) {
       // OPT: `content:none` -> `content:""`
       this.chain[0][1] = new objects.String('');
     } else if (kw.declarationName === 'display' && this.chain.length > 1) {
-      const sec = this.chain[1][1];
-      switch (this.chain[0][1]) {
+      const sec = this.chain[1][1].toString();
+      switch (this.chain[0][1].toString()) {
         case 'block':
           if (sec === 'flow') {
             this.chain.splice(1, 1);
           } else if (sec === 'flow-root') {
-            this.chain = [[null, 'flow-root']];
+            this.chain = [[null, new objects.String('flow-root')]];
           } else if (sec === 'flex') {
-            this.chain = [[null, 'flex']];
+            this.chain = [[null, new objects.String('flex')]];
           } else if (sec === 'grid') {
-            this.chain = [[null, 'grid']];
+            this.chain = [[null, new objects.String('grid')]];
           } else if (sec === 'table') {
-            this.chain = [[null, 'table']];
+            this.chain = [[null, new objects.String('table')]];
           }
           break;
         case 'inline':
           if (sec === 'flow') {
             this.chain.splice(1, 1);
           } else if (sec === 'flow-root') {
-            this.chain = [[null, 'inline-block']];
+            this.chain = [[null, new objects.String('inline-block')]];
           } else if (sec === 'flex') {
-            this.chain = [[null, 'inline-flex']];
+            this.chain = [[null, new objects.String('inline-flex')]];
           } else if (sec === 'grid') {
-            this.chain = [[null, 'inline-grid']];
+            this.chain = [[null, new objects.String('inline-grid')]];
           } else if (sec === 'ruby') {
-            this.chain = [[null, 'ruby']];
+            this.chain = [[null, new objects.String('ruby')]];
           } else if (sec === 'table') {
-            this.chain = [[null, 'inline-table']];
+            this.chain = [[null, new objects.String('inline-table')]];
           }
           break;
         case 'run-in':
@@ -197,11 +195,14 @@ export default class Expression implements Node {
           }
           break;
         case 'list-item':
-          if (this.chain.length === 3 && this.chain[2][1] === 'flow') {
+          if (
+            this.chain.length === 3 &&
+            this.chain[2][1].toString() === 'flow'
+          ) {
             if (sec === 'block') {
-              this.chain = [[null, 'list-item']];
+              this.chain = [[null, new objects.String('list-item')]];
             } else if (sec === 'inline') {
-              this.chain = [[null, 'inline-list-item']];
+              this.chain = [[null, new objects.String('inline-list-item')]];
             }
           }
           break;
@@ -221,7 +222,7 @@ export default class Expression implements Node {
       this.chain[0][1].toString() === 'none'
     ) {
       // OPT: none -> 0 where possible.
-      this.chain[0][1] = '0';
+      this.chain[0][1] = new objects.Number(0);
     }
 
     // OPT: Convert color names to hex when possible.

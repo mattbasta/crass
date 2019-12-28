@@ -1,6 +1,6 @@
-import {Node, OptimizeKeywords} from './Node';
+import {Expression, OptimizeKeywords} from './Node';
 
-export default class Identifier implements Node {
+export default class Identifier implements Expression {
   value: string;
 
   constructor(value: string) {

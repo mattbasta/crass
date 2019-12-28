@@ -1,7 +1,6 @@
 import * as assert from 'assert';
 
-import * as objects from '../src/objects';
-import * as utils from '../src/utils';
+import * as utils from './utils';
 
 describe('opts', () => {
   it('should default to process.argv', () => {

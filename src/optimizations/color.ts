@@ -63,7 +63,10 @@ export default function(
 
     // OPT: Return the color name instead of hex value when shorter.
     if (hex in colors.HEX_TO_COLOR) {
-      choices.push([colors.HEX_TO_COLOR[hex], () => colors.HEX_TO_COLOR[hex]]);
+      choices.push([
+        colors.HEX_TO_COLOR[hex],
+        () => new objects.Identifier(colors.HEX_TO_COLOR[hex]),
+      ]);
     }
 
     if (kw.css4 && rgb[0] === rgb[1] && rgb[1] === rgb[2]) {
@@ -138,7 +141,10 @@ export default function(
     }
 
     if (alpha === 0) {
-      choices.push(['transparent', () => 'transparent']);
+      choices.push([
+        'transparent',
+        () => new objects.Identifier('transparent'),
+      ]);
     }
   }
 

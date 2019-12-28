@@ -41,7 +41,7 @@ describe('MathSum', () => {
           new Dimension(new Number(3), 'px'),
         ),
       );
-      expect(m.toString()).toBe('5px - 4em + 3px');
+      expect(m.toString()).toBe('5px - 4em - 3px');
       expect(m.toStringWithFlippedSign()).toBe('5px + 4em - 3px');
     });
   });

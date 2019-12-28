@@ -97,7 +97,7 @@ export default class URI implements StringableExpression {
     }
 
     if (self.uri instanceof objects.String) {
-      self.uri = self.uri.optimize(kw);
+      self.uri = await self.uri.optimize(kw);
       if (!self.uri) {
         return null;
       }

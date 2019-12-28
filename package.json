@@ -4,6 +4,8 @@
   "description": "A CSS utility library for JS",
   "main": "src/index.js",
   "scripts": {
+    "build": "npm run clean && npm run grammar && cp src/grammar.js dist/ && tsc src/index.ts --outDir dist/",
+    "clean": "rm -rf dist/* && rm src/grammar.js",
     "check": "tsc src/index.ts --noEmit",
     "test": "jest",
     "grammar": "jison src/grammar.y --outfile=src/grammar.js"

@@ -4,10 +4,7 @@ import {Node, OptimizeKeywords} from '../nodes/Node';
 import * as objects from '../objects';
 import optimizeList from './optimizeList';
 
-export default async (
-  content: Array<Node>,
-  kw: OptimizeKeywords,
-) => {
+export default async (content: Array<Node>, kw: OptimizeKeywords) => {
   content = await optimizeList(content, kw);
   if (!content.length) {
     return [];
@@ -15,19 +12,16 @@ export default async (
 
   // OPT: Remove duplicate blocks.
   if (kw.o1) {
-    const values: {[key: string]: number} = {};
-    const removalMap: Array<boolean> = [];
-    for (let i = 0; i < content.length; i++) {
-      const lval = content[i].toString();
+    const values: Record<string, number> = {};
+    const removalMap = new Set<number>();
+    content.forEach((item, i) => {
+      const lval = item.toString();
       if (lval in values) {
-        removalMap[values[lval]] = true;
+        removalMap.add(values[lval]);
       }
       values[lval] = i;
-    }
-    if (removalMap.length) {
-      // Don't create a new array if nothing changed.
-      content = content.filter((elem, i) => !removalMap[i]);
-    }
+    });
+    content = content.filter((_, i) => !removalMap.has(i));
   }
 
   // OPT: Combine nearby rulesets

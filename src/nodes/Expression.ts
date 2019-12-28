@@ -165,28 +165,28 @@ export default class Expression implements Node {
           if (sec === 'flow') {
             this.chain.splice(1, 1);
           } else if (sec === 'flow-root') {
-            this.chain = [[null, new objects.String('flow-root')]];
+            this.chain = [[null, new objects.Identifier('flow-root')]];
           } else if (sec === 'flex') {
-            this.chain = [[null, new objects.String('flex')]];
+            this.chain = [[null, new objects.Identifier('flex')]];
           } else if (sec === 'grid') {
-            this.chain = [[null, new objects.String('grid')]];
+            this.chain = [[null, new objects.Identifier('grid')]];
           } else if (sec === 'table') {
-            this.chain = [[null, new objects.String('table')]];
+            this.chain = [[null, new objects.Identifier('table')]];
           }
           break;
         case 'inline':
           if (sec === 'flow') {
             this.chain.splice(1, 1);
           } else if (sec === 'flow-root') {
-            this.chain = [[null, new objects.String('inline-block')]];
+            this.chain = [[null, new objects.Identifier('inline-block')]];
           } else if (sec === 'flex') {
-            this.chain = [[null, new objects.String('inline-flex')]];
+            this.chain = [[null, new objects.Identifier('inline-flex')]];
           } else if (sec === 'grid') {
-            this.chain = [[null, new objects.String('inline-grid')]];
+            this.chain = [[null, new objects.Identifier('inline-grid')]];
           } else if (sec === 'ruby') {
-            this.chain = [[null, new objects.String('ruby')]];
+            this.chain = [[null, new objects.Identifier('ruby')]];
           } else if (sec === 'table') {
-            this.chain = [[null, new objects.String('inline-table')]];
+            this.chain = [[null, new objects.Identifier('inline-table')]];
           }
           break;
         case 'run-in':
@@ -200,9 +200,9 @@ export default class Expression implements Node {
             this.chain[2][1].toString() === 'flow'
           ) {
             if (sec === 'block') {
-              this.chain = [[null, new objects.String('list-item')]];
+              this.chain = [[null, new objects.Identifier('list-item')]];
             } else if (sec === 'inline') {
-              this.chain = [[null, new objects.String('inline-list-item')]];
+              this.chain = [[null, new objects.Identifier('inline-list-item')]];
             }
           }
           break;

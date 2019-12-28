@@ -1,6 +1,6 @@
 import * as colorConvert from 'color-convert';
 
-import {ChainLinkValue} from 'src/nodes/Expression';
+import {ChainLinkValue} from '../nodes/Expression';
 import * as colors from '../colors';
 import {func} from '../utils';
 import * as objects from '../objects';

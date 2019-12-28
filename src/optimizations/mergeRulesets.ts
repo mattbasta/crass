@@ -184,7 +184,7 @@ export function isSubset<T extends {toString: () => string}>(
 }
 
 export function canRulesetsBeCombined(
-  parentBody: Array<objects.Ruleset>,
+  parentBody: Array<Node>,
   xIdx: number,
   yIdx: number,
 ): boolean {
@@ -212,7 +212,9 @@ export function canRulesetsBeCombined(
       continue;
     }
 
-    const tempSelector = normalizeSelector(parentBody[i].selector);
+    const tempSelector = normalizeSelector(
+      (parentBody[i] as objects.Ruleset).selector,
+    );
     if (canSelectorsEverTouchSameElement(ySelector, tempSelector)) {
       return false;
     }
